@@ -4,133 +4,105 @@ def update_file(path, content):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
-    print(f"✅ Fixed: {path}")
+    print(f"✅ Paper UI Aligned: {path}")
 
-# 1. Hardened Supabase Client
-supabase_client_v2 = """
-import { createClient } from '@supabase/supabase-js'
+builder_paper_fix = """
+import React, { useState, useEffect } from 'react'
+import ResumeForm from '../components/ResumeForm.jsx'
+import ResumePreview from '../components/ResumePreview.jsx'
+import ToastContainer from '../components/ToastContainer.jsx'
+import PayGateModal from '../components/PayGateModal.jsx'
+import AuthModal from '../components/AuthModal.jsx'
+import { generatePDF } from '../utils/pdfExport.js'
+import { defaultResumeData } from '../utils/defaultData.js'
+import { useAutosave, loadDraft } from '../hooks/useAutosave.js'
+import { useToast } from '../hooks/useToast.js'
+import { supabase, syncResumeToCloud } from '../services/supabaseClient'
+import '../styles/builder.css'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+export default function BuilderPage({ template, onChangeTemplate, unlocked, user, onSignOut }) {
+  const [resumeData, setResumeData] = useState(() => loadDraft() || defaultResumeData)
+  const [isExporting, setIsExporting] = useState(false)
+  const [showPayGate, setShowPayGate] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const { toasts, showToast } = useToast()
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase keys missing. Auth will not work until VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.')
-}
+  useAutosave(resumeData, user, unlocked)
 
-// We initialize even if empty to prevent 'cannot read auth of null'
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder'
-)
+  useEffect(() => {
+    if (user) {
+      const fetchCloudData = async () => {
+        try {
+          const { data } = await supabase
+            .from('resumes')
+            .select('resume_data')
+            .eq('user_id', user.id)
+            .maybeSingle()
 
-export async function syncResumeToCloud(userId, resumeData, isPaid) {
-  const { data, error } = await supabase
-    .from('resumes')
-    .upsert({
-      user_id: userId,
-      resume_data: resumeData,
-      is_paid: isPaid,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id' })
-
-  if (error) throw error
-  return data
-}
-"""
-
-# 2. AuthModal with "PayGate" Styling
-auth_modal_fixed = """
-import React, { useState } from 'react'
-import { supabase } from '../services/supabaseClient'
-import '../styles/payment.css' // Re-using payment styles for consistency
-
-export default function AuthModal({ onDismiss, onSuccess }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [mode, setMode] = useState('signup')
-
-  const handleAuth = async (e) => {
-    e.preventDefault()
-    if (!supabase || import.meta.env.VITE_SUPABASE_URL?.includes('placeholder')) {
-      setError("Cloud services not configured. Check environment variables.")
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-
-    try {
-      let result;
-      if (mode === 'signup') {
-        result = await supabase.auth.signUp({ email, password })
-      } else {
-        result = await supabase.auth.signInWithPassword({ email, password })
+          if (data?.resume_data) {
+            setResumeData(data.resume_data)
+          }
+        } catch (e) { console.error(e) }
       }
-
-      if (result.error) throw result.error
-      if (result.data?.user) onSuccess(result.data.user)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+      fetchCloudData()
     }
+  }, [user])
+
+  const handleCloudSave = async () => {
+    if (!user) { setShowAuth(true); return; }
+    setIsSyncing(true)
+    try {
+      await syncResumeToCloud(user.id, resumeData, unlocked)
+      showToast('Saved to cloud', 'success')
+    } catch (err) {
+      showToast('Sync failed', 'error')
+    } finally { setIsSyncing(false) }
   }
 
   return (
-    <div className="modal-overlay" onClick={onDismiss}>
-      <div className="modal-card" onClick={e => e.stopPropagation()}>
-        <button className="modal-close" onClick={onDismiss}>&times;</button>
-        <div className="payment-logo">Resum<span>e</span>ly</div>
-        <h2 className="payment-title" style={{marginTop: '10px'}}>
-          {mode === 'signup' ? 'Create Account' : 'Welcome Back'}
-        </h2>
-        <p className="payment-sub">Save your progress and access your resume anywhere.</p>
-
-        <form onSubmit={handleAuth} style={{ marginTop: '20px', textAlign: 'left' }}>
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: '500' }}>Email</label>
-            <input
-              type="email"
-              className="form-input"
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', fontWeight: '500' }}>Password</label>
-            <input
-              type="password"
-              className="form-input"
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          {error && <p style={{ color: '#e74c3c', fontSize: '0.8rem', marginBottom: '15px' }}>{error}</p>}
-
-          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
-            {loading ? 'Processing...' : (mode === 'signup' ? 'Sign Up' : 'Log In')}
+    <div className="builder-layout" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <header className="builder-header">
+        <div className="builder-header__logo">Resum<span>e</span>ly</div>
+        <div className="builder-header__actions">
+          <button className="btn btn-ghost" onClick={onChangeTemplate}>Template</button>
+          <button className="btn btn-ghost" onClick={handleCloudSave} disabled={isSyncing}>
+            {user ? (isSyncing ? 'Syncing...' : 'Saved') : 'Save to Cloud'}
           </button>
-        </form>
+          {user && <button className="btn btn-ghost" onClick={onSignOut} style={{color: '#ff4d4d'}}>Sign Out</button>}
+          <button className="btn btn-secondary" onClick={() => unlocked ? generatePDF(null, resumeData) : setShowPayGate(true)}>
+            {unlocked ? 'Download' : 'Download — $8'}
+          </button>
+        </div>
+      </header>
 
-        <button
-          className="btn btn-ghost"
-          style={{ width: '100%', marginTop: '10px', fontSize: '0.8rem' }}
-          onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}
-        >
-          {mode === 'signup' ? 'Already have an account? Log in' : 'Need an account? Sign up'}
-        </button>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <aside style={{ width: '400px', minWidth: '350px', overflowY: 'auto', borderRight: '1px solid #eee' }}>
+          <ResumeForm data={resumeData} onChange={setResumeData} onToast={showToast} />
+        </aside>
+
+        {/* Gray Preview Area */}
+        <main style={{ flex: 1, overflowY: 'auto', background: '#e0e0e0', display: 'flex', justifyContent: 'center', padding: '50px 20px' }}>
+          {/* The Paper Component */}
+          <div style={{
+            width: '100%',
+            maxWidth: '210mm', // Standard A4 width
+            minHeight: '297mm', // Standard A4 height
+            background: 'white',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+            transformOrigin: 'top center'
+          }}>
+            <ResumePreview data={resumeData} template={template} />
+          </div>
+        </main>
       </div>
+
+      {showPayGate && <PayGateModal onDismiss={() => setShowPayGate(false)} />}
+      {showAuth && <AuthModal onDismiss={() => setShowAuth(false)} onSuccess={() => setShowAuth(false)} />}
+      <ToastContainer toasts={toasts} />
     </div>
   )
 }
 """
 
-update_file('src/services/supabaseClient.js', supabase_client_v2)
-update_file('src/components/AuthModal.jsx', auth_modal_fixed)
+update_file('src/pages/BuilderPage.jsx', builder_paper_fix)

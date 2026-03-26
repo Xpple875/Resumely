@@ -5,35 +5,47 @@ import TemplatePage from './pages/TemplatePage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import { isUnlocked } from './services/paymentService'
 import { loadDraft } from './hooks/useAutosave'
+import { supabase } from './services/supabaseClient'
 
 export default function App() {
-  // Check if we have a draft. If we do, we should probably be in 'builder' view
-  const hasDraft = !!loadDraft()
-
-  const [view, setView] = useState(hasDraft ? 'builder' : 'template')
+  const [view, setView] = useState(!!loadDraft() ? 'builder' : 'template')
   const [template, setTemplate] = useState('classic')
   const [unlocked, setUnlocked] = useState(isUnlocked())
+  const [user, setUser] = useState(null)
 
-  const params = new URLSearchParams(window.location.search)
-  const isPaymentSuccess = params.get('payment') === 'success'
-  const sessionId = params.get('session_id')
+  useEffect(() => {
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+
+    // Listen for login/logout events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const handleSelectTemplate = (id) => {
     setTemplate(id)
     setView('builder')
   }
 
-  const handlePaymentComplete = () => {
-    setUnlocked(true)
-    // IMPORTANT: We force the view to 'builder' here
-    setView('builder')
-    // Clean the URL without refreshing the page
-    window.history.replaceState({}, document.title, "/")
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    window.location.reload()
   }
 
-  // If we're in the middle of a payment confirmation, show that screen
-  if (isPaymentSuccess && !unlocked) {
-    return <PaymentSuccessPage sessionId={sessionId} onUnlocked={handlePaymentComplete} />
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('payment') === 'success' && !unlocked) {
+    return (
+      <PaymentSuccessPage
+        sessionId={params.get('session_id')}
+        onUnlocked={() => { setUnlocked(true); setView('builder'); }}
+      />
+    )
   }
 
   return (
@@ -45,6 +57,8 @@ export default function App() {
           template={template}
           onChangeTemplate={() => setView('template')}
           unlocked={unlocked}
+          user={user}
+          onSignOut={handleSignOut}
         />
       )}
     </div>

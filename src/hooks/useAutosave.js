@@ -1,58 +1,39 @@
+
 import { useEffect, useRef } from 'react'
+import { syncResumeToCloud } from '../services/supabaseClient'
 
-const STORAGE_KEY = 'resumely_draft'
-const INTERVAL_MS = 30_000  // 30 seconds
-
-/**
- * Autosave hook.
- * - Saves resumeData to localStorage every 30 seconds
- * - Also saves immediately on page unload (tab close / refresh)
- * - Returns nothing — side-effect only
- */
-export function useAutosave(resumeData) {
-  const dataRef = useRef(resumeData)
-
-  // Keep ref current so the unload handler always has fresh data
-  useEffect(() => {
-    dataRef.current = resumeData
-  }, [resumeData])
+export function useAutosave(resumeData, user, unlocked) {
+  const timeoutRef = useRef(null)
 
   useEffect(() => {
-    const save = () => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataRef.current))
-      } catch (e) {
-        // localStorage quota exceeded — silent fail, not critical
-        console.warn('Autosave failed:', e)
-      }
+    // 1. Always save to LocalStorage for speed
+    localStorage.setItem('resume_draft', JSON.stringify(resumeData))
+
+    // 2. If user is logged in, debounce the cloud sync (save every 3 seconds of typing)
+    if (user) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+
+      timeoutRef.current = setTimeout(async () => {
+        try {
+          await syncResumeToCloud(user.id, resumeData, unlocked)
+          console.log("Cloud sync successful")
+        } catch (err) {
+          console.error("Cloud sync failed:", err)
+        }
+      }, 3000)
     }
-
-    const interval = setInterval(save, INTERVAL_MS)
-    window.addEventListener('beforeunload', save)
 
     return () => {
-      clearInterval(interval)
-      window.removeEventListener('beforeunload', save)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
-  }, [])
+  }, [resumeData, user, unlocked])
 }
 
-/**
- * Load saved draft from localStorage.
- * Returns parsed data or null if nothing saved.
- */
-export function loadDraft() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
+export const loadDraft = () => {
+  const saved = localStorage.getItem('resume_draft')
+  return saved ? JSON.parse(saved) : null
 }
 
-/**
- * Clear the saved draft (used when user wants to start fresh).
- */
-export function clearDraft() {
-  localStorage.removeItem(STORAGE_KEY)
+export const clearDraft = () => {
+  localStorage.removeItem('resume_draft')
 }
