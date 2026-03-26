@@ -1,0 +1,145 @@
+/* ── Template Selection Page ── */
+.template-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px 80px;
+}
+
+.template-page__inner {
+  width: 100%;
+  max-width: 900px;
+}
+
+.template-logo {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+.template-logo span { color: var(--accent); }
+
+.template-page__header {
+  margin-bottom: 40px;
+}
+
+.template-page__title {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.template-page__sub {
+  font-size: 15px;
+  color: var(--text-mid);
+}
+
+/* ── Grid ── */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 680px) {
+  .template-grid {
+    grid-template-columns: 1fr;
+    max-width: 340px;
+  }
+}
+
+/* ── Card ── */
+.template-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  overflow: hidden;
+}
+
+.template-card:hover {
+  border-color: var(--text-light);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.template-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(196,98,45,0.12);
+}
+
+.template-card__tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  z-index: 1;
+}
+
+.template-card__preview {
+  height: 220px;
+  background: #E8E2DB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.template-card__info {
+  padding: 16px 18px;
+}
+
+.template-card__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.template-card__desc {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.5;
+}
+
+.template-card__check {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Actions ── */
+.template-page__actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-lg {
+  padding: 13px 28px;
+  font-size: 15px;
+  gap: 8px;
+}
