@@ -26,7 +26,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
     if (user) {
       const fetchCloudData = async () => {
         try {
-          const { data, error } = await supabase
+          const { data } = await supabase
             .from('resumes')
             .select('resume_data')
             .eq('user_id', user.id)
@@ -48,7 +48,6 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
       await syncResumeToCloud(user.id, resumeData, unlocked)
       showToast('Saved to cloud', 'success')
     } catch (err) {
-      console.error("Sync Error:", err)
       showToast('Sync failed', 'error')
     } finally { setIsSyncing(false) }
   }
@@ -70,12 +69,21 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
       </header>
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <aside style={{ width: '40%', overflowY: 'auto', borderRight: '1px solid #eee', padding: '20px' }}>
+        <aside style={{ width: '400px', minWidth: '350px', overflowY: 'auto', borderRight: '1px solid #eee' }}>
           <ResumeForm data={resumeData} onChange={setResumeData} onToast={showToast} />
         </aside>
 
-        <main style={{ width: '60%', overflowY: 'auto', background: '#f5f5f5', display: 'flex', justifyContent: 'center', padding: '40px' }}>
-          <div style={{ width: '100%', maxWidth: '800px' }}>
+        {/* Gray Preview Area */}
+        <main style={{ flex: 1, overflowY: 'auto', background: '#e0e0e0', display: 'flex', justifyContent: 'center', padding: '50px 20px' }}>
+          {/* The Paper Component */}
+          <div style={{
+            width: '100%',
+            maxWidth: '210mm', // Standard A4 width
+            minHeight: '297mm', // Standard A4 height
+            background: 'white',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+            transformOrigin: 'top center'
+          }}>
             <ResumePreview data={resumeData} template={template} />
           </div>
         </main>
