@@ -75,3 +75,29 @@
   margin-top: 6px;
   padding-left: 20px;
 }
+
+/* ── CLASSIC ── */
+.resume-classic { width: 100%; }
+.resume-classic .r-header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #1A1714; text-align: center; }
+.resume-classic .r-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.6em; line-height: 1.1; margin-bottom: 5px; text-transform: uppercase; }
+.resume-classic .r-tagline { font-weight: bold; font-size: 1.15em; text-transform: uppercase; margin-bottom: 10px; }
+.resume-classic .r-contact { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 15px; font-size: 0.9em; }
+
+/* ── MODERN ── */
+.resume-modern { width: 100%; }
+.resume-modern .rm-header { background: #1A1714; padding: 25px 20mm 20px 20mm; margin: 0 -20mm; text-align: left; }
+.resume-modern .rm-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.8em; color: #FDFAF7; line-height: 1.1; margin-bottom: 6px; }
+.resume-modern .rm-title { font-size: 1em; font-weight: 500; letter-spacing: 0.3px; }
+.resume-modern .rm-contact { background: #F0E6DF; padding: 10px 20mm; margin: 0 -20mm 25px -20mm; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 0.9em; color: #6B6460; }
+.resume-modern .rm-section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #E2DAD4; padding-bottom: 5px; margin: 20px 0 14px 0; break-after: avoid; }
+.resume-modern .rm-skill-pill { background: #F0E6DF; font-size: 0.9em; font-weight: 500; padding: 3px 10px; border-radius: 3px; display: inline-block; margin: 0 6px 6px 0; }
+
+/* ── MINIMAL ── */
+.resume-minimal { width: 100%; }
+.resume-minimal .rmin-header { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #E2DAD4; text-align: left; }
+.resume-minimal .rmin-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.8em; line-height: 1.1; margin-bottom: 6px; }
+.resume-minimal .rmin-title { font-size: 1em; color: #6B6460; margin-bottom: 12px; }
+.resume-minimal .rmin-contact { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 0.9em; color: #A09894; }
+.resume-minimal .rmin-section { margin-bottom: 28px; display: grid; grid-template-columns: 110px 1fr; gap: 0 24px; }
+.resume-minimal .rmin-section-title { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #A09894; padding-top: 2px; break-after: avoid; }
+.resume-minimal .rmin-skills { font-size: 1em; color: #6B6460; }

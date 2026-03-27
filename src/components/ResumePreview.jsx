@@ -7,26 +7,16 @@ const TOP_PAD_MM = 20;
 const BOT_PAD_MM = 30; 
 const CONTENT_H_MM = A4_HEIGHT_MM - TOP_PAD_MM - BOT_PAD_MM;
 
-const ResumeContent = React.forwardRef(({ data, template }, ref) => {
-   const { personal, experience = [], education = [], skills = [], projects = [], theme = {} } = data;
-
+const ClassicContent = ({ data, theme, innerRef }) => {
+   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
    const accentColor = theme.accentColor || '#C4622D';
-   const fontFamily = theme.fontFamily || 'Helvetica, Arial, sans-serif';
-   const fontSize = theme.fontSize ? `${theme.fontSize}px` : '13px';
 
    return (
-      <div ref={ref} className={`resume-${template} resume-content-inner`} style={{ position: 'relative', fontFamily, fontSize }}>
-         {/* HEADER */}
-         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
-               {personal.name || 'YOUR NAME'}
-            </h1>
-            {personal.title && (
-               <div style={{ color: accentColor, fontWeight: 'bold', fontSize: '1.15em', textTransform: 'uppercase' }}>
-                  {personal.title}
-               </div>
-            )}
-            <div style={{ marginTop: '10px', fontSize: '0.9em', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+      <div ref={innerRef} className="resume-classic resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize }}>
+         <div className="r-header">
+            <h1 className="r-name">{personal.name || 'YOUR NAME'}</h1>
+            {personal.title && <div className="r-tagline" style={{ color: accentColor }}>{personal.title}</div>}
+            <div className="r-contact">
                {personal.email && <span>📧 {personal.email}</span>}
                {personal.phone && <span>📞 {personal.phone}</span>}
                {personal.location && <span>📍 {personal.location}</span>}
@@ -35,7 +25,6 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
             </div>
          </div>
 
-         {/* SUMMARY */}
          {personal.summary && (
             <div style={{ marginBottom: '25px' }}>
                <div className="r-section-title" style={{ color: accentColor }}>SUMMARY</div>
@@ -43,14 +32,11 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
             </div>
          )}
 
-         {/* EXPERIENCE */}
          {experience.length > 0 && experience.some(e => e.title || e.company) && (
             <div style={{ marginBottom: '25px' }}>
                <div className="r-section-title" style={{ color: accentColor }}>EXPERIENCE</div>
-               {experience.map((exp, i) => {
-                  const safeId = exp.id || `idx-${i}`;
-                  return (
-                  <div className="r-entry" key={safeId}>
+               {experience.map((exp, i) => (
+                  <div className="r-entry" key={exp.id || i}>
                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
                         <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
                         <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
@@ -60,29 +46,23 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
                      <div style={{ fontStyle: 'italic', color: '#444' }}>
                         {exp.company}{exp.location ? ` · ${exp.location}` : ''}
                      </div>
-                     
                      {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
                         <ul className="r-entry-bullets">
-                           {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
-                              <li key={idx} style={{ lineHeight: '1.5' }}>
-                                 {bullet}
-                              </li>
+                           {exp.bullets.filter(b => b && b.trim()).map((b, idx) => (
+                              <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
                            ))}
                         </ul>
                      )}
                   </div>
-               )})}
+               ))}
             </div>
          )}
 
-         {/* EDUCATION */}
-         {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
+         {education.length > 0 && education.some(e => e.degree || e.institution) && (
             <div style={{ marginBottom: '25px' }}>
                <div className="r-section-title" style={{ color: accentColor }}>EDUCATION</div>
-               {education.map((edu, i) => {
-                  const safeId = edu.id || `idx-${i}`;
-                  return (
-                  <div className="r-entry" key={safeId}>
+               {education.map((edu, i) => (
+                  <div className="r-entry" key={edu.id || i}>
                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
                         <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
                         <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
@@ -92,11 +72,10 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
                      <div>{edu.institution}</div>
                      {edu.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {edu.gpa}</div>}
                   </div>
-               )})}
+               ))}
             </div>
          )}
 
-         {/* SKILLS */}
          {skills && skills.length > 0 && (
             <div style={{ marginBottom: '25px' }}>
                <div className="r-section-title" style={{ color: accentColor }}>SKILLS</div>
@@ -108,14 +87,11 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
             </div>
          )}
 
-         {/* PROJECTS */}
          {projects && projects.length > 0 && projects.some(p => p.name) && (
             <div>
                <div className="r-section-title" style={{ color: accentColor }}>PROJECTS</div>
-               {projects.map((proj, i) => {
-                  const safeId = proj.id || `idx-${i}`;
-                  return (
-                  <div className="r-entry" key={safeId}>
+               {projects.map((proj, i) => (
+                  <div className="r-entry" key={proj.id || i}>
                      <div style={{ fontWeight: 'bold', fontSize: '1.05em', overflowWrap: 'break-word' }}>
                         {proj.name}
                         {proj.url && (
@@ -126,11 +102,230 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
                      </div>
                      <p style={{ margin: '4px 0 0 0' }}>{proj.description}</p>
                   </div>
-               )})}
+               ))}
             </div>
          )}
       </div>
-   )
+   );
+};
+
+const ModernContent = ({ data, theme, innerRef }) => {
+   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+   const accentColor = theme.accentColor || '#C4622D';
+
+   return (
+      <div ref={innerRef} className="resume-modern resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize }}>
+         <div className="rm-header">
+            <h1 className="rm-name">{personal.name || 'YOUR NAME'}</h1>
+            {personal.title && <div className="rm-title" style={{ color: accentColor }}>{personal.title}</div>}
+         </div>
+         <div className="rm-contact">
+            {personal.email && <span>{personal.email}</span>}
+            {personal.phone && <span>{personal.phone}</span>}
+            {personal.location && <span>{personal.location}</span>}
+            {personal.linkedin && <span>{personal.linkedin}</span>}
+            {personal.website && <span>{personal.website}</span>}
+         </div>
+
+         {personal.summary && (
+            <div style={{ marginBottom: '25px' }}>
+               <div className="rm-section-title" style={{ color: accentColor }}>SUMMARY</div>
+               <p style={{ lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
+            </div>
+         )}
+
+         {experience.length > 0 && experience.some(e => e.title || e.company) && (
+            <div style={{ marginBottom: '25px' }}>
+               <div className="rm-section-title" style={{ color: accentColor }}>EXPERIENCE</div>
+               {experience.map((exp, i) => (
+                  <div className="r-entry" key={exp.id || i}>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
+                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                           {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
+                        </span>
+                     </div>
+                     <div style={{ fontStyle: 'italic', color: '#444' }}>
+                        {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                     </div>
+                     {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
+                        <ul className="r-entry-bullets">
+                           {exp.bullets.filter(b => b && b.trim()).map((b, idx) => (
+                              <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
+                           ))}
+                        </ul>
+                     )}
+                  </div>
+               ))}
+            </div>
+         )}
+
+         {education.length > 0 && education.some(e => e.degree || e.institution) && (
+            <div style={{ marginBottom: '25px' }}>
+               <div className="rm-section-title" style={{ color: accentColor }}>EDUCATION</div>
+               {education.map((edu, i) => (
+                  <div className="r-entry" key={edu.id || i}>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
+                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                           {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
+                        </span>
+                     </div>
+                     <div>{edu.institution}</div>
+                     {edu.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {edu.gpa}</div>}
+                  </div>
+               ))}
+            </div>
+         )}
+
+         {skills && skills.length > 0 && (
+            <div style={{ marginBottom: '25px' }}>
+               <div className="rm-section-title" style={{ color: accentColor }}>SKILLS</div>
+               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                  {skills.map((skill, i) => (
+                     <span key={i} className="rm-skill-pill" style={{ color: accentColor }}>{skill}</span>
+                  ))}
+               </div>
+            </div>
+         )}
+
+         {projects && projects.length > 0 && projects.some(p => p.name) && (
+            <div>
+               <div className="rm-section-title" style={{ color: accentColor }}>PROJECTS</div>
+               {projects.map((proj, i) => (
+                  <div className="r-entry" key={proj.id || i}>
+                     <div style={{ fontWeight: 'bold', fontSize: '1.05em', overflowWrap: 'break-word' }}>
+                        {proj.name}
+                        {proj.url && (
+                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '0.85em', color: accentColor, marginTop: '2px', overflowWrap: 'break-word' }}>
+                              {proj.url}
+                           </span>
+                        )}
+                     </div>
+                     <p style={{ margin: '4px 0 0 0' }}>{proj.description}</p>
+                  </div>
+               ))}
+            </div>
+         )}
+      </div>
+   );
+};
+
+const MinimalContent = ({ data, theme, innerRef }) => {
+   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+   const accentColor = theme.accentColor || '#C4622D';
+
+   return (
+      <div ref={innerRef} className="resume-minimal resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize }}>
+         <div className="rmin-header">
+            <h1 className="rmin-name" style={{ color: accentColor }}>{personal.name || 'YOUR NAME'}</h1>
+            {personal.title && <div className="rmin-title">{personal.title}</div>}
+            <div className="rmin-contact">
+               {personal.email && <span>{personal.email}</span>}
+               {personal.phone && <span>{personal.phone}</span>}
+               {personal.location && <span>{personal.location}</span>}
+               {personal.linkedin && <span>{personal.linkedin}</span>}
+               {personal.website && <span>{personal.website}</span>}
+            </div>
+         </div>
+
+         {personal.summary && (
+            <div className="rmin-section">
+               <div className="rmin-section-title" style={{ color: accentColor }}>SUMMARY</div>
+               <p style={{ lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
+            </div>
+         )}
+
+         {experience.length > 0 && experience.some(e => e.title || e.company) && (
+            <div className="rmin-section">
+               <div className="rmin-section-title" style={{ color: accentColor }}>EXPERIENCE</div>
+               <div>
+                  {experience.map((exp, i) => (
+                     <div className="r-entry" key={exp.id || i}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                           <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
+                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                              {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
+                           </span>
+                        </div>
+                        <div style={{ fontStyle: 'italic', color: '#444' }}>
+                           {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                        </div>
+                        {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
+                           <ul className="r-entry-bullets">
+                              {exp.bullets.filter(b => b && b.trim()).map((b, idx) => (
+                                 <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
+                              ))}
+                           </ul>
+                        )}
+                     </div>
+                  ))}
+               </div>
+            </div>
+         )}
+
+         {education.length > 0 && education.some(e => e.degree || e.institution) && (
+            <div className="rmin-section">
+               <div className="rmin-section-title" style={{ color: accentColor }}>EDUCATION</div>
+               <div>
+                  {education.map((edu, i) => (
+                     <div className="r-entry" key={edu.id || i}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                           <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
+                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                              {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
+                           </span>
+                        </div>
+                        <div>{edu.institution}</div>
+                        {edu.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {edu.gpa}</div>}
+                     </div>
+                  ))}
+               </div>
+            </div>
+         )}
+
+         {skills && skills.length > 0 && (
+            <div className="rmin-section">
+               <div className="rmin-section-title" style={{ color: accentColor }}>SKILLS</div>
+               <div className="rmin-skills">{skills.join('  ·  ')}</div>
+            </div>
+         )}
+
+         {projects && projects.length > 0 && projects.some(p => p.name) && (
+            <div className="rmin-section">
+               <div className="rmin-section-title" style={{ color: accentColor }}>PROJECTS</div>
+               <div>
+                  {projects.map((proj, i) => (
+                     <div className="r-entry" key={proj.id || i}>
+                        <div style={{ fontWeight: 'bold', fontSize: '1.05em', overflowWrap: 'break-word' }}>
+                           {proj.name}
+                           {proj.url && (
+                              <span style={{ display: 'block', fontWeight: 'normal', fontSize: '0.85em', color: accentColor, marginTop: '2px', overflowWrap: 'break-word' }}>
+                                 {proj.url}
+                              </span>
+                           )}
+                        </div>
+                        <p style={{ margin: '4px 0 0 0' }}>{proj.description}</p>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         )}
+      </div>
+   );
+};
+
+const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+   const { theme = {} } = data;
+   const resolvedTheme = {
+      accentColor: theme.accentColor || '#C4622D',
+      fontFamily: theme.fontFamily || 'Helvetica, Arial, sans-serif',
+      fontSize: theme.fontSize ? `${theme.fontSize}px` : '13px'
+   };
+
+   if (template === 'modern') return <ModernContent data={data} theme={resolvedTheme} innerRef={ref} />;
+   if (template === 'minimal') return <MinimalContent data={data} theme={resolvedTheme} innerRef={ref} />;
+   return <ClassicContent data={data} theme={resolvedTheme} innerRef={ref} />;
 });
 
 export default function ResumePreview({ data, template = 'classic' }) {

@@ -1,0 +1,1598 @@
+commit 7e5a81bcfc788b0a41a699c33098ef90b3af5755
+Author: Xpple875 <hamzaelseyagy@gmail.com>
+Date:   Fri Mar 27 23:49:39 2026 +0400
+
+    feat: added personalize section
+
+diff --git a/src/components/ResumePreview.jsx b/src/components/ResumePreview.jsx
+index 8829bf0..ead7993 100644
+--- a/src/components/ResumePreview.jsx
++++ b/src/components/ResumePreview.jsx
+@@ -8,21 +8,25 @@ const BOT_PAD_MM = 30;
+ const CONTENT_H_MM = A4_HEIGHT_MM - TOP_PAD_MM - BOT_PAD_MM;
+ 
+ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+-   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
++   const { personal, experience = [], education = [], skills = [], projects = [], theme = {} } = data;
++
++   const accentColor = theme.accentColor || '#C4622D';
++   const fontFamily = theme.fontFamily || 'Helvetica, Arial, sans-serif';
++   const fontSize = theme.fontSize ? `${theme.fontSize}px` : '13px';
+ 
+    return (
+-      <div ref={ref} className={`resume-${template} resume-content-inner`} style={{ position: 'relative' }}>
++      <div ref={ref} className={`resume-${template} resume-content-inner`} style={{ position: 'relative', fontFamily, fontSize }}>
+          {/* HEADER */}
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+             <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
+                {personal.name || 'YOUR NAME'}
+             </h1>
+             {personal.title && (
+-               <div style={{ color: '#C4622D', fontWeight: 'bold', fontSize: '15px', textTransform: 'uppercase' }}>
++               <div style={{ color: accentColor, fontWeight: 'bold', fontSize: '1.15em', textTransform: 'uppercase' }}>
+                   {personal.title}
+                </div>
+             )}
+-            <div style={{ marginTop: '10px', fontSize: '12px', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
++            <div style={{ marginTop: '10px', fontSize: '0.9em', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                {personal.email && <span>📧 {personal.email}</span>}
+                {personal.phone && <span>📞 {personal.phone}</span>}
+                {personal.location && <span>📍 {personal.location}</span>}
+@@ -34,33 +38,33 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+          {/* SUMMARY */}
+          {personal.summary && (
+             <div style={{ marginBottom: '25px' }}>
+-               <div className="r-section-title">SUMMARY</div>
+-               <p style={{ fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
++               <div className="r-section-title" style={{ color: accentColor }}>SUMMARY</div>
++               <p style={{ lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
+             </div>
+          )}
+ 
+          {/* EXPERIENCE */}
+          {experience.length > 0 && experience.some(e => e.title || e.company) && (
+             <div style={{ marginBottom: '25px' }}>
+-               <div className="r-section-title">EXPERIENCE</div>
++               <div className="r-section-title" style={{ color: accentColor }}>EXPERIENCE</div>
+                {experience.map((exp, i) => {
+                   const safeId = exp.id || `idx-${i}`;
+                   return (
+                   <div className="r-entry" key={safeId}>
+-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
++                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                         <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
+-                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
++                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                            {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
+                         </span>
+                      </div>
+-                     <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
++                     <div style={{ fontStyle: 'italic', color: '#444' }}>
+                         {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                      </div>
+                      
+                      {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
+                         <ul className="r-entry-bullets">
+                            {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
+-                              <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>
++                              <li key={idx} style={{ lineHeight: '1.5' }}>
+                                  {bullet}
+                               </li>
+                            ))}
+@@ -74,19 +78,19 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+          {/* EDUCATION */}
+          {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
+             <div style={{ marginBottom: '25px' }}>
+-               <div className="r-section-title">EDUCATION</div>
++               <div className="r-section-title" style={{ color: accentColor }}>EDUCATION</div>
+                {education.map((edu, i) => {
+                   const safeId = edu.id || `idx-${i}`;
+                   return (
+                   <div className="r-entry" key={safeId}>
+-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
++                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                         <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
+-                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
++                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                            {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
+                         </span>
+                      </div>
+-                     <div style={{ fontSize: '13px' }}>{edu.institution}</div>
+-                     {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
++                     <div>{edu.institution}</div>
++                     {edu.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {edu.gpa}</div>}
+                   </div>
+                )})}
+             </div>
+@@ -95,7 +99,7 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+          {/* SKILLS */}
+          {skills && skills.length > 0 && (
+             <div style={{ marginBottom: '25px' }}>
+-               <div className="r-section-title">SKILLS</div>
++               <div className="r-section-title" style={{ color: accentColor }}>SKILLS</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                   {skills.map((skill, i) => (
+                      <span key={i} className="skill-tag-preview">{skill}</span>
+@@ -107,20 +111,20 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+          {/* PROJECTS */}
+          {projects && projects.length > 0 && projects.some(p => p.name) && (
+             <div>
+-               <div className="r-section-title">PROJECTS</div>
++               <div className="r-section-title" style={{ color: accentColor }}>PROJECTS</div>
+                {projects.map((proj, i) => {
+                   const safeId = proj.id || `idx-${i}`;
+                   return (
+                   <div className="r-entry" key={safeId}>
+-                     <div style={{ fontWeight: 'bold', fontSize: '14px', overflowWrap: 'break-word' }}>
++                     <div style={{ fontWeight: 'bold', fontSize: '1.05em', overflowWrap: 'break-word' }}>
+                         {proj.name}
+                         {proj.url && (
+-                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', overflowWrap: 'break-word' }}>
++                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '0.85em', color: accentColor, marginTop: '2px', overflowWrap: 'break-word' }}>
+                               {proj.url}
+                            </span>
+                         )}
+                      </div>
+-                     <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
++                     <p style={{ margin: '4px 0 0 0' }}>{proj.description}</p>
+                   </div>
+                )})}
+             </div>
+
+commit 90254e9de44ffae632c717de856f092e298b8b77
+Author: Xpple875 <hamzaelseyagy@gmail.com>
+Date:   Fri Mar 27 22:31:46 2026 +0400
+
+    fix: proper text moving to other pages
+
+diff --git a/src/components/ResumePreview.jsx b/src/components/ResumePreview.jsx
+index 91bd3ce..8829bf0 100644
+--- a/src/components/ResumePreview.jsx
++++ b/src/components/ResumePreview.jsx
+@@ -1,14 +1,20 @@
+ import React, { useRef, useLayoutEffect, useState } from 'react'
+ import '../styles/preview.css'
+ 
++const A4_HEIGHT_MM = 297;
++const A4_WIDTH_MM = 210;
++const TOP_PAD_MM = 20;
++const BOT_PAD_MM = 30; 
++const CONTENT_H_MM = A4_HEIGHT_MM - TOP_PAD_MM - BOT_PAD_MM;
++
+ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+    const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+ 
+    return (
+-      <div ref={ref} className={`resume-${template} resume-content-inner`}>
++      <div ref={ref} className={`resume-${template} resume-content-inner`} style={{ position: 'relative' }}>
+          {/* HEADER */}
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+-            <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase', wordBreak: 'break-all' }}>
++            <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
+                {personal.name || 'YOUR NAME'}
+             </h1>
+             {personal.title && (
+@@ -20,7 +26,8 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+                {personal.email && <span>📧 {personal.email}</span>}
+                {personal.phone && <span>📞 {personal.phone}</span>}
+                {personal.location && <span>📍 {personal.location}</span>}
+-               {personal.linkedin && <span>🔗 LinkedIn</span>}
++               {personal.linkedin && <span>🔗 {personal.linkedin}</span>}
++               {personal.website && <span>🌐 {personal.website}</span>}
+             </div>
+          </div>
+ 
+@@ -36,10 +43,12 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+          {experience.length > 0 && experience.some(e => e.title || e.company) && (
+             <div style={{ marginBottom: '25px' }}>
+                <div className="r-section-title">EXPERIENCE</div>
+-               {experience.map((exp) => (
+-                  <div className="r-entry" key={exp.id}>
++               {experience.map((exp, i) => {
++                  const safeId = exp.id || `idx-${i}`;
++                  return (
++                  <div className="r-entry" key={safeId}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
+-                        <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{exp.title}</span>
++                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
+                         <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                            {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
+                         </span>
+@@ -47,15 +56,18 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+                      <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
+                         {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                      </div>
++                     
+                      {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
+                         <ul className="r-entry-bullets">
+                            {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
+-                              <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>{bullet}</li>
++                              <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>
++                                 {bullet}
++                              </li>
+                            ))}
+                         </ul>
+                      )}
+                   </div>
+-               ))}
++               )})}
+             </div>
+          )}
+ 
+@@ -63,10 +75,12 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+          {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
+             <div style={{ marginBottom: '25px' }}>
+                <div className="r-section-title">EDUCATION</div>
+-               {education.map((edu) => (
+-                  <div className="r-entry" key={edu.id}>
++               {education.map((edu, i) => {
++                  const safeId = edu.id || `idx-${i}`;
++                  return (
++                  <div className="r-entry" key={safeId}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
+-                        <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{edu.degree}</span>
++                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
+                         <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                            {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
+                         </span>
+@@ -74,7 +88,7 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+                      <div style={{ fontSize: '13px' }}>{edu.institution}</div>
+                      {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
+                   </div>
+-               ))}
++               )})}
+             </div>
+          )}
+ 
+@@ -94,19 +108,21 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+          {projects && projects.length > 0 && projects.some(p => p.name) && (
+             <div>
+                <div className="r-section-title">PROJECTS</div>
+-               {projects.map((proj) => (
+-                  <div className="r-entry" key={proj.id}>
+-                     <div style={{ fontWeight: 'bold', fontSize: '14px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
++               {projects.map((proj, i) => {
++                  const safeId = proj.id || `idx-${i}`;
++                  return (
++                  <div className="r-entry" key={safeId}>
++                     <div style={{ fontWeight: 'bold', fontSize: '14px', overflowWrap: 'break-word' }}>
+                         {proj.name}
+                         {proj.url && (
+-                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
++                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', overflowWrap: 'break-word' }}>
+                               {proj.url}
+                            </span>
+                         )}
+                      </div>
+                      <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
+                   </div>
+-               ))}
++               )})}
+             </div>
+          )}
+       </div>
+@@ -116,59 +132,108 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
+ export default function ResumePreview({ data, template = 'classic' }) {
+    const [numPages, setNumPages] = useState(1);
+    const measureRef = useRef(null);
++   const innerRef = useRef(null);
+ 
+    useLayoutEffect(() => {
+-      if (!measureRef.current) return;
+-
+-      const resizeObserver = new ResizeObserver((entries) => {
+-         for (let entry of entries) {
+-            const totalHeight = entry.target.scrollHeight;
+-            const width = entry.target.offsetWidth;
+-            // The aspect ratio of A4 is exactly 297mm height / 210mm width
+-            const pageHeight = width * (297 / 210);
+-
+-            let calculatedPages = 1;
+-            if (pageHeight > 0 && totalHeight > 0) {
+-               // Subtract 5px to avoid floating point math causing a whole blank page for 1px overflow
+-               calculatedPages = Math.ceil((totalHeight - 5) / pageHeight);
+-            }
+-            calculatedPages = Math.max(1, calculatedPages); // at least 1 page
+-
+-            setNumPages(prev => (prev !== calculatedPages ? calculatedPages : prev));
++      const calculatePages = () => {
++         if (!measureRef.current || !innerRef.current) return;
++         
++         const engineContainer = measureRef.current;
++         const innerContainer = innerRef.current;
++         
++         const engineRect = engineContainer.getBoundingClientRect();
++         const scaledColWidth = engineRect.width;
++         if (scaledColWidth === 0) return;
++
++         // Determine the deepest fragmented column spill by polling absolute render matrices of natively wrapped elements.
++         // This fundamentally bypasses the Chrome / Firefox multi-column horizontal 'scrollWidth' zero-report bug.
++         let maxRight = engineRect.right;
++         const children = innerContainer.children;
++         for (let i = 0; i < children.length; i++) {
++             const childRect = children[i].getBoundingClientRect();
++             if (childRect.right > maxRight) {
++                 maxRight = childRect.right;
++             }
+          }
++         
++         // Converts proportional 30mm gaps explicitly mapped to the active transformed CSS scaling matrices
++         const scaledGapWidth = scaledColWidth * (30 / A4_WIDTH_MM); 
++         
++         const trueTotalWidth = maxRight - engineRect.left;
++         const colStride = scaledColWidth + scaledGapWidth;
++         
++         let calculatedPages = Math.ceil(trueTotalWidth / colStride);
++         calculatedPages = Math.max(1, calculatedPages);
++         
++         setNumPages(prev => (prev !== calculatedPages ? calculatedPages : prev));
++      };
++
++      // Run immediately dynamically resolving the current hydration chunk
++      calculatePages();
++
++      // Observer simply secures responsive edge-case changes (like active window CSS template switching)
++      let handle;
++      const resizeObserver = new ResizeObserver(() => {
++         cancelAnimationFrame(handle);
++         handle = requestAnimationFrame(calculatePages);
+       });
+ 
+-      resizeObserver.observe(measureRef.current);
+-
+-      return () => resizeObserver.disconnect();
+-   }, [data]);
++      if (measureRef.current) resizeObserver.observe(measureRef.current);
++      return () => {
++         resizeObserver.disconnect();
++         cancelAnimationFrame(handle);
++      };
++   }, [data, template]);
+ 
+    if (!data || !data.personal) return null;
+ 
++   // The Magical Browser-Native HTML Splitting Engine
++   // Utilizing CSS Multi-column layout horizontally ensures strings natively break 
++   // line-by-line across bounded areas EXACTLY like Microsoft Word mapping algorithms!
++   const MultiColEngine = React.forwardRef((props, ref) => (
++      <div ref={ref} style={{
++         height: `${CONTENT_H_MM}mm`,
++         columnWidth: `${A4_WIDTH_MM}mm`,
++         columnGap: '30mm', // Unseen natively but perfectly dictates scrollWidth expansion
++         columnFill: 'auto',
++      }}>
++         <ResumeContent {...props} ref={props.innerRef} />
++      </div>
++   ));
++
+    return (
+       <div className="resume-container">
+          {/*
+-        Measurement Layer:
+-        Renders the full continuous resume completely hidden, so the ResizeObserver
+-        can read its true 'scrollHeight' and divide by A4 height to get the page count.
+-      */}
+-         <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', zIndex: -100, width: '210mm' }}>
+-            <div className="global-paper-flow" style={{ height: 'auto', overflow: 'visible' }}>
+-               <ResumeContent data={data} template={template} ref={measureRef} />
+-            </div>
++          Measurement Layer:
++          The native CSS multi-column forces horizontal fragmentation. 
++          We read how wide it generated to precisely extract vertical pages sequentially!
++         */}
++         <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', zIndex: -100 }}>
++            <MultiColEngine data={data} template={template} ref={measureRef} innerRef={innerRef} />
+          </div>
+ 
+          {/*
+-        Physical Pages Layer:
+-        Creates distinct, actual DOM divs separated by real CSS gaps.
+-        It uses CSS transform (translateY) to perfectly 'scroll' the content up for each page,
+-        so text that flows past 297mm on page 1 is seamlessly displayed at the top of page 2.
+-      */}
++          True Physical DOM Pages Layer:
++          We apply a positional masking loop to virtually convert the horizontal multi-column renderer 
++          into sequentially stacked physical vertical sheets identically replicating Google Docs.
++          No graphic pixel-slicing logic or text chopping natively exists here!
++         */}
+          {Array.from({ length: numPages }).map((_, i) => (
+-            <div key={i} className="global-paper-flow" style={{ position: 'relative', overflow: 'hidden' }}>
+-               <div style={{ transform: `translateY(calc(-${i} * 297mm))` }}>
+-                  <ResumeContent data={data} template={template} />
++            <div key={i} className="physical-paper-sheet">
++               <div style={{ height: `${TOP_PAD_MM}mm`, backgroundColor: 'transparent', width: '100%' }} />
++
++               <div style={{ height: `${CONTENT_H_MM}mm`, width: `${A4_WIDTH_MM}mm`, overflow: 'hidden', position: 'relative' }}>
++                  <div style={{ 
++                     position: 'absolute', 
++                     top: 0, 
++                     left: 0,
++                     transform: `translateX(calc(-${i} * (${A4_WIDTH_MM}mm + 30mm)))` 
++                  }}>
++                     <MultiColEngine data={data} template={template} />
++                  </div>
+                </div>
++
++               <div style={{ height: `${BOT_PAD_MM}mm`, backgroundColor: 'transparent', width: '100%' }} />
+             </div>
+          ))}
+       </div>
+
+commit a904ade04fcecef5818d7f1835b473732955fc02
+Author: Xpple875 <hamzaelseyagy@gmail.com>
+Date:   Fri Mar 27 18:31:42 2026 +0400
+
+    fixed text moving to next page when no space
+
+diff --git a/src/components/ResumePreview.jsx b/src/components/ResumePreview.jsx
+index 073fbe0..91bd3ce 100644
+--- a/src/components/ResumePreview.jsx
++++ b/src/components/ResumePreview.jsx
+@@ -1,171 +1,176 @@
+-
+-import React, { useRef, useLayoutEffect } from 'react'
++import React, { useRef, useLayoutEffect, useState } from 'react'
+ import '../styles/preview.css'
+ 
+-/* ── Pagination Engine ───────────────────────────────────────────────────────
+-   After every render, find any .r-entry or .r-section-title that straddles
+-   a visual page-break boundary and push it down past the beige gap.
+-   The .global-paper-flow background-image draws the visual gap;
+-   the spacers ensure no content actually sits inside that gap zone.
+-──────────────────────────────────────────────────────────────────────────── */
+-function repaginate(paper) {
+-   if (!paper) return
+-
+-   // 1. Remove previously injected spacers
+-   paper.querySelectorAll('.page-break-spacer').forEach(s => s.remove())
+-
+-   // 2. mm → px: paper.offsetWidth === 210mm rendered width
+-   const mmToPx = paper.offsetWidth / 210
+-   const PAGE_H = mmToPx * 297   // one A4 page in px
+-   const GAP_H = mmToPx * 20    // beige gap in px
+-
+-   // 3. Fix up to 8 page-break zones
+-   for (let page = 0; page < 8; page++) {
+-      const breakY = (page + 1) * PAGE_H + page * GAP_H  // bottom edge of this page
+-
+-      // Re-query each pass so offsetTops are fresh after prior insertions
+-      const els = paper.querySelectorAll('.r-entry, .r-section-title')
+-      let inserted = false
+-
+-      for (const el of els) {
+-         const top = el.offsetTop
+-         const bottom = top + el.offsetHeight
+-
+-         if (top < breakY && bottom > breakY) {
+-            // Element straddles the break — push it to next page
+-            const push = breakY + GAP_H - top
+-            const spacer = document.createElement('div')
+-            spacer.className = 'page-break-spacer'
+-            spacer.style.cssText = `display:block;height:${push}px;flex-shrink:0;`
+-            el.parentNode.insertBefore(spacer, el)
+-            inserted = true
+-            break
+-         }
+-      }
+-
+-      if (!inserted) break  // no more breaks needed
+-   }
+-}
+-
+-export default function ResumePreview({ data, template = 'classic' }) {
+-   const paperRef = useRef(null)
+-
+-   // useLayoutEffect: runs after every DOM commit, before paint → no flicker
+-   useLayoutEffect(() => { repaginate(paperRef.current) })
+-
+-   if (!data || !data.personal) return null
+-
+-   const { personal, experience = [], education = [], skills = [], projects = [] } = data
++const ResumeContent = React.forwardRef(({ data, template }, ref) => {
++   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+ 
+    return (
+-      <div className="resume-container">
+-         <div ref={paperRef} className={`resume-${template} global-paper-flow`}>
+-
+-            {/* HEADER */}
+-            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+-               <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase', wordBreak: 'break-all' }}>
+-                  {personal.name || 'YOUR NAME'}
+-               </h1>
+-               {personal.title && (
+-                  <div style={{ color: '#C4622D', fontWeight: 'bold', fontSize: '15px', textTransform: 'uppercase' }}>
+-                     {personal.title}
+-                  </div>
+-               )}
+-               <div style={{ marginTop: '10px', fontSize: '12px', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+-                  {personal.email && <span>📧 {personal.email}</span>}
+-                  {personal.phone && <span>📞 {personal.phone}</span>}
+-                  {personal.location && <span>📍 {personal.location}</span>}
+-                  {personal.linkedin && <span>🔗 LinkedIn</span>}
+-               </div>
+-            </div>
+-
+-            {/* SUMMARY */}
+-            {personal.summary && (
+-               <div style={{ marginBottom: '25px' }}>
+-                  <div className="r-section-title">SUMMARY</div>
+-                  <p style={{ fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
++      <div ref={ref} className={`resume-${template} resume-content-inner`}>
++         {/* HEADER */}
++         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
++            <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase', wordBreak: 'break-all' }}>
++               {personal.name || 'YOUR NAME'}
++            </h1>
++            {personal.title && (
++               <div style={{ color: '#C4622D', fontWeight: 'bold', fontSize: '15px', textTransform: 'uppercase' }}>
++                  {personal.title}
+                </div>
+             )}
++            <div style={{ marginTop: '10px', fontSize: '12px', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
++               {personal.email && <span>📧 {personal.email}</span>}
++               {personal.phone && <span>📞 {personal.phone}</span>}
++               {personal.location && <span>📍 {personal.location}</span>}
++               {personal.linkedin && <span>🔗 LinkedIn</span>}
++            </div>
++         </div>
+ 
+-            {/* EXPERIENCE */}
+-            {experience.length > 0 && experience.some(e => e.title || e.company) && (
+-               <div style={{ marginBottom: '25px' }}>
+-                  <div className="r-section-title">EXPERIENCE</div>
+-                  {experience.map((exp) => (
+-                     <div className="r-entry" key={exp.id}>
+-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
+-                           <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{exp.title}</span>
+-                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
+-                              {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
+-                           </span>
+-                        </div>
+-                        <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
+-                           {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+-                        </div>
+-                        {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
+-                           <ul className="r-entry-bullets">
+-                              {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
+-                                 <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>{bullet}</li>
+-                              ))}
+-                           </ul>
+-                        )}
++         {/* SUMMARY */}
++         {personal.summary && (
++            <div style={{ marginBottom: '25px' }}>
++               <div className="r-section-title">SUMMARY</div>
++               <p style={{ fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
++            </div>
++         )}
++
++         {/* EXPERIENCE */}
++         {experience.length > 0 && experience.some(e => e.title || e.company) && (
++            <div style={{ marginBottom: '25px' }}>
++               <div className="r-section-title">EXPERIENCE</div>
++               {experience.map((exp) => (
++                  <div className="r-entry" key={exp.id}>
++                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
++                        <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{exp.title}</span>
++                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
++                           {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
++                        </span>
++                     </div>
++                     <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
++                        {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                      </div>
++                     {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
++                        <ul className="r-entry-bullets">
++                           {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
++                              <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>{bullet}</li>
++                           ))}
++                        </ul>
++                     )}
++                  </div>
++               ))}
++            </div>
++         )}
++
++         {/* EDUCATION */}
++         {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
++            <div style={{ marginBottom: '25px' }}>
++               <div className="r-section-title">EDUCATION</div>
++               {education.map((edu) => (
++                  <div className="r-entry" key={edu.id}>
++                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
++                        <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{edu.degree}</span>
++                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
++                           {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
++                        </span>
++                     </div>
++                     <div style={{ fontSize: '13px' }}>{edu.institution}</div>
++                     {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
++                  </div>
++               ))}
++            </div>
++         )}
++
++         {/* SKILLS */}
++         {skills && skills.length > 0 && (
++            <div style={{ marginBottom: '25px' }}>
++               <div className="r-section-title">SKILLS</div>
++               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
++                  {skills.map((skill, i) => (
++                     <span key={i} className="skill-tag-preview">{skill}</span>
+                   ))}
+                </div>
+-            )}
+-
+-            {/* EDUCATION */}
+-            {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
+-               <div style={{ marginBottom: '25px' }}>
+-                  <div className="r-section-title">EDUCATION</div>
+-                  {education.map((edu) => (
+-                     <div className="r-entry" key={edu.id}>
+-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
+-                           <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{edu.degree}</span>
+-                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
+-                              {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
++            </div>
++         )}
++
++         {/* PROJECTS */}
++         {projects && projects.length > 0 && projects.some(p => p.name) && (
++            <div>
++               <div className="r-section-title">PROJECTS</div>
++               {projects.map((proj) => (
++                  <div className="r-entry" key={proj.id}>
++                     <div style={{ fontWeight: 'bold', fontSize: '14px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
++                        {proj.name}
++                        {proj.url && (
++                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
++                              {proj.url}
+                            </span>
+-                        </div>
+-                        <div style={{ fontSize: '13px' }}>{edu.institution}</div>
+-                        {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
++                        )}
+                      </div>
+-                  ))}
+-               </div>
+-            )}
+-
+-            {/* SKILLS */}
+-            {skills && skills.length > 0 && (
+-               <div style={{ marginBottom: '25px' }}>
+-                  <div className="r-section-title">SKILLS</div>
+-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+-                     {skills.map((skill, i) => (
+-                        <span key={i} className="skill-tag-preview">{skill}</span>
+-                     ))}
++                     <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
+                   </div>
+-               </div>
+-            )}
++               ))}
++            </div>
++         )}
++      </div>
++   )
++});
+ 
+-            {/* PROJECTS */}
+-            {projects && projects.length > 0 && projects.some(p => p.name) && (
+-               <div>
+-                  <div className="r-section-title">PROJECTS</div>
+-                  {projects.map((proj) => (
+-                     <div className="r-entry" key={proj.id}>
+-                        <div style={{ fontWeight: 'bold', fontSize: '14px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
+-                           {proj.name}
+-                           {proj.url && (
+-                              <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
+-                                 {proj.url}
+-                              </span>
+-                           )}
+-                        </div>
+-                        <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
+-                     </div>
+-                  ))}
+-               </div>
+-            )}
++export default function ResumePreview({ data, template = 'classic' }) {
++   const [numPages, setNumPages] = useState(1);
++   const measureRef = useRef(null);
++
++   useLayoutEffect(() => {
++      if (!measureRef.current) return;
++
++      const resizeObserver = new ResizeObserver((entries) => {
++         for (let entry of entries) {
++            const totalHeight = entry.target.scrollHeight;
++            const width = entry.target.offsetWidth;
++            // The aspect ratio of A4 is exactly 297mm height / 210mm width
++            const pageHeight = width * (297 / 210);
++
++            let calculatedPages = 1;
++            if (pageHeight > 0 && totalHeight > 0) {
++               // Subtract 5px to avoid floating point math causing a whole blank page for 1px overflow
++               calculatedPages = Math.ceil((totalHeight - 5) / pageHeight);
++            }
++            calculatedPages = Math.max(1, calculatedPages); // at least 1 page
++
++            setNumPages(prev => (prev !== calculatedPages ? calculatedPages : prev));
++         }
++      });
++
++      resizeObserver.observe(measureRef.current);
++
++      return () => resizeObserver.disconnect();
++   }, [data]);
++
++   if (!data || !data.personal) return null;
+ 
++   return (
++      <div className="resume-container">
++         {/*
++        Measurement Layer:
++        Renders the full continuous resume completely hidden, so the ResizeObserver
++        can read its true 'scrollHeight' and divide by A4 height to get the page count.
++      */}
++         <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', zIndex: -100, width: '210mm' }}>
++            <div className="global-paper-flow" style={{ height: 'auto', overflow: 'visible' }}>
++               <ResumeContent data={data} template={template} ref={measureRef} />
++            </div>
+          </div>
++
++         {/*
++        Physical Pages Layer:
++        Creates distinct, actual DOM divs separated by real CSS gaps.
++        It uses CSS transform (translateY) to perfectly 'scroll' the content up for each page,
++        so text that flows past 297mm on page 1 is seamlessly displayed at the top of page 2.
++      */}
++         {Array.from({ length: numPages }).map((_, i) => (
++            <div key={i} className="global-paper-flow" style={{ position: 'relative', overflow: 'hidden' }}>
++               <div style={{ transform: `translateY(calc(-${i} * 297mm))` }}>
++                  <ResumeContent data={data} template={template} />
++               </div>
++            </div>
++         ))}
+       </div>
+    )
+ }
+
+commit 78343fc6bfe0ebcb356f917165b63ff9d8814a0a
+Author: Xpple875 <hamzaelseyagy@gmail.com>
+Date:   Fri Mar 27 17:56:42 2026 +0400
+
+    tests
+
+diff --git a/src/components/ResumePreview.jsx b/src/components/ResumePreview.jsx
+index 74abee7..073fbe0 100644
+--- a/src/components/ResumePreview.jsx
++++ b/src/components/ResumePreview.jsx
+@@ -1,118 +1,171 @@
+ 
+-import React from 'react'
++import React, { useRef, useLayoutEffect } from 'react'
+ import '../styles/preview.css'
+ 
++/* ── Pagination Engine ───────────────────────────────────────────────────────
++   After every render, find any .r-entry or .r-section-title that straddles
++   a visual page-break boundary and push it down past the beige gap.
++   The .global-paper-flow background-image draws the visual gap;
++   the spacers ensure no content actually sits inside that gap zone.
++──────────────────────────────────────────────────────────────────────────── */
++function repaginate(paper) {
++   if (!paper) return
++
++   // 1. Remove previously injected spacers
++   paper.querySelectorAll('.page-break-spacer').forEach(s => s.remove())
++
++   // 2. mm → px: paper.offsetWidth === 210mm rendered width
++   const mmToPx = paper.offsetWidth / 210
++   const PAGE_H = mmToPx * 297   // one A4 page in px
++   const GAP_H = mmToPx * 20    // beige gap in px
++
++   // 3. Fix up to 8 page-break zones
++   for (let page = 0; page < 8; page++) {
++      const breakY = (page + 1) * PAGE_H + page * GAP_H  // bottom edge of this page
++
++      // Re-query each pass so offsetTops are fresh after prior insertions
++      const els = paper.querySelectorAll('.r-entry, .r-section-title')
++      let inserted = false
++
++      for (const el of els) {
++         const top = el.offsetTop
++         const bottom = top + el.offsetHeight
++
++         if (top < breakY && bottom > breakY) {
++            // Element straddles the break — push it to next page
++            const push = breakY + GAP_H - top
++            const spacer = document.createElement('div')
++            spacer.className = 'page-break-spacer'
++            spacer.style.cssText = `display:block;height:${push}px;flex-shrink:0;`
++            el.parentNode.insertBefore(spacer, el)
++            inserted = true
++            break
++         }
++      }
++
++      if (!inserted) break  // no more breaks needed
++   }
++}
++
+ export default function ResumePreview({ data, template = 'classic' }) {
+-  // 1. Ultimate Safety Check
+-  if (!data || !data.personal) return null;
+-
+-  const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+-
+-  return (
+-    <div className="resume-container">
+-      {/* global-paper-flow uses your CSS to create visual A4 gaps */}
+-      <div className={`resume-${template} global-paper-flow`}>
+-
+-        {/* HEADER */}
+-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+-          <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
+-            {personal.name || 'YOUR NAME'}
+-          </h1>
+-          {personal.title && (
+-            <div style={{ color: '#C4622D', fontWeight: 'bold', fontSize: '15px', textTransform: 'uppercase' }}>
+-              {personal.title}
+-            </div>
+-          )}
+-          <div style={{ marginTop: '10px', fontSize: '12px', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+-            {personal.email && <span>📧 {personal.email}</span>}
+-            {personal.phone && <span>📞 {personal.phone}</span>}
+-            {personal.location && <span>📍 {personal.location}</span>}
+-            {personal.linkedin && <span>🔗 LinkedIn</span>}
+-          </div>
+-        </div>
+-
+-        {/* SUMMARY */}
+-        {personal.summary && (
+-          <div style={{ marginBottom: '25px' }}>
+-            <div className="r-section-title">SUMMARY</div>
+-            <p style={{ fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
+-          </div>
+-        )}
+-
+-        {/* EXPERIENCE */}
+-        {experience.length > 0 && experience.some(e => e.title || e.company) && (
+-          <div style={{ marginBottom: '25px' }}>
+-            <div className="r-section-title">EXPERIENCE</div>
+-            {experience.map((exp) => (
+-              <div className="r-entry" key={exp.id}>
+-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
+-                  <span>{exp.title}</span>
+-                  <span style={{ fontWeight: 'normal', color: '#666', fontSize: '12px' }}>
+-                    {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
+-                  </span>
+-                </div>
+-                <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
+-                  {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+-                </div>
+-                {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
+-                  <ul className="r-entry-bullets">
+-                    {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
+-                      <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>{bullet}</li>
+-                    ))}
+-                  </ul>
+-                )}
+-              </div>
+-            ))}
+-          </div>
+-        )}
+-
+-        {/* EDUCATION */}
+-        {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
+-          <div style={{ marginBottom: '25px' }}>
+-            <div className="r-section-title">EDUCATION</div>
+-            {education.map((edu) => (
+-              <div className="r-entry" key={edu.id}>
+-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
+-                  <span>{edu.degree}</span>
+-                  <span style={{ fontWeight: 'normal', color: '#666', fontSize: '12px' }}>
+-                    {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
+-                  </span>
+-                </div>
+-                <div style={{ fontSize: '13px' }}>{edu.institution}</div>
+-                {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
+-              </div>
+-            ))}
+-          </div>
+-        )}
+-
+-        {/* SKILLS */}
+-        {skills && skills.length > 0 && (
+-          <div style={{ marginBottom: '25px' }}>
+-            <div className="r-section-title">SKILLS</div>
+-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+-              {skills.map((skill, i) => (
+-                <span key={i} className="skill-tag-preview">{skill}</span>
+-              ))}
++   const paperRef = useRef(null)
++
++   // useLayoutEffect: runs after every DOM commit, before paint → no flicker
++   useLayoutEffect(() => { repaginate(paperRef.current) })
++
++   if (!data || !data.personal) return null
++
++   const { personal, experience = [], education = [], skills = [], projects = [] } = data
++
++   return (
++      <div className="resume-container">
++         <div ref={paperRef} className={`resume-${template} global-paper-flow`}>
++
++            {/* HEADER */}
++            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
++               <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase', wordBreak: 'break-all' }}>
++                  {personal.name || 'YOUR NAME'}
++               </h1>
++               {personal.title && (
++                  <div style={{ color: '#C4622D', fontWeight: 'bold', fontSize: '15px', textTransform: 'uppercase' }}>
++                     {personal.title}
++                  </div>
++               )}
++               <div style={{ marginTop: '10px', fontSize: '12px', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
++                  {personal.email && <span>📧 {personal.email}</span>}
++                  {personal.phone && <span>📞 {personal.phone}</span>}
++                  {personal.location && <span>📍 {personal.location}</span>}
++                  {personal.linkedin && <span>🔗 LinkedIn</span>}
++               </div>
+             </div>
+-          </div>
+-        )}
+-
+-        {/* PROJECTS */}
+-        {projects && projects.length > 0 && projects.some(p => p.name) && (
+-          <div>
+-            <div className="r-section-title">PROJECTS</div>
+-            {projects.map((proj) => (
+-              <div className="r-entry" key={proj.id}>
+-                <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
+-                  {proj.name}
+-                  {proj.url && <span style={{ fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginLeft: '10px' }}>{proj.url}</span>}
+-                </div>
+-                <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
+-              </div>
+-            ))}
+-          </div>
+-        )}
++
++            {/* SUMMARY */}
++            {personal.summary && (
++               <div style={{ marginBottom: '25px' }}>
++                  <div className="r-section-title">SUMMARY</div>
++                  <p style={{ fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
++               </div>
++            )}
++
++            {/* EXPERIENCE */}
++            {experience.length > 0 && experience.some(e => e.title || e.company) && (
++               <div style={{ marginBottom: '25px' }}>
++                  <div className="r-section-title">EXPERIENCE</div>
++                  {experience.map((exp) => (
++                     <div className="r-entry" key={exp.id}>
++                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
++                           <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{exp.title}</span>
++                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
++                              {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
++                           </span>
++                        </div>
++                        <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
++                           {exp.company}{exp.location ? ` · ${exp.location}` : ''}
++                        </div>
++                        {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
++                           <ul className="r-entry-bullets">
++                              {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
++                                 <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>{bullet}</li>
++                              ))}
++                           </ul>
++                        )}
++                     </div>
++                  ))}
++               </div>
++            )}
++
++            {/* EDUCATION */}
++            {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
++               <div style={{ marginBottom: '25px' }}>
++                  <div className="r-section-title">EDUCATION</div>
++                  {education.map((edu) => (
++                     <div className="r-entry" key={edu.id}>
++                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
++                           <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{edu.degree}</span>
++                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
++                              {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
++                           </span>
++                        </div>
++                        <div style={{ fontSize: '13px' }}>{edu.institution}</div>
++                        {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
++                     </div>
++                  ))}
++               </div>
++            )}
++
++            {/* SKILLS */}
++            {skills && skills.length > 0 && (
++               <div style={{ marginBottom: '25px' }}>
++                  <div className="r-section-title">SKILLS</div>
++                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
++                     {skills.map((skill, i) => (
++                        <span key={i} className="skill-tag-preview">{skill}</span>
++                     ))}
++                  </div>
++               </div>
++            )}
++
++            {/* PROJECTS */}
++            {projects && projects.length > 0 && projects.some(p => p.name) && (
++               <div>
++                  <div className="r-section-title">PROJECTS</div>
++                  {projects.map((proj) => (
++                     <div className="r-entry" key={proj.id}>
++                        <div style={{ fontWeight: 'bold', fontSize: '14px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
++                           {proj.name}
++                           {proj.url && (
++                              <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
++                                 {proj.url}
++                              </span>
++                           )}
++                        </div>
++                        <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
++                     </div>
++                  ))}
++               </div>
++            )}
++
++         </div>
+       </div>
+-    </div>
+-  )
++   )
+ }
+
+commit e2da7cd7e5526dc74d575dd0a85475613e067455
+Author: Xpple875 <hamzaelseyagy@gmail.com>
+Date:   Fri Mar 27 17:01:53 2026 +0400
+
+    fix: much better text wrapping over pages
+
+diff --git a/src/components/ResumePreview.jsx b/src/components/ResumePreview.jsx
+index 4f051e3..74abee7 100644
+--- a/src/components/ResumePreview.jsx
++++ b/src/components/ResumePreview.jsx
+@@ -1,214 +1,118 @@
++
+ import React from 'react'
+ import '../styles/preview.css'
+ 
+ export default function ResumePreview({ data, template = 'classic' }) {
+-  if (template === 'modern')  return <ModernTemplate  data={data} />
+-  if (template === 'minimal') return <MinimalTemplate data={data} />
+-  return <ClassicTemplate data={data} />
+-}
+-
+-// ── SHARED HELPERS ────────────────────────────────────────────────────────────
+-function ContactItems({ personal }) {
+-  const items = [
+-    personal.email,
+-    personal.phone,
+-    personal.location,
+-    personal.linkedin,
+-    personal.website,
+-  ].filter(Boolean)
+-  return items.map((item, i) => <span key={i}>{item}</span>)
+-}
+-
+-function ExperienceEntries({ experience, accentColor }) {
+-  return (experience || []).filter(e => e.title || e.company).map(entry => (
+-    <div className="r-entry" key={entry.id}>
+-      <div className="r-entry-header">
+-        <span className="r-entry-title">{entry.title}</span>
+-        <span className="r-entry-dates">
+-          {[entry.startDate, entry.endDate].filter(Boolean).join(' – ')}
+-        </span>
+-      </div>
+-      <div className="r-entry-sub">
+-        {[entry.company, entry.location].filter(Boolean).join(' · ')}
+-      </div>
+-      {(entry.bullets || []).filter(b => b.trim()).length > 0 && (
+-        <ul className="r-entry-bullets">
+-          {entry.bullets.filter(b => b.trim()).map((b, i) => <li key={i}>{b}</li>)}
+-        </ul>
+-      )}
+-    </div>
+-  ))
+-}
++  // 1. Ultimate Safety Check
++  if (!data || !data.personal) return null;
+ 
+-function EducationEntries({ education }) {
+-  return (education || []).filter(e => e.degree || e.institution).map(entry => (
+-    <div className="r-entry" key={entry.id}>
+-      <div className="r-entry-header">
+-        <span className="r-entry-title">{entry.degree}</span>
+-        <span className="r-entry-dates">
+-          {[entry.startDate, entry.endDate].filter(Boolean).join(' – ')}
+-        </span>
+-      </div>
+-      <div className="r-entry-sub">{entry.institution}</div>
+-      {entry.gpa && <div style={{fontSize:'12px',color:'#A09894',marginTop:'2px'}}>{entry.gpa}</div>}
+-    </div>
+-  ))
+-}
++  const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+ 
+-function ProjectEntries({ projects }) {
+-  return (projects || []).filter(p => p.name).map(entry => (
+-    <div className="r-entry" key={entry.id}>
+-      <div className="r-entry-header">
+-        <span className="r-entry-title">{entry.name}</span>
+-        {entry.url && <span style={{fontSize:'12px',color:'#A09894'}}>{entry.url}</span>}
+-      </div>
+-      {entry.description && (
+-        <p style={{fontSize:'13px',marginTop:'4px',color:'#1A1714'}}>{entry.description}</p>
+-      )}
+-    </div>
+-  ))
+-}
+-
+-// ── CLASSIC TEMPLATE ──────────────────────────────────────────────────────────
+-function ClassicTemplate({ data }) {
+-  const { personal, experience, education, skills, projects } = data
+   return (
+-    <div className="resume-classic">
+-      <div className="r-header">
+-        <div className="r-name">{personal.name || 'Your Name'}</div>
+-        {personal.title && <div className="r-tagline">{personal.title}</div>}
+-        <div className="r-contact"><ContactItems personal={personal} /></div>
+-      </div>
+-      {personal.summary && (
+-        <div className="r-section">
+-          <div className="r-section-title">Summary</div>
+-          <p style={{fontSize:'13px',color:'#1A1714',lineHeight:'1.6'}}>{personal.summary}</p>
+-        </div>
+-      )}
+-      {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
+-        <div className="r-section">
+-          <div className="r-section-title">Experience</div>
+-          <ExperienceEntries experience={experience} />
+-        </div>
+-      )}
+-      {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
+-        <div className="r-section">
+-          <div className="r-section-title">Education</div>
+-          <EducationEntries education={education} />
+-        </div>
+-      )}
+-      {(skills||[]).length > 0 && (
+-        <div className="r-section">
+-          <div className="r-section-title">Skills</div>
+-          <div className="r-skills-grid">
+-            {skills.map(s => <span className="r-skill-pill" key={s}>{s}</span>)}
++    <div className="resume-container">
++      {/* global-paper-flow uses your CSS to create visual A4 gaps */}
++      <div className={`resume-${template} global-paper-flow`}>
++
++        {/* HEADER */}
++        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
++          <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
++            {personal.name || 'YOUR NAME'}
++          </h1>
++          {personal.title && (
++            <div style={{ color: '#C4622D', fontWeight: 'bold', fontSize: '15px', textTransform: 'uppercase' }}>
++              {personal.title}
++            </div>
++          )}
++          <div style={{ marginTop: '10px', fontSize: '12px', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
++            {personal.email && <span>📧 {personal.email}</span>}
++            {personal.phone && <span>📞 {personal.phone}</span>}
++            {personal.location && <span>📍 {personal.location}</span>}
++            {personal.linkedin && <span>🔗 LinkedIn</span>}
+           </div>
+         </div>
+-      )}
+-      {(projects||[]).filter(p=>p.name).length > 0 && (
+-        <div className="r-section">
+-          <div className="r-section-title">Projects</div>
+-          <ProjectEntries projects={projects} />
+-        </div>
+-      )}
+-    </div>
+-  )
+-}
+ 
+-// ── MODERN TEMPLATE ───────────────────────────────────────────────────────────
+-function ModernTemplate({ data }) {
+-  const { personal, experience, education, skills, projects } = data
+-  return (
+-    <div className="resume-modern">
+-      {/* Dark header band */}
+-      <div className="rm-header">
+-        <div className="rm-name">{personal.name || 'Your Name'}</div>
+-        {personal.title && <div className="rm-title">{personal.title}</div>}
+-      </div>
+-      {/* Contact strip */}
+-      <div className="rm-contact">
+-        <ContactItems personal={personal} />
+-      </div>
+-      <div className="rm-body">
++        {/* SUMMARY */}
+         {personal.summary && (
+-          <div className="rm-section">
+-            <div className="rm-section-title">Summary</div>
+-            <p className="rm-prose">{personal.summary}</p>
++          <div style={{ marginBottom: '25px' }}>
++            <div className="r-section-title">SUMMARY</div>
++            <p style={{ fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
+           </div>
+         )}
+-        {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
+-          <div className="rm-section">
+-            <div className="rm-section-title">Experience</div>
+-            <ExperienceEntries experience={experience} />
++
++        {/* EXPERIENCE */}
++        {experience.length > 0 && experience.some(e => e.title || e.company) && (
++          <div style={{ marginBottom: '25px' }}>
++            <div className="r-section-title">EXPERIENCE</div>
++            {experience.map((exp) => (
++              <div className="r-entry" key={exp.id}>
++                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
++                  <span>{exp.title}</span>
++                  <span style={{ fontWeight: 'normal', color: '#666', fontSize: '12px' }}>
++                    {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
++                  </span>
++                </div>
++                <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
++                  {exp.company}{exp.location ? ` · ${exp.location}` : ''}
++                </div>
++                {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
++                  <ul className="r-entry-bullets">
++                    {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
++                      <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>{bullet}</li>
++                    ))}
++                  </ul>
++                )}
++              </div>
++            ))}
+           </div>
+         )}
+-        {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
+-          <div className="rm-section">
+-            <div className="rm-section-title">Education</div>
+-            <EducationEntries education={education} />
++
++        {/* EDUCATION */}
++        {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
++          <div style={{ marginBottom: '25px' }}>
++            <div className="r-section-title">EDUCATION</div>
++            {education.map((edu) => (
++              <div className="r-entry" key={edu.id}>
++                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
++                  <span>{edu.degree}</span>
++                  <span style={{ fontWeight: 'normal', color: '#666', fontSize: '12px' }}>
++                    {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
++                  </span>
++                </div>
++                <div style={{ fontSize: '13px' }}>{edu.institution}</div>
++                {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
++              </div>
++            ))}
+           </div>
+         )}
+-        {(skills||[]).length > 0 && (
+-          <div className="rm-section">
+-            <div className="rm-section-title">Skills</div>
+-            <div className="r-skills-grid">
+-              {skills.map(s => <span className="rm-skill-pill" key={s}>{s}</span>)}
++
++        {/* SKILLS */}
++        {skills && skills.length > 0 && (
++          <div style={{ marginBottom: '25px' }}>
++            <div className="r-section-title">SKILLS</div>
++            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
++              {skills.map((skill, i) => (
++                <span key={i} className="skill-tag-preview">{skill}</span>
++              ))}
+             </div>
+           </div>
+         )}
+-        {(projects||[]).filter(p=>p.name).length > 0 && (
+-          <div className="rm-section">
+-            <div className="rm-section-title">Projects</div>
+-            <ProjectEntries projects={projects} />
++
++        {/* PROJECTS */}
++        {projects && projects.length > 0 && projects.some(p => p.name) && (
++          <div>
++            <div className="r-section-title">PROJECTS</div>
++            {projects.map((proj) => (
++              <div className="r-entry" key={proj.id}>
++                <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
++                  {proj.name}
++                  {proj.url && <span style={{ fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginLeft: '10px' }}>{proj.url}</span>}
++                </div>
++                <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
++              </div>
++            ))}
+           </div>
+         )}
+       </div>
+     </div>
+   )
+ }
+-
+-// ── MINIMAL TEMPLATE ──────────────────────────────────────────────────────────
+-function MinimalTemplate({ data }) {
+-  const { personal, experience, education, skills, projects } = data
+-  return (
+-    <div className="resume-minimal">
+-      <div className="rmin-header">
+-        <div className="rmin-name">{personal.name || 'Your Name'}</div>
+-        {personal.title && <div className="rmin-title">{personal.title}</div>}
+-        <div className="rmin-contact"><ContactItems personal={personal} /></div>
+-      </div>
+-      {personal.summary && (
+-        <div className="rmin-section">
+-          <div className="rmin-section-title">Summary</div>
+-          <p className="rmin-prose">{personal.summary}</p>
+-        </div>
+-      )}
+-      {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
+-        <div className="rmin-section">
+-          <div className="rmin-section-title">Experience</div>
+-          <ExperienceEntries experience={experience} />
+-        </div>
+-      )}
+-      {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
+-        <div className="rmin-section">
+-          <div className="rmin-section-title">Education</div>
+-          <EducationEntries education={education} />
+-        </div>
+-      )}
+-      {(skills||[]).length > 0 && (
+-        <div className="rmin-section">
+-          <div className="rmin-section-title">Skills</div>
+-          <div className="rmin-skills">
+-            {skills.join('  ·  ')}
+-          </div>
+-        </div>
+-      )}
+-      {(projects||[]).filter(p=>p.name).length > 0 && (
+-        <div className="rmin-section">
+-          <div className="rmin-section-title">Projects</div>
+-          <ProjectEntries projects={projects} />
+-        </div>
+-      )}
+-    </div>
+-  )
+-}
+
+commit 65e1d1190777ce0cd0d27db4d82399b5cd7014a3
+Author: Xpple875 <hamzaelseyagy@gmail.com>
+Date:   Thu Mar 26 22:09:50 2026 +0400
+
+    well working everything save cloud in working
+
+diff --git a/src/components/ResumePreview.jsx b/src/components/ResumePreview.jsx
+new file mode 100644
+index 0000000..4f051e3
+--- /dev/null
++++ b/src/components/ResumePreview.jsx
+@@ -0,0 +1,214 @@
++import React from 'react'
++import '../styles/preview.css'
++
++export default function ResumePreview({ data, template = 'classic' }) {
++  if (template === 'modern')  return <ModernTemplate  data={data} />
++  if (template === 'minimal') return <MinimalTemplate data={data} />
++  return <ClassicTemplate data={data} />
++}
++
++// ── SHARED HELPERS ────────────────────────────────────────────────────────────
++function ContactItems({ personal }) {
++  const items = [
++    personal.email,
++    personal.phone,
++    personal.location,
++    personal.linkedin,
++    personal.website,
++  ].filter(Boolean)
++  return items.map((item, i) => <span key={i}>{item}</span>)
++}
++
++function ExperienceEntries({ experience, accentColor }) {
++  return (experience || []).filter(e => e.title || e.company).map(entry => (
++    <div className="r-entry" key={entry.id}>
++      <div className="r-entry-header">
++        <span className="r-entry-title">{entry.title}</span>
++        <span className="r-entry-dates">
++          {[entry.startDate, entry.endDate].filter(Boolean).join(' – ')}
++        </span>
++      </div>
++      <div className="r-entry-sub">
++        {[entry.company, entry.location].filter(Boolean).join(' · ')}
++      </div>
++      {(entry.bullets || []).filter(b => b.trim()).length > 0 && (
++        <ul className="r-entry-bullets">
++          {entry.bullets.filter(b => b.trim()).map((b, i) => <li key={i}>{b}</li>)}
++        </ul>
++      )}
++    </div>
++  ))
++}
++
++function EducationEntries({ education }) {
++  return (education || []).filter(e => e.degree || e.institution).map(entry => (
++    <div className="r-entry" key={entry.id}>
++      <div className="r-entry-header">
++        <span className="r-entry-title">{entry.degree}</span>
++        <span className="r-entry-dates">
++          {[entry.startDate, entry.endDate].filter(Boolean).join(' – ')}
++        </span>
++      </div>
++      <div className="r-entry-sub">{entry.institution}</div>
++      {entry.gpa && <div style={{fontSize:'12px',color:'#A09894',marginTop:'2px'}}>{entry.gpa}</div>}
++    </div>
++  ))
++}
++
++function ProjectEntries({ projects }) {
++  return (projects || []).filter(p => p.name).map(entry => (
++    <div className="r-entry" key={entry.id}>
++      <div className="r-entry-header">
++        <span className="r-entry-title">{entry.name}</span>
++        {entry.url && <span style={{fontSize:'12px',color:'#A09894'}}>{entry.url}</span>}
++      </div>
++      {entry.description && (
++        <p style={{fontSize:'13px',marginTop:'4px',color:'#1A1714'}}>{entry.description}</p>
++      )}
++    </div>
++  ))
++}
++
++// ── CLASSIC TEMPLATE ──────────────────────────────────────────────────────────
++function ClassicTemplate({ data }) {
++  const { personal, experience, education, skills, projects } = data
++  return (
++    <div className="resume-classic">
++      <div className="r-header">
++        <div className="r-name">{personal.name || 'Your Name'}</div>
++        {personal.title && <div className="r-tagline">{personal.title}</div>}
++        <div className="r-contact"><ContactItems personal={personal} /></div>
++      </div>
++      {personal.summary && (
++        <div className="r-section">
++          <div className="r-section-title">Summary</div>
++          <p style={{fontSize:'13px',color:'#1A1714',lineHeight:'1.6'}}>{personal.summary}</p>
++        </div>
++      )}
++      {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
++        <div className="r-section">
++          <div className="r-section-title">Experience</div>
++          <ExperienceEntries experience={experience} />
++        </div>
++      )}
++      {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
++        <div className="r-section">
++          <div className="r-section-title">Education</div>
++          <EducationEntries education={education} />
++        </div>
++      )}
++      {(skills||[]).length > 0 && (
++        <div className="r-section">
++          <div className="r-section-title">Skills</div>
++          <div className="r-skills-grid">
++            {skills.map(s => <span className="r-skill-pill" key={s}>{s}</span>)}
++          </div>
++        </div>
++      )}
++      {(projects||[]).filter(p=>p.name).length > 0 && (
++        <div className="r-section">
++          <div className="r-section-title">Projects</div>
++          <ProjectEntries projects={projects} />
++        </div>
++      )}
++    </div>
++  )
++}
++
++// ── MODERN TEMPLATE ───────────────────────────────────────────────────────────
++function ModernTemplate({ data }) {
++  const { personal, experience, education, skills, projects } = data
++  return (
++    <div className="resume-modern">
++      {/* Dark header band */}
++      <div className="rm-header">
++        <div className="rm-name">{personal.name || 'Your Name'}</div>
++        {personal.title && <div className="rm-title">{personal.title}</div>}
++      </div>
++      {/* Contact strip */}
++      <div className="rm-contact">
++        <ContactItems personal={personal} />
++      </div>
++      <div className="rm-body">
++        {personal.summary && (
++          <div className="rm-section">
++            <div className="rm-section-title">Summary</div>
++            <p className="rm-prose">{personal.summary}</p>
++          </div>
++        )}
++        {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
++          <div className="rm-section">
++            <div className="rm-section-title">Experience</div>
++            <ExperienceEntries experience={experience} />
++          </div>
++        )}
++        {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
++          <div className="rm-section">
++            <div className="rm-section-title">Education</div>
++            <EducationEntries education={education} />
++          </div>
++        )}
++        {(skills||[]).length > 0 && (
++          <div className="rm-section">
++            <div className="rm-section-title">Skills</div>
++            <div className="r-skills-grid">
++              {skills.map(s => <span className="rm-skill-pill" key={s}>{s}</span>)}
++            </div>
++          </div>
++        )}
++        {(projects||[]).filter(p=>p.name).length > 0 && (
++          <div className="rm-section">
++            <div className="rm-section-title">Projects</div>
++            <ProjectEntries projects={projects} />
++          </div>
++        )}
++      </div>
++    </div>
++  )
++}
++
++// ── MINIMAL TEMPLATE ──────────────────────────────────────────────────────────
++function MinimalTemplate({ data }) {
++  const { personal, experience, education, skills, projects } = data
++  return (
++    <div className="resume-minimal">
++      <div className="rmin-header">
++        <div className="rmin-name">{personal.name || 'Your Name'}</div>
++        {personal.title && <div className="rmin-title">{personal.title}</div>}
++        <div className="rmin-contact"><ContactItems personal={personal} /></div>
++      </div>
++      {personal.summary && (
++        <div className="rmin-section">
++          <div className="rmin-section-title">Summary</div>
++          <p className="rmin-prose">{personal.summary}</p>
++        </div>
++      )}
++      {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
++        <div className="rmin-section">
++          <div className="rmin-section-title">Experience</div>
++          <ExperienceEntries experience={experience} />
++        </div>
++      )}
++      {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
++        <div className="rmin-section">
++          <div className="rmin-section-title">Education</div>
++          <EducationEntries education={education} />
++        </div>
++      )}
++      {(skills||[]).length > 0 && (
++        <div className="rmin-section">
++          <div className="rmin-section-title">Skills</div>
++          <div className="rmin-skills">
++            {skills.join('  ·  ')}
++          </div>
++        </div>
++      )}
++      {(projects||[]).filter(p=>p.name).length > 0 && (
++        <div className="rmin-section">
++          <div className="rmin-section-title">Projects</div>
++          <ProjectEntries projects={projects} />
++        </div>
++      )}
++    </div>
++  )
++}
