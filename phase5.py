@@ -4,15 +4,15 @@ def update_file(path, content):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
-    print(f"✅ Styles Fixed: {path}")
+    print(f"✅ Preview Styles Fixed: {path}")
 
 css_content = """
-/* ── Layout & Background ── */
 .resume-container {
-  background: #D9D3CC; /* The beige desk color */
+  background: #D9D3CC;
   padding: 50px 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .preview-panel {
@@ -20,55 +20,58 @@ css_content = """
   height: calc(100vh - 56px);
 }
 
-/* ── The Global Paper Flow ── */
 .global-paper-flow {
   background: #fff;
   width: 210mm;
-  min-height: 297mm; /* At least one A4 page */
-  padding: 20mm;     /* Standard resume margins */
+  min-height: 297mm;
+  padding: 20mm 20mm 40mm 20mm; /* Increased bottom padding for Page 1 footer */
   box-sizing: border-box;
   box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  position: relative;
 
-  /* VISUAL PAGE BREAK: Instead of a solid block that hides text,
-     we use a subtle crease/shadow every 297mm. Text remains readable! */
+  /* THE GAP ENGINE:
+     Creates a 20mm beige desk gap every 297mm.
+     We use a solid color block to 'cut' the paper visually.
+  */
   background-image: linear-gradient(
     to bottom,
-    transparent 296mm,
-    #eaeaea 296.5mm,
-    #cfcfcf 297mm,
-    transparent 297.1mm
+    transparent 297mm,
+    #D9D3CC 297mm,
+    #D9D3CC 317mm,
+    transparent 317mm
   );
-  background-size: 100% 297mm;
+  background-size: 100% 317mm;
 }
 
-/* ── CRITICAL TEXT WRAPPING FIX ── */
+/* Restores Skill Tags */
+.skill-tag-preview {
+  background: #f0f0f0;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #333;
+  border: 1px solid #ddd;
+  display: inline-block;
+}
+
+/* Ensure text actually wraps and doesn't bleed out */
 .global-paper-flow * {
-  /* This forces giant unbroken strings (like your bullet points or URLs) to wrap */
   word-break: break-word;
   overflow-wrap: anywhere !important;
-  white-space: normal;
 }
 
-/* ── Typography & Sections ── */
 .r-section-title {
   font-weight: bold;
   font-size: 12px;
   border-bottom: 1px solid #eee;
-  margin-bottom: 10px;
+  margin: 20px 0 10px 0;
   padding-bottom: 4px;
   color: #333;
   text-transform: uppercase;
 }
 
-.r-prose {
-  white-space: pre-line !important;
-}
-
-/* ── Entries ── */
 .r-entry {
-  display: block;
-  width: 100%;
-  margin-bottom: 14px;
+  margin-bottom: 15px;
 }
 
 .r-entry-bullets {
@@ -76,17 +79,16 @@ css_content = """
   padding-left: 20px;
 }
 
-.r-entry-bullets li {
-  margin-bottom: 4px;
-  line-height: 1.5;
-}
-
-.skill-tag-preview {
-  background: #f0f0f0;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  display: inline-block;
+/* The 'Infinite Paper' background for pages 2+ */
+.global-paper-flow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  z-index: -1;
 }
 """
 
