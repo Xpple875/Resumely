@@ -101,7 +101,6 @@ export default function PersonalizeSection({ data = {}, onChange }) {
                <select
                   value={fontFamily}
                   onChange={e => set('fontFamily', e.target.value)}
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px', background: '#fff' }}
                >
                   {FONT_OPTIONS.map(opt => (
                      <option key={opt.value} value={opt.value}>{opt.label}</option>

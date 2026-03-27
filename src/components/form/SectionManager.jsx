@@ -48,12 +48,37 @@ export default function SectionManager({ order, labels, onOrderChange, onLabelCh
 
       <style>{`
         .section-manager { display: flex; flex-direction: column; gap: 8px; }
-        .manager-row { display: flex; align-items: center; gap: 12px; background: #fafafa; padding: 8px 12px; border-radius: 8px; border: 1px solid #eee; }
-        .manager-row__drag { display: flex; flex-direction: column; gap: 2px; }
-        .manager-row__drag button { 
-          background: none; border: none; cursor: pointer; padding: 2px; border-radius: 4px; color: #aaa; display: flex; align-items: center; justify-content: center;
+        .manager-row { 
+          display: flex; 
+          align-items: center; 
+          gap: 12px; 
+          background: var(--bg-card); 
+          padding: 10px 14px; 
+          border-radius: var(--radius-md); 
+          border: 1px solid var(--border); 
+          transition: border-color 0.15s ease;
         }
-        .manager-row__drag button:hover:not(:disabled) { background: #eee; color: #666; }
+        .manager-row:hover {
+          border-color: var(--accent);
+        }
+        .manager-row__drag { display: flex; flex-direction: column; gap: 4px; }
+        .manager-row__drag button { 
+          background: var(--bg); 
+          border: 1px solid var(--border); 
+          cursor: pointer; 
+          padding: 4px; 
+          border-radius: 4px; 
+          color: var(--text-light); 
+          display: flex; 
+          align-items: center; 
+          justify-content: center;
+          transition: all 0.15s ease;
+        }
+        .manager-row__drag button:hover:not(:disabled) { 
+          background: var(--accent-soft); 
+          color: var(--accent); 
+          border-color: var(--accent); 
+        }
         .manager-row__drag button:disabled { opacity: 0.3; cursor: not-allowed; }
       `}</style>
     </SectionWrapper>
