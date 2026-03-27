@@ -8,21 +8,25 @@ const BOT_PAD_MM = 30;
 const CONTENT_H_MM = A4_HEIGHT_MM - TOP_PAD_MM - BOT_PAD_MM;
 
 const ResumeContent = React.forwardRef(({ data, template }, ref) => {
-   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+   const { personal, experience = [], education = [], skills = [], projects = [], theme = {} } = data;
+
+   const accentColor = theme.accentColor || '#C4622D';
+   const fontFamily = theme.fontFamily || 'Helvetica, Arial, sans-serif';
+   const fontSize = theme.fontSize ? `${theme.fontSize}px` : '13px';
 
    return (
-      <div ref={ref} className={`resume-${template} resume-content-inner`} style={{ position: 'relative' }}>
+      <div ref={ref} className={`resume-${template} resume-content-inner`} style={{ position: 'relative', fontFamily, fontSize }}>
          {/* HEADER */}
          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
             <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
                {personal.name || 'YOUR NAME'}
             </h1>
             {personal.title && (
-               <div style={{ color: '#C4622D', fontWeight: 'bold', fontSize: '15px', textTransform: 'uppercase' }}>
+               <div style={{ color: accentColor, fontWeight: 'bold', fontSize: '1.15em', textTransform: 'uppercase' }}>
                   {personal.title}
                </div>
             )}
-            <div style={{ marginTop: '10px', fontSize: '12px', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+            <div style={{ marginTop: '10px', fontSize: '0.9em', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
                {personal.email && <span>📧 {personal.email}</span>}
                {personal.phone && <span>📞 {personal.phone}</span>}
                {personal.location && <span>📍 {personal.location}</span>}
@@ -34,33 +38,33 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
          {/* SUMMARY */}
          {personal.summary && (
             <div style={{ marginBottom: '25px' }}>
-               <div className="r-section-title">SUMMARY</div>
-               <p style={{ fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
+               <div className="r-section-title" style={{ color: accentColor }}>SUMMARY</div>
+               <p style={{ lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
             </div>
          )}
 
          {/* EXPERIENCE */}
          {experience.length > 0 && experience.some(e => e.title || e.company) && (
             <div style={{ marginBottom: '25px' }}>
-               <div className="r-section-title">EXPERIENCE</div>
+               <div className="r-section-title" style={{ color: accentColor }}>EXPERIENCE</div>
                {experience.map((exp, i) => {
                   const safeId = exp.id || `idx-${i}`;
                   return (
                   <div className="r-entry" key={safeId}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
                         <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
-                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
                            {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
                         </span>
                      </div>
-                     <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
+                     <div style={{ fontStyle: 'italic', color: '#444' }}>
                         {exp.company}{exp.location ? ` · ${exp.location}` : ''}
                      </div>
                      
                      {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
                         <ul className="r-entry-bullets">
                            {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
-                              <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>
+                              <li key={idx} style={{ lineHeight: '1.5' }}>
                                  {bullet}
                               </li>
                            ))}
@@ -74,19 +78,19 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
          {/* EDUCATION */}
          {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
             <div style={{ marginBottom: '25px' }}>
-               <div className="r-section-title">EDUCATION</div>
+               <div className="r-section-title" style={{ color: accentColor }}>EDUCATION</div>
                {education.map((edu, i) => {
                   const safeId = edu.id || `idx-${i}`;
                   return (
                   <div className="r-entry" key={safeId}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
                         <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
-                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
                            {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
                         </span>
                      </div>
-                     <div style={{ fontSize: '13px' }}>{edu.institution}</div>
-                     {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
+                     <div>{edu.institution}</div>
+                     {edu.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {edu.gpa}</div>}
                   </div>
                )})}
             </div>
@@ -95,7 +99,7 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
          {/* SKILLS */}
          {skills && skills.length > 0 && (
             <div style={{ marginBottom: '25px' }}>
-               <div className="r-section-title">SKILLS</div>
+               <div className="r-section-title" style={{ color: accentColor }}>SKILLS</div>
                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {skills.map((skill, i) => (
                      <span key={i} className="skill-tag-preview">{skill}</span>
@@ -107,20 +111,20 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
          {/* PROJECTS */}
          {projects && projects.length > 0 && projects.some(p => p.name) && (
             <div>
-               <div className="r-section-title">PROJECTS</div>
+               <div className="r-section-title" style={{ color: accentColor }}>PROJECTS</div>
                {projects.map((proj, i) => {
                   const safeId = proj.id || `idx-${i}`;
                   return (
                   <div className="r-entry" key={safeId}>
-                     <div style={{ fontWeight: 'bold', fontSize: '14px', overflowWrap: 'break-word' }}>
+                     <div style={{ fontWeight: 'bold', fontSize: '1.05em', overflowWrap: 'break-word' }}>
                         {proj.name}
                         {proj.url && (
-                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', overflowWrap: 'break-word' }}>
+                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '0.85em', color: accentColor, marginTop: '2px', overflowWrap: 'break-word' }}>
                               {proj.url}
                            </span>
                         )}
                      </div>
-                     <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
+                     <p style={{ margin: '4px 0 0 0' }}>{proj.description}</p>
                   </div>
                )})}
             </div>

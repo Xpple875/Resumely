@@ -1,4 +1,5 @@
 import React from 'react'
+import PersonalizeSection from './form/PersonalizeSection.jsx'
 import PersonalSection from './form/PersonalSection.jsx'
 import ExperienceSection from './form/ExperienceSection.jsx'
 import EducationSection from './form/EducationSection.jsx'
@@ -11,6 +12,10 @@ export default function ResumeForm({ data, onChange, onToast }) {
 
   return (
     <div style={{ paddingBottom: '70px' }}>
+      <PersonalizeSection
+        data={data.theme}
+        onChange={val => update('theme', val)}
+      />
       <PersonalSection
         data={data.personal}
         onChange={val => update('personal', val)}

@@ -1,6 +1,15 @@
 
 const PW = 595.28; const PH = 841.89; const ML = 52; const MR = 52; const MT = 52; const MB = 52; const CW = PW - ML - MR;
-const C_DARK = '0.102 0.090 0.078'; const C_MID = '0.420 0.392 0.376'; const C_LIGHT = '0.627 0.596 0.580'; const C_ACCENT = '0.769 0.384 0.176';
+const C_DARK = '0.102 0.090 0.078'; const C_MID = '0.420 0.392 0.376'; const C_LIGHT = '0.627 0.596 0.580';
+
+// Converts #RRGGBB to PDF 'r g b' string
+function hexToPdfColor(hex) {
+    if (!hex) return '0.769 0.384 0.176'; // Default #C4622D
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    return `${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)}`;
+}
 
 function esc(str) { return !str ? '' : String(str).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/g, ''); }
 
@@ -73,8 +82,11 @@ class PDFWriter {
 }
 
 export async function generatePDF(_element, resumeData, filename = 'resume') {
-    const { personal, experience, education, skills, projects } = resumeData;
+    const { personal, experience, education, skills, projects, theme } = resumeData;
     const pages = []; let ops = []; let y = PH - MT;
+    
+    // Evaluate dynamic color from theme properties mapped natively to stream format
+    const dynamicAccentColor = hexToPdfColor(theme?.accentColor);
 
     const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = PH - MT; };
     const checkBreak = (needed = 40) => { if (y - needed < MB) newPage(); };
@@ -94,7 +106,7 @@ export async function generatePDF(_element, resumeData, filename = 'resume') {
     // HEADER
     const nameLines = wrapText(personal.name || 'Your Name', CW, false, 28);
     for (const line of nameLines) { checkBreak(35); drawText(line, ML, y, 'F1', 28, C_DARK); y -= 32; }
-    if (personal.title) { checkBreak(20); drawText(personal.title, ML, y, 'F2', 11, C_ACCENT); y -= 14; }
+    if (personal.title) { checkBreak(20); drawText(personal.title, ML, y, 'F2', 11, dynamicAccentColor); y -= 14; }
     const contactParts = [personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean);
     if (contactParts.length) { drawWrapped(contactParts.join('  |  '), ML, CW, 'F1', 9, C_MID, 12); }
     y -= 4; hline(y, 0.8); y -= 10;

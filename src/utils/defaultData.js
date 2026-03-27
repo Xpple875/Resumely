@@ -12,6 +12,11 @@ export const defaultResumeData = {
     website: '',
     summary: '',
   },
+  theme: {
+    accentColor: '#C4622D',
+    fontFamily: 'Helvetica, Arial, sans-serif',
+    fontSize: 13,
+  },
   experience: [
     {
       id: uid(),
