@@ -1,41 +1,46 @@
+/* ── Resume outer wrapper (grey desk area) ── */
 .resume-container {
-   background: blue;
+   background: #D9D3CC;
    padding: 50px 0;
    display: flex;
    flex-direction: column;
    align-items: center;
-   overflow-x: hidden;
    width: 100%;
 }
 
-.preview-panel {
-   overflow-y: auto;
-   height: calc(100vh - 56px);
-}
-
+/* ── A4 Paper (Single Physical Page) ── */
 .global-paper-flow {
    background: #fff;
    width: 210mm;
-   min-height: 297mm;
-   padding: 20mm 20mm 40mm 20mm;
+   height: 297mm;
+   /* Strictly 1 A4 page high now */
    box-sizing: border-box;
    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+   margin-bottom: 30px;
+   /* Actual physical gap between pages */
    position: relative;
-   /* Prevent any content from escaping the paper horizontally */
    overflow: hidden;
-   /* Force the container itself to respect its own width */
-   max-width: 210mm;
-
-   /* THE GAP ENGINE */
-   background-image: linear-gradient(to bottom,
-         transparent 297mm,
-         #D9D3CC 297mm,
-         #D9D3CC 317mm,
-         transparent 317mm);
-   background-size: 100% 317mm;
+   /* Clips content exactly at the page edge */
 }
 
-/* Restores Skill Tags */
+/* ── Inner content wrapper ── */
+.resume-content-inner {
+   padding: 20mm 20mm 40mm 20mm;
+   /* Since global-paper-flow is 210mm, inner must match */
+   width: 210mm;
+   box-sizing: border-box;
+}
+
+/* All children must stay within paper width */
+.global-paper-flow * {
+   max-width: 100%;
+   min-width: 0;
+   box-sizing: border-box;
+   word-break: break-all;
+   overflow-wrap: anywhere;
+}
+
+/* ── Skill tags in preview ── */
 .skill-tag-preview {
    background: #f0f0f0;
    padding: 4px 12px;
@@ -46,16 +51,7 @@
    display: inline-block;
 }
 
-/* Nuclear word-wrap fix: every descendant of the paper must wrap */
-.global-paper-flow,
-.global-paper-flow * {
-   word-break: break-all;
-   overflow-wrap: anywhere;
-   max-width: 100%;
-   min-width: 0;
-   box-sizing: border-box;
-}
-
+/* ── Section titles ── */
 .r-section-title {
    font-weight: bold;
    font-size: 12px;
@@ -66,6 +62,7 @@
    text-transform: uppercase;
 }
 
+/* ── Entry blocks ── */
 .r-entry {
    margin-bottom: 15px;
 }
@@ -73,24 +70,4 @@
 .r-entry-bullets {
    margin-top: 6px;
    padding-left: 20px;
-}
-
-/* The 'Infinite Paper' background for pages 2+ */
-.global-paper-flow::after {
-   content: "";
-   position: absolute;
-   top: 0;
-   left: 0;
-   width: 100%;
-   height: 100%;
-   background-color: white;
-   z-index: -1;
-}
-
-/* Injected by the JS pagination engine — must be transparent so the
-   background-image gradient (the beige gap) shows through */
-.page-break-spacer {
-   display: block;
-   pointer-events: none;
-   background: transparent;
 }
