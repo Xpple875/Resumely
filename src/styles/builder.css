@@ -55,6 +55,7 @@
   align-items: flex-start;
   justify-content: center;
   padding: 32px 24px;
+  height: 100%;
 }
 
 /* ── Buttons ── */

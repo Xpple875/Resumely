@@ -1,214 +1,118 @@
+
 import React from 'react'
 import '../styles/preview.css'
 
 export default function ResumePreview({ data, template = 'classic' }) {
-  if (template === 'modern')  return <ModernTemplate  data={data} />
-  if (template === 'minimal') return <MinimalTemplate data={data} />
-  return <ClassicTemplate data={data} />
-}
+  // 1. Ultimate Safety Check
+  if (!data || !data.personal) return null;
 
-// ── SHARED HELPERS ────────────────────────────────────────────────────────────
-function ContactItems({ personal }) {
-  const items = [
-    personal.email,
-    personal.phone,
-    personal.location,
-    personal.linkedin,
-    personal.website,
-  ].filter(Boolean)
-  return items.map((item, i) => <span key={i}>{item}</span>)
-}
+  const { personal, experience = [], education = [], skills = [], projects = [] } = data;
 
-function ExperienceEntries({ experience, accentColor }) {
-  return (experience || []).filter(e => e.title || e.company).map(entry => (
-    <div className="r-entry" key={entry.id}>
-      <div className="r-entry-header">
-        <span className="r-entry-title">{entry.title}</span>
-        <span className="r-entry-dates">
-          {[entry.startDate, entry.endDate].filter(Boolean).join(' – ')}
-        </span>
-      </div>
-      <div className="r-entry-sub">
-        {[entry.company, entry.location].filter(Boolean).join(' · ')}
-      </div>
-      {(entry.bullets || []).filter(b => b.trim()).length > 0 && (
-        <ul className="r-entry-bullets">
-          {entry.bullets.filter(b => b.trim()).map((b, i) => <li key={i}>{b}</li>)}
-        </ul>
-      )}
-    </div>
-  ))
-}
-
-function EducationEntries({ education }) {
-  return (education || []).filter(e => e.degree || e.institution).map(entry => (
-    <div className="r-entry" key={entry.id}>
-      <div className="r-entry-header">
-        <span className="r-entry-title">{entry.degree}</span>
-        <span className="r-entry-dates">
-          {[entry.startDate, entry.endDate].filter(Boolean).join(' – ')}
-        </span>
-      </div>
-      <div className="r-entry-sub">{entry.institution}</div>
-      {entry.gpa && <div style={{fontSize:'12px',color:'#A09894',marginTop:'2px'}}>{entry.gpa}</div>}
-    </div>
-  ))
-}
-
-function ProjectEntries({ projects }) {
-  return (projects || []).filter(p => p.name).map(entry => (
-    <div className="r-entry" key={entry.id}>
-      <div className="r-entry-header">
-        <span className="r-entry-title">{entry.name}</span>
-        {entry.url && <span style={{fontSize:'12px',color:'#A09894'}}>{entry.url}</span>}
-      </div>
-      {entry.description && (
-        <p style={{fontSize:'13px',marginTop:'4px',color:'#1A1714'}}>{entry.description}</p>
-      )}
-    </div>
-  ))
-}
-
-// ── CLASSIC TEMPLATE ──────────────────────────────────────────────────────────
-function ClassicTemplate({ data }) {
-  const { personal, experience, education, skills, projects } = data
   return (
-    <div className="resume-classic">
-      <div className="r-header">
-        <div className="r-name">{personal.name || 'Your Name'}</div>
-        {personal.title && <div className="r-tagline">{personal.title}</div>}
-        <div className="r-contact"><ContactItems personal={personal} /></div>
-      </div>
-      {personal.summary && (
-        <div className="r-section">
-          <div className="r-section-title">Summary</div>
-          <p style={{fontSize:'13px',color:'#1A1714',lineHeight:'1.6'}}>{personal.summary}</p>
-        </div>
-      )}
-      {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
-        <div className="r-section">
-          <div className="r-section-title">Experience</div>
-          <ExperienceEntries experience={experience} />
-        </div>
-      )}
-      {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
-        <div className="r-section">
-          <div className="r-section-title">Education</div>
-          <EducationEntries education={education} />
-        </div>
-      )}
-      {(skills||[]).length > 0 && (
-        <div className="r-section">
-          <div className="r-section-title">Skills</div>
-          <div className="r-skills-grid">
-            {skills.map(s => <span className="r-skill-pill" key={s}>{s}</span>)}
+    <div className="resume-container">
+      {/* global-paper-flow uses your CSS to create visual A4 gaps */}
+      <div className={`resume-${template} global-paper-flow`}>
+
+        {/* HEADER */}
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
+            {personal.name || 'YOUR NAME'}
+          </h1>
+          {personal.title && (
+            <div style={{ color: '#C4622D', fontWeight: 'bold', fontSize: '15px', textTransform: 'uppercase' }}>
+              {personal.title}
+            </div>
+          )}
+          <div style={{ marginTop: '10px', fontSize: '12px', display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+            {personal.email && <span>📧 {personal.email}</span>}
+            {personal.phone && <span>📞 {personal.phone}</span>}
+            {personal.location && <span>📍 {personal.location}</span>}
+            {personal.linkedin && <span>🔗 LinkedIn</span>}
           </div>
         </div>
-      )}
-      {(projects||[]).filter(p=>p.name).length > 0 && (
-        <div className="r-section">
-          <div className="r-section-title">Projects</div>
-          <ProjectEntries projects={projects} />
-        </div>
-      )}
-    </div>
-  )
-}
 
-// ── MODERN TEMPLATE ───────────────────────────────────────────────────────────
-function ModernTemplate({ data }) {
-  const { personal, experience, education, skills, projects } = data
-  return (
-    <div className="resume-modern">
-      {/* Dark header band */}
-      <div className="rm-header">
-        <div className="rm-name">{personal.name || 'Your Name'}</div>
-        {personal.title && <div className="rm-title">{personal.title}</div>}
-      </div>
-      {/* Contact strip */}
-      <div className="rm-contact">
-        <ContactItems personal={personal} />
-      </div>
-      <div className="rm-body">
+        {/* SUMMARY */}
         {personal.summary && (
-          <div className="rm-section">
-            <div className="rm-section-title">Summary</div>
-            <p className="rm-prose">{personal.summary}</p>
+          <div style={{ marginBottom: '25px' }}>
+            <div className="r-section-title">SUMMARY</div>
+            <p style={{ fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
           </div>
         )}
-        {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
-          <div className="rm-section">
-            <div className="rm-section-title">Experience</div>
-            <ExperienceEntries experience={experience} />
+
+        {/* EXPERIENCE */}
+        {experience.length > 0 && experience.some(e => e.title || e.company) && (
+          <div style={{ marginBottom: '25px' }}>
+            <div className="r-section-title">EXPERIENCE</div>
+            {experience.map((exp) => (
+              <div className="r-entry" key={exp.id}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
+                  <span>{exp.title}</span>
+                  <span style={{ fontWeight: 'normal', color: '#666', fontSize: '12px' }}>
+                    {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
+                  </span>
+                </div>
+                <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
+                  {exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                </div>
+                {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
+                  <ul className="r-entry-bullets">
+                    {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
+                      <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>{bullet}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
           </div>
         )}
-        {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
-          <div className="rm-section">
-            <div className="rm-section-title">Education</div>
-            <EducationEntries education={education} />
+
+        {/* EDUCATION */}
+        {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
+          <div style={{ marginBottom: '25px' }}>
+            <div className="r-section-title">EDUCATION</div>
+            {education.map((edu) => (
+              <div className="r-entry" key={edu.id}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
+                  <span>{edu.degree}</span>
+                  <span style={{ fontWeight: 'normal', color: '#666', fontSize: '12px' }}>
+                    {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
+                  </span>
+                </div>
+                <div style={{ fontSize: '13px' }}>{edu.institution}</div>
+                {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
+              </div>
+            ))}
           </div>
         )}
-        {(skills||[]).length > 0 && (
-          <div className="rm-section">
-            <div className="rm-section-title">Skills</div>
-            <div className="r-skills-grid">
-              {skills.map(s => <span className="rm-skill-pill" key={s}>{s}</span>)}
+
+        {/* SKILLS */}
+        {skills && skills.length > 0 && (
+          <div style={{ marginBottom: '25px' }}>
+            <div className="r-section-title">SKILLS</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {skills.map((skill, i) => (
+                <span key={i} className="skill-tag-preview">{skill}</span>
+              ))}
             </div>
           </div>
         )}
-        {(projects||[]).filter(p=>p.name).length > 0 && (
-          <div className="rm-section">
-            <div className="rm-section-title">Projects</div>
-            <ProjectEntries projects={projects} />
+
+        {/* PROJECTS */}
+        {projects && projects.length > 0 && projects.some(p => p.name) && (
+          <div>
+            <div className="r-section-title">PROJECTS</div>
+            {projects.map((proj) => (
+              <div className="r-entry" key={proj.id}>
+                <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                  {proj.name}
+                  {proj.url && <span style={{ fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginLeft: '10px' }}>{proj.url}</span>}
+                </div>
+                <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
+              </div>
+            ))}
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-// ── MINIMAL TEMPLATE ──────────────────────────────────────────────────────────
-function MinimalTemplate({ data }) {
-  const { personal, experience, education, skills, projects } = data
-  return (
-    <div className="resume-minimal">
-      <div className="rmin-header">
-        <div className="rmin-name">{personal.name || 'Your Name'}</div>
-        {personal.title && <div className="rmin-title">{personal.title}</div>}
-        <div className="rmin-contact"><ContactItems personal={personal} /></div>
-      </div>
-      {personal.summary && (
-        <div className="rmin-section">
-          <div className="rmin-section-title">Summary</div>
-          <p className="rmin-prose">{personal.summary}</p>
-        </div>
-      )}
-      {(experience||[]).filter(e=>e.title||e.company).length > 0 && (
-        <div className="rmin-section">
-          <div className="rmin-section-title">Experience</div>
-          <ExperienceEntries experience={experience} />
-        </div>
-      )}
-      {(education||[]).filter(e=>e.degree||e.institution).length > 0 && (
-        <div className="rmin-section">
-          <div className="rmin-section-title">Education</div>
-          <EducationEntries education={education} />
-        </div>
-      )}
-      {(skills||[]).length > 0 && (
-        <div className="rmin-section">
-          <div className="rmin-section-title">Skills</div>
-          <div className="rmin-skills">
-            {skills.join('  ·  ')}
-          </div>
-        </div>
-      )}
-      {(projects||[]).filter(p=>p.name).length > 0 && (
-        <div className="rmin-section">
-          <div className="rmin-section-title">Projects</div>
-          <ProjectEntries projects={projects} />
-        </div>
-      )}
     </div>
   )
 }

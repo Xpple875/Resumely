@@ -1,88 +1,82 @@
-/* ── Resume Preview Shell ── */
-.resume-preview-wrapper {
-  width: 794px;
-  min-height: 1123px;
-  background: #fff;
-  box-shadow: var(--shadow-lg);
-  border-radius: 2px;
-  flex-shrink: 0;
-}
 
-/* ── SHARED entry styles (used by all templates) ── */
-.r-entry { margin-bottom: 14px; }
-.r-entry:last-child { margin-bottom: 0; }
-.r-entry-header {
+/* ── Layout & Background ── */
+.resume-container {
+  background: #D9D3CC; /* The beige desk color */
+  padding: 50px 0;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: center;
 }
-.r-entry-title { font-size: 13.5px; font-weight: 600; color: #1A1714; }
-.r-entry-dates { font-size: 12px; color: #A09894; white-space: nowrap; flex-shrink: 0; }
-.r-entry-sub { font-size: 13px; color: #6B6460; font-weight: 500; margin-top: 1px; margin-bottom: 5px; }
-.r-entry-bullets { padding-left: 16px; list-style: disc; margin-top: 4px; }
-.r-entry-bullets li { margin-bottom: 3px; color: #1A1714; font-size: 13px; }
 
-/* ── CLASSIC ── */
-.resume-classic {
+.preview-panel {
+  overflow-y: auto;
+  height: calc(100vh - 56px);
+}
+
+/* ── The Global Paper Flow ── */
+.global-paper-flow {
+  background: #fff;
+  width: 210mm;
+  min-height: 297mm; /* At least one A4 page */
+  padding: 20mm;     /* Standard resume margins */
+  box-sizing: border-box;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+
+  /* VISUAL PAGE BREAK: Instead of a solid block that hides text,
+     we use a subtle crease/shadow every 297mm. Text remains readable! */
+  background-image: linear-gradient(
+    to bottom,
+    transparent 296mm,
+    #eaeaea 296.5mm,
+    #cfcfcf 297mm,
+    transparent 297.1mm
+  );
+  background-size: 100% 297mm;
+}
+
+/* ── CRITICAL TEXT WRAPPING FIX ── */
+.global-paper-flow * {
+  /* This forces giant unbroken strings (like your bullet points or URLs) to wrap */
+  word-break: break-word;
+  overflow-wrap: anywhere !important;
+  white-space: normal;
+}
+
+/* ── Typography & Sections ── */
+.r-section-title {
+  font-weight: bold;
+  font-size: 12px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  color: #333;
+  text-transform: uppercase;
+}
+
+.r-prose {
+  white-space: pre-line !important;
+}
+
+/* ── Entries ── */
+.r-entry {
+  display: block;
   width: 100%;
-  min-height: 1123px;
-  padding: 56px 60px;
-  font-family: 'Geist', system-ui, sans-serif;
-  color: #1A1714;
-  font-size: 13px;
-  line-height: 1.55;
+  margin-bottom: 14px;
 }
-.resume-classic .r-header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #1A1714; }
-.resume-classic .r-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; font-weight: 400; line-height: 1.1; color: #1A1714; margin-bottom: 6px; }
-.resume-classic .r-tagline { font-size: 14px; font-weight: 500; color: #C4622D; margin-bottom: 10px; }
-.resume-classic .r-contact { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 12.5px; color: #6B6460; }
-.resume-classic .r-section { margin-bottom: 24px; }
-.resume-classic .r-section-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 14px; font-weight: 400; letter-spacing: 1.5px; text-transform: uppercase; color: #1A1714; border-bottom: 1px solid #E2DAD4; padding-bottom: 5px; margin-bottom: 14px; }
-.resume-classic .r-skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-.resume-classic .r-skill-pill { background: #F6F1EC; color: #1A1714; font-size: 12.5px; padding: 3px 10px; border-radius: 3px; border: 1px solid #E2DAD4; }
 
-/* ── MODERN ── */
-.resume-modern {
-  width: 100%;
-  min-height: 1123px;
-  font-family: 'Geist', system-ui, sans-serif;
-  color: #1A1714;
-  font-size: 13px;
-  line-height: 1.55;
+.r-entry-bullets {
+  margin-top: 6px;
+  padding-left: 20px;
 }
-.resume-modern .rm-header { background: #1A1714; padding: 36px 52px 28px; }
-.resume-modern .rm-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 36px; font-weight: 400; color: #FDFAF7; line-height: 1.1; margin-bottom: 6px; }
-.resume-modern .rm-title { font-size: 13px; font-weight: 500; color: #C4622D; letter-spacing: 0.3px; }
-.resume-modern .rm-contact { background: #F0E6DF; padding: 10px 52px; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 12px; color: #6B6460; }
-.resume-modern .rm-body { padding: 32px 52px 52px; }
-.resume-modern .rm-section { margin-bottom: 24px; }
-.resume-modern .rm-section-title { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #C4622D; border-bottom: 1px solid #E2DAD4; padding-bottom: 5px; margin-bottom: 14px; }
-.resume-modern .rm-prose { font-size: 13px; color: #1A1714; line-height: 1.6; }
-.resume-modern .r-skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-.resume-modern .rm-skill-pill { background: #F0E6DF; color: #C4622D; font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 3px; }
 
-/* ── MINIMAL ── */
-.resume-minimal {
-  width: 100%;
-  min-height: 1123px;
-  padding: 64px 68px;
-  font-family: 'Geist', system-ui, sans-serif;
-  color: #1A1714;
-  font-size: 13px;
-  line-height: 1.6;
+.r-entry-bullets li {
+  margin-bottom: 4px;
+  line-height: 1.5;
 }
-.resume-minimal .rmin-header { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #E2DAD4; }
-.resume-minimal .rmin-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 38px; font-weight: 400; color: #1A1714; line-height: 1.1; margin-bottom: 6px; }
-.resume-minimal .rmin-title { font-size: 13px; color: #6B6460; margin-bottom: 12px; }
-.resume-minimal .rmin-contact { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 12px; color: #A09894; }
-.resume-minimal .rmin-section { margin-bottom: 28px; display: grid; grid-template-columns: 110px 1fr; gap: 0 24px; }
-.resume-minimal .rmin-section-title { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #A09894; padding-top: 2px; }
-.resume-minimal .rmin-prose { font-size: 13px; color: #1A1714; line-height: 1.6; }
-.resume-minimal .rmin-skills { font-size: 13px; color: #6B6460; }
 
-/* ── Print ── */
-@media print {
-  .resume-preview-wrapper { box-shadow: none; border-radius: 0; }
+.skill-tag-preview {
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: inline-block;
 }
