@@ -4,169 +4,165 @@ def update_file(path, content):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
-    print(f"✅ Consistent UI Applied: {path}")
+    print(f"✅ PDF Export Fully Optimized & Fixed: {path}")
 
-# 1. Create the new ConfirmModal component
-confirm_modal_code = """
-import React from 'react'
-import '../styles/payment.css'
+# This version handles the "y is not defined" error by keeping the scope tight
+# and fixes the horizontal overflow by character-counting long strings.
 
-export default function ConfirmModal({ title, message, onConfirm, onDismiss }) {
-  return (
-    <div className="payment-page" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 2000, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="payment-card" style={{ textAlign: 'center', maxWidth: '400px' }}>
-        <div className="payment-logo" style={{ marginBottom: '10px' }}>Resum<span>e</span>ly</div>
-        <h2 className="payment-title">{title}</h2>
-        <p className="payment-sub" style={{ margin: '15px 0 25px' }}>{message}</p>
+pdf_engine_fixed = """
+const PW = 595.28; const PH = 841.89; const ML = 52; const MR = 52; const MT = 52; const MB = 52; const CW = PW - ML - MR;
+const C_DARK = '0.102 0.090 0.078'; const C_MID = '0.420 0.392 0.376'; const C_LIGHT = '0.627 0.596 0.580'; const C_ACCENT = '0.769 0.384 0.176';
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            className="btn btn-ghost"
-            style={{ flex: 1, border: '1px solid #ddd' }}
-            onClick={onDismiss}
-          >
-            Cancel
-          </button>
-          <button
-            className="btn btn-primary"
-            style={{ flex: 1, background: '#ff4d4d', borderColor: '#ff4d4d' }}
-            onClick={() => { onConfirm(); onDismiss(); }}
-          >
-            Clear All
-          </button>
-        </div>
-      </div>
-    </div>
-  )
+function esc(str) { return !str ? '' : String(str).replace(/\\\\/g, '\\\\\\\\').replace(/\\(/g, '\\\\(').replace(/\\)/g, '\\\\)').replace(/[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f-\\xff]/g, ''); }
+
+const WIDTHS_REGULAR = { default: 278, ' ': 278, '!': 278, '"': 355, '#': 556, '$': 556, '%': 889, '&': 667, "'": 191, '(': 333, ')': 333, '*': 389, '+': 584, ',': 278, '-': 333, '.': 278, '/': 278, '0': 556, '1': 556, '2': 556, '3': 556, '4': 556, '5': 556, '6': 556, '7': 556, '8': 556, '9': 556, ':': 278, ';': 278, '<': 584, '=': 584, '>': 584, '?': 556, '@': 1015, 'A': 667, 'B': 667, 'C': 722, 'D': 722, 'E': 667, 'F': 611, 'G': 778, 'H': 722, 'I': 278, 'J': 500, 'K': 667, 'L': 556, 'M': 833, 'N': 722, 'O': 778, 'P': 667, 'Q': 778, 'R': 722, 'S': 667, 'T': 611, 'U': 722, 'V': 667, 'W': 944, 'X': 667, 'Y': 667, 'Z': 611, '[': 278, '\\\\': 278, ']': 278, '^': 469, '_': 556, '`': 333, 'a': 556, 'b': 556, 'c': 500, 'd': 556, 'e': 556, 'f': 278, 'g': 556, 'h': 556, 'i': 222, 'j': 222, 'k': 500, 'l': 222, 'm': 833, 'n': 556, 'o': 556, 'p': 556, 'q': 556, 'r': 333, 's': 500, 't': 278, 'u': 556, 'v': 500, 'w': 722, 'x': 500, 'y': 500, 'z': 500, '{': 334, '|': 260, '}': 334, '~': 584 };
+const WIDTHS_BOLD = { ...WIDTHS_REGULAR };
+
+function strWidth(str, bold, size) {
+    const map = bold ? WIDTHS_BOLD : WIDTHS_REGULAR;
+    let w = 0;
+    for (const ch of String(str || '')) { w += (map[ch] ?? map.default); }
+    return (w / 1000) * size;
 }
-"""
 
-# 2. Update BuilderPage to use the new modal
-builder_updated_code = """
-import React, { useState, useEffect } from 'react'
-import ResumeForm from '../components/ResumeForm.jsx'
-import ResumePreview from '../components/ResumePreview.jsx'
-import ToastContainer from '../components/ToastContainer.jsx'
-import PayGateModal from '../components/PayGateModal.jsx'
-import AuthModal from '../components/AuthModal.jsx'
-import ConfirmModal from '../components/ConfirmModal.jsx' // New
-import { generatePDF } from '../utils/pdfExport.js'
-import { defaultResumeData } from '../utils/defaultData.js'
-import { useAutosave, loadDraft, clearDraft } from '../hooks/useAutosave.js'
-import { useToast } from '../hooks/useToast.js'
-import { supabase, syncResumeToCloud } from '../services/supabaseClient'
-import '../styles/builder.css'
+function wrapText(str, maxPt, bold, size) {
+    if (!str) return [];
+    const lines = [];
+    const words = String(str).split(' ');
+    let currentLine = '';
 
-export default function BuilderPage({ template, onChangeTemplate, unlocked, user, onSignOut }) {
-  const [resumeData, setResumeData] = useState(() => loadDraft() || defaultResumeData)
-  const [showPayGate, setShowPayGate] = useState(false)
-  const [showAuth, setShowAuth] = useState(false)
-  const [showClearConfirm, setShowClearConfirm] = useState(false) // New
-  const [isSyncing, setIsSyncing] = useState(false)
-  const { toasts, showToast } = useToast()
-
-  useAutosave(resumeData, user, unlocked)
-
-  useEffect(() => {
-    if (user) {
-      const fetchCloudData = async () => {
-        try {
-          const { data } = await supabase
-            .from('resumes')
-            .select('resume_data')
-            .eq('user_id', user.id)
-            .maybeSingle()
-
-          if (data?.resume_data) {
-            setResumeData(data.resume_data)
-          }
-        } catch (e) { console.error(e) }
-      }
-      fetchCloudData()
+    for (const word of words) {
+        if (strWidth(word, bold, size) > maxPt) {
+            if (currentLine) lines.push(currentLine);
+            let temp = '';
+            for (const char of word) {
+                if (strWidth(temp + char, bold, size) > maxPt) { lines.push(temp); temp = char; }
+                else { temp += char; }
+            }
+            currentLine = temp;
+            continue;
+        }
+        const test = currentLine ? currentLine + ' ' + word : word;
+        if (strWidth(test, bold, size) <= maxPt) { currentLine = test; }
+        else { lines.push(currentLine); currentLine = word; }
     }
-  }, [user])
+    if (currentLine) lines.push(currentLine);
+    return lines;
+}
 
-  const handleCloudSave = async () => {
-    if (!user) { setShowAuth(true); return; }
-    setIsSyncing(true)
-    try {
-      await syncResumeToCloud(user.id, resumeData, unlocked)
-      showToast('Saved to cloud', 'success')
-    } catch (err) {
-      showToast('Sync failed', 'error')
-    } finally { setIsSyncing(false) }
-  }
+class PDFWriter {
+    constructor() { this.objects = []; this.pages = []; this.pageIds = []; this._oid = 0; }
+    newObj() { const id = ++this._oid; const obj = { id, lines: [] }; this.objects.push(obj); return obj; }
+    buildPages(pageDataList) {
+        for (const ops of pageDataList) {
+            const stream = ops.join('\\n');
+            const contentObj = this.newObj();
+            contentObj.lines = [`${contentObj.id} 0 obj`, `<< /Length ${stream.length} >>`, 'stream', stream, 'endstream', 'endobj'];
+            this.pages.push(contentObj.id);
+            const pageObj = this.newObj();
+            this.pageIds.push(pageObj.id);
+            pageObj._contentId = contentObj.id;
+        }
+    }
+    serialise() {
+        const f1 = this.newObj(); f1.lines = [`${f1.id} 0 obj`, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>', 'endobj'];
+        const f2 = this.newObj(); f2.lines = [`${f2.id} 0 obj`, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>', 'endobj'];
+        const pagesObj = this.newObj(); const kids = this.pageIds.map(id => `${id} 0 R`).join(' ');
+        pagesObj.lines = [`${pagesObj.id} 0 obj`, `<< /Type /Pages /Kids [${kids}] /Count ${this.pageIds.length} >>`, 'endobj'];
+        for (let i = 0; i < this.pageIds.length; i++) {
+            const p = this.objects.find(o => o.id === this.pageIds[i]);
+            p.lines = [`${p.id} 0 obj`, `<< /Type /Page /Parent ${pagesObj.id} 0 R /MediaBox [0 0 ${PW} ${PH}] /Contents ${p._contentId} 0 R /Resources << /Font << /F1 ${f1.id} 0 R /F2 ${f2.id} 0 R >> >> >>`, 'endobj'];
+        }
+        const cat = this.newObj(); cat.lines = [`${cat.id} 0 obj`, `<< /Type /Catalog /Pages ${pagesObj.id} 0 R >>`, 'endobj'];
+        const lines = ['%PDF-1.4', '%\\xE2\\xE3\\xCF\\xD3']; const offsets = [];
+        for (const obj of this.objects) { offsets.push({ id: obj.id, offset: lines.join('\\n').length + 1 }); lines.push(...obj.lines, ''); }
+        const xr = lines.join('\\n').length + 1; lines.push('xref', `0 ${this.objects.length + 1}`, '0000000000 65535 f ');
+        for (const { offset } of offsets) { lines.push(String(offset).padStart(10, '0') + ' 00000 n '); }
+        lines.push('trailer', `<< /Size ${this.objects.length + 1} /Root ${cat.id} 0 R >>`, 'startxref', String(xr), '%%EOF');
+        return lines.join('\\n');
+    }
+}
 
-  const performClear = () => {
-    clearDraft()
-    setResumeData(defaultResumeData)
-    showToast('Form cleared', 'info')
-  }
+export async function generatePDF(_element, resumeData, filename = 'resume') {
+    const { personal, experience, education, skills, projects } = resumeData;
+    const pages = []; let ops = []; let y = PH - MT;
 
-  return (
-    <div className="builder-layout" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header className="builder-header">
-        <div className="builder-header__logo">Resum<span>e</span>ly</div>
+    const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = PH - MT; };
+    const checkBreak = (needed = 40) => { if (y - needed < MB) newPage(); };
+    const drawText = (str, x, py, font, size, col) => { if (!str) return; ops.push('BT', `/${font} ${size} Tf`, `${col} rg`, `${x} ${py} Td`, `(${esc(str)}) Tj`, 'ET'); };
+    const drawTextRight = (str, rx, py, font, size, col) => { const w = strWidth(str, font === 'F2', size); drawText(str, rx - w, py, font, size, col); };
 
-        <div className="builder-header__actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {user && (
-            <button className="btn btn-ghost" onClick={onSignOut} style={{color: '#ff4d4d', fontWeight: '500'}}>
-              Sign Out
-            </button>
-          )}
+    const drawWrapped = (str, x, maxW, font, size, col, lh) => {
+        if (!str) return;
+        const lines = wrapText(str, maxW, font === 'F2', size);
+        for (const line of lines) { checkBreak(lh + 2); drawText(line, x, y, font, size, col); y -= lh; }
+    };
 
-          <button className="btn btn-ghost" onClick={onChangeTemplate}>Template</button>
+    const hline = (py, thick = 0.5, col = C_DARK) => { ops.push(`${col} RG`, `${thick} w`, `${ML} ${py} m`, `${PW - MR} ${py} l`, 'S'); };
+    const thinLine = (py) => { ops.push('0.886 0.855 0.831 RG', '0.3 w', `${ML} ${py} m`, `${PW - MR} ${py} l`, 'S'); };
+    const sectionTitle = (label) => { checkBreak(30); y -= 8; drawText(label.toUpperCase(), ML, y, 'F2', 8.5, C_DARK); y -= 4; thinLine(y); y -= 7; };
 
-          <button className="btn btn-ghost" onClick={handleCloudSave} disabled={isSyncing}>
-            {user ? (isSyncing ? 'Syncing...' : 'Saved') : 'Save to Cloud'}
-          </button>
+    // HEADER
+    const nameLines = wrapText(personal.name || 'Your Name', CW, false, 28);
+    for (const line of nameLines) { checkBreak(35); drawText(line, ML, y, 'F1', 28, C_DARK); y -= 32; }
+    if (personal.title) { checkBreak(20); drawText(personal.title, ML, y, 'F2', 11, C_ACCENT); y -= 14; }
+    const contactParts = [personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean);
+    if (contactParts.length) { drawWrapped(contactParts.join('  |  '), ML, CW, 'F1', 9, C_MID, 12); }
+    y -= 4; hline(y, 0.8); y -= 10;
 
-          <button className="btn btn-ghost" onClick={() => setShowClearConfirm(true)}>
-            Clear
-          </button>
+    // CONTENT
+    if (personal.summary) { sectionTitle('Summary'); drawWrapped(personal.summary, ML, CW, 'F1', 10, C_DARK, 14); y -= 6; }
+    if (experience?.length) {
+        sectionTitle('Experience');
+        for (const e of experience) {
+            if (!e.title && !e.company) continue;
+            checkBreak(40);
+            const d = [e.startDate, e.endDate].filter(Boolean).join(' \u2013 ');
+            drawText(e.title || '', ML, y, 'F2', 10.5, C_DARK);
+            if (d) drawTextRight(d, PW - MR, y, 'F1', 9, C_LIGHT);
+            y -= 13;
+            const sub = [e.company, e.location].filter(Boolean).join(' \u00B7 ');
+            if (sub) { drawText(sub, ML, y, 'F1', 9.5, C_MID); y -= 12; }
+            for (const b of (e.bullets || [])) { if (b?.trim()) drawWrapped('\u2022 ' + b, ML, CW, 'F1', 10, C_DARK, 13); }
+            y -= 4;
+        }
+    }
+    if (education?.length) {
+        sectionTitle('Education');
+        for (const e of education) {
+            if (!e.degree && !e.institution) continue;
+            checkBreak(30);
+            const d = [e.startDate, e.endDate].filter(Boolean).join(' \u2013 ');
+            drawText(e.degree || '', ML, y, 'F2', 10.5, C_DARK);
+            if (d) drawTextRight(d, PW - MR, y, 'F1', 9, C_LIGHT);
+            y -= 13;
+            if (e.institution) { drawText(e.institution, ML, y, 'F1', 9.5, C_MID); y -= 12; }
+            y -= 2;
+        }
+    }
+    if (skills?.length) { sectionTitle('Skills'); drawWrapped(skills.join('  \u00B7  '), ML, CW, 'F1', 10, C_DARK, 14); y -= 6; }
+    if (projects?.length) {
+        sectionTitle('Projects');
+        for (const p of projects) {
+            if (!p.name) continue;
+            checkBreak(30);
+            drawText(p.url ? `${p.name}  \u2014  ${p.url}` : p.name, ML, y, 'F2', 10.5, C_DARK);
+            y -= 13;
+            if (p.description) { drawWrapped(p.description, ML, CW, 'F1', 10, C_DARK, 13); }
+            y -= 4;
+        }
+    }
 
-          <button className="btn btn-secondary" onClick={() => unlocked ? generatePDF(null, resumeData) : setShowPayGate(true)}>
-            {unlocked ? 'Download' : 'Download — $8'}
-          </button>
-        </div>
-      </header>
-
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <aside style={{ width: '400px', minWidth: '350px', overflowY: 'auto', borderRight: '1px solid #eee' }}>
-          <ResumeForm data={resumeData} onChange={setResumeData} onToast={showToast} />
-        </aside>
-
-        <main style={{ flex: 1, overflowY: 'auto', background: '#e0e0e0', display: 'flex', justifyContent: 'center', padding: '50px 20px' }}>
-          <div style={{
-            width: '100%',
-            maxWidth: '210mm',
-            minHeight: '297mm',
-            background: 'white',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-            marginBottom: '50px'
-          }}>
-            <ResumePreview data={resumeData} template={template} />
-          </div>
-        </main>
-      </div>
-
-      {showPayGate && <PayGateModal onDismiss={() => setShowPayGate(false)} />}
-      {showAuth && <AuthModal onDismiss={() => setShowAuth(false)} onSuccess={() => setShowAuth(false)} />}
-
-      {showClearConfirm && (
-        <ConfirmModal
-          title="Reset Resume?"
-          message="This will delete all information currently in the form. This cannot be undone."
-          onConfirm={performClear}
-          onDismiss={() => setShowClearConfirm(false)}
-        />
-      )}
-
-      <ToastContainer toasts={toasts} />
-    </div>
-  )
+    if (ops.length) pages.push(ops);
+    const writer = new PDFWriter(); writer.buildPages(pages);
+    const pdf = writer.serialise();
+    const bytes = new Uint8Array(pdf.length);
+    for (let i = 0; i < pdf.length; i++) { bytes[i] = pdf.charCodeAt(i) & 0xff; }
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `${filename}-resume.pdf`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 """
 
-update_file('src/components/ConfirmModal.jsx', confirm_modal_code)
-update_file('src/pages/BuilderPage.jsx', builder_updated_code)
+update_file('src/utils/pdfExport.js', pdf_engine_fixed)
