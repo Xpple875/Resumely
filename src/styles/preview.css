@@ -1,73 +1,77 @@
 /* ── Resume outer wrapper (grey desk area) ── */
 .resume-container {
-   background: #D9D3CC;
-   padding: 50px 0;
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   width: 100%;
+  background: #D9D3CC;
+  padding: 50px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
-/* ── A4 Paper (Single Physical Page) ── */
-.global-paper-flow {
-   background: #fff;
-   width: 210mm;
-   height: 297mm;
-   /* Strictly 1 A4 page high now */
-   box-sizing: border-box;
-   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-   margin-bottom: 30px;
-   /* Actual physical gap between pages */
-   position: relative;
-   overflow: hidden;
-   /* Clips content exactly at the page edge */
+/* ── True A4 Paper Container ── */
+.physical-paper-sheet {
+  background: #fff;
+  width: 210mm;
+  height: 297mm;
+  box-sizing: border-box;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  margin-bottom: 30px; /* Actual physical gap separating the generated sheets */
+  position: relative;
+  overflow: hidden; /* Prevent visual overflow */
+
+  word-break: normal;
+  overflow-wrap: break-word; /* Ensure single unbroken words are forced to wrap inside */
 }
 
-/* ── Inner content wrapper ── */
+/* ── Content Text Container ── */
 .resume-content-inner {
-   padding: 20mm 20mm 40mm 20mm;
-   /* Since global-paper-flow is 210mm, inner must match */
-   width: 210mm;
-   box-sizing: border-box;
+  /* Internal top/bottom padding is now fully managed by physical DIV chunks in React.
+     We only specify side padding here to ensure text stays neatly away from the left/right edges */
+  padding: 0 20mm;
+  width: 210mm;
+  box-sizing: border-box;
+  background: transparent;
 }
 
 /* All children must stay within paper width */
-.global-paper-flow * {
-   max-width: 100%;
-   min-width: 0;
-   box-sizing: border-box;
-   word-break: break-all;
-   overflow-wrap: anywhere;
+.physical-paper-sheet *, .resume-content-inner * {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  word-break: normal;
+  overflow-wrap: break-word; /* Only split long unbroken strings. Normal words wrap entirely to next line */
 }
 
 /* ── Skill tags in preview ── */
 .skill-tag-preview {
-   background: #f0f0f0;
-   padding: 4px 12px;
-   border-radius: 4px;
-   font-size: 12px;
-   color: #333;
-   border: 1px solid #ddd;
-   display: inline-block;
+  background: #f0f0f0;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #333;
+  border: 1px solid #ddd;
+  display: inline-block;
 }
 
 /* ── Section titles ── */
 .r-section-title {
-   font-weight: bold;
-   font-size: 12px;
-   border-bottom: 1px solid #eee;
-   margin: 20px 0 10px 0;
-   padding-bottom: 4px;
-   color: #333;
-   text-transform: uppercase;
+  font-weight: bold;
+  font-size: 12px;
+  border-bottom: 1px solid #eee;
+  margin: 20px 0 10px 0;
+  padding-bottom: 4px;
+  color: #333;
+  text-transform: uppercase;
+  break-after: avoid; /* Prevent section titles from being orphaned at bottom of pages */
 }
 
 /* ── Entry blocks ── */
 .r-entry {
-   margin-bottom: 15px;
+  margin-bottom: 15px;
+  /* break-inside: avoid // REMOVED! Entries explicitly MUST flow and break naturally across pages */
 }
 
 .r-entry-bullets {
-   margin-top: 6px;
-   padding-left: 20px;
+  margin-top: 6px;
+  padding-left: 20px;
 }

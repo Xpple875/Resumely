@@ -1,14 +1,20 @@
 import React, { useRef, useLayoutEffect, useState } from 'react'
 import '../styles/preview.css'
 
+const A4_HEIGHT_MM = 297;
+const A4_WIDTH_MM = 210;
+const TOP_PAD_MM = 20;
+const BOT_PAD_MM = 30; 
+const CONTENT_H_MM = A4_HEIGHT_MM - TOP_PAD_MM - BOT_PAD_MM;
+
 const ResumeContent = React.forwardRef(({ data, template }, ref) => {
    const { personal, experience = [], education = [], skills = [], projects = [] } = data;
 
    return (
-      <div ref={ref} className={`resume-${template} resume-content-inner`}>
+      <div ref={ref} className={`resume-${template} resume-content-inner`} style={{ position: 'relative' }}>
          {/* HEADER */}
          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase', wordBreak: 'break-all' }}>
+            <h1 style={{ fontSize: '32px', margin: '0 0 5px 0', textTransform: 'uppercase' }}>
                {personal.name || 'YOUR NAME'}
             </h1>
             {personal.title && (
@@ -20,7 +26,8 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
                {personal.email && <span>📧 {personal.email}</span>}
                {personal.phone && <span>📞 {personal.phone}</span>}
                {personal.location && <span>📍 {personal.location}</span>}
-               {personal.linkedin && <span>🔗 LinkedIn</span>}
+               {personal.linkedin && <span>🔗 {personal.linkedin}</span>}
+               {personal.website && <span>🌐 {personal.website}</span>}
             </div>
          </div>
 
@@ -36,10 +43,12 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
          {experience.length > 0 && experience.some(e => e.title || e.company) && (
             <div style={{ marginBottom: '25px' }}>
                <div className="r-section-title">EXPERIENCE</div>
-               {experience.map((exp) => (
-                  <div className="r-entry" key={exp.id}>
+               {experience.map((exp, i) => {
+                  const safeId = exp.id || `idx-${i}`;
+                  return (
+                  <div className="r-entry" key={safeId}>
                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
-                        <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{exp.title}</span>
+                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
                         <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
                            {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
                         </span>
@@ -47,15 +56,18 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
                      <div style={{ fontStyle: 'italic', fontSize: '13px', color: '#444' }}>
                         {exp.company}{exp.location ? ` · ${exp.location}` : ''}
                      </div>
+                     
                      {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
                         <ul className="r-entry-bullets">
                            {exp.bullets.filter(b => b && b.trim()).map((bullet, idx) => (
-                              <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>{bullet}</li>
+                              <li key={idx} style={{ fontSize: '13px', lineHeight: '1.5' }}>
+                                 {bullet}
+                              </li>
                            ))}
                         </ul>
                      )}
                   </div>
-               ))}
+               )})}
             </div>
          )}
 
@@ -63,10 +75,12 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
          {education.length > 0 && education.some(edu => edu.degree || edu.institution) && (
             <div style={{ marginBottom: '25px' }}>
                <div className="r-section-title">EDUCATION</div>
-               {education.map((edu) => (
-                  <div className="r-entry" key={edu.id}>
+               {education.map((edu, i) => {
+                  const safeId = edu.id || `idx-${i}`;
+                  return (
+                  <div className="r-entry" key={safeId}>
                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '14px' }}>
-                        <span style={{ minWidth: 0, wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{edu.degree}</span>
+                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
                         <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
                            {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
                         </span>
@@ -74,7 +88,7 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
                      <div style={{ fontSize: '13px' }}>{edu.institution}</div>
                      {edu.gpa && <div style={{ fontSize: '12px', color: '#666' }}>GPA: {edu.gpa}</div>}
                   </div>
-               ))}
+               )})}
             </div>
          )}
 
@@ -94,19 +108,21 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
          {projects && projects.length > 0 && projects.some(p => p.name) && (
             <div>
                <div className="r-section-title">PROJECTS</div>
-               {projects.map((proj) => (
-                  <div className="r-entry" key={proj.id}>
-                     <div style={{ fontWeight: 'bold', fontSize: '14px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
+               {projects.map((proj, i) => {
+                  const safeId = proj.id || `idx-${i}`;
+                  return (
+                  <div className="r-entry" key={safeId}>
+                     <div style={{ fontWeight: 'bold', fontSize: '14px', overflowWrap: 'break-word' }}>
                         {proj.name}
                         {proj.url && (
-                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
+                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '11px', color: '#C4622D', marginTop: '2px', overflowWrap: 'break-word' }}>
                               {proj.url}
                            </span>
                         )}
                      </div>
                      <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>{proj.description}</p>
                   </div>
-               ))}
+               )})}
             </div>
          )}
       </div>
@@ -116,59 +132,108 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
 export default function ResumePreview({ data, template = 'classic' }) {
    const [numPages, setNumPages] = useState(1);
    const measureRef = useRef(null);
+   const innerRef = useRef(null);
 
    useLayoutEffect(() => {
-      if (!measureRef.current) return;
+      const calculatePages = () => {
+         if (!measureRef.current || !innerRef.current) return;
+         
+         const engineContainer = measureRef.current;
+         const innerContainer = innerRef.current;
+         
+         const engineRect = engineContainer.getBoundingClientRect();
+         const scaledColWidth = engineRect.width;
+         if (scaledColWidth === 0) return;
 
-      const resizeObserver = new ResizeObserver((entries) => {
-         for (let entry of entries) {
-            const totalHeight = entry.target.scrollHeight;
-            const width = entry.target.offsetWidth;
-            // The aspect ratio of A4 is exactly 297mm height / 210mm width
-            const pageHeight = width * (297 / 210);
-
-            let calculatedPages = 1;
-            if (pageHeight > 0 && totalHeight > 0) {
-               // Subtract 5px to avoid floating point math causing a whole blank page for 1px overflow
-               calculatedPages = Math.ceil((totalHeight - 5) / pageHeight);
-            }
-            calculatedPages = Math.max(1, calculatedPages); // at least 1 page
-
-            setNumPages(prev => (prev !== calculatedPages ? calculatedPages : prev));
+         // Determine the deepest fragmented column spill by polling absolute render matrices of natively wrapped elements.
+         // This fundamentally bypasses the Chrome / Firefox multi-column horizontal 'scrollWidth' zero-report bug.
+         let maxRight = engineRect.right;
+         const children = innerContainer.children;
+         for (let i = 0; i < children.length; i++) {
+             const childRect = children[i].getBoundingClientRect();
+             if (childRect.right > maxRight) {
+                 maxRight = childRect.right;
+             }
          }
+         
+         // Converts proportional 30mm gaps explicitly mapped to the active transformed CSS scaling matrices
+         const scaledGapWidth = scaledColWidth * (30 / A4_WIDTH_MM); 
+         
+         const trueTotalWidth = maxRight - engineRect.left;
+         const colStride = scaledColWidth + scaledGapWidth;
+         
+         let calculatedPages = Math.ceil(trueTotalWidth / colStride);
+         calculatedPages = Math.max(1, calculatedPages);
+         
+         setNumPages(prev => (prev !== calculatedPages ? calculatedPages : prev));
+      };
+
+      // Run immediately dynamically resolving the current hydration chunk
+      calculatePages();
+
+      // Observer simply secures responsive edge-case changes (like active window CSS template switching)
+      let handle;
+      const resizeObserver = new ResizeObserver(() => {
+         cancelAnimationFrame(handle);
+         handle = requestAnimationFrame(calculatePages);
       });
 
-      resizeObserver.observe(measureRef.current);
-
-      return () => resizeObserver.disconnect();
-   }, [data]);
+      if (measureRef.current) resizeObserver.observe(measureRef.current);
+      return () => {
+         resizeObserver.disconnect();
+         cancelAnimationFrame(handle);
+      };
+   }, [data, template]);
 
    if (!data || !data.personal) return null;
+
+   // The Magical Browser-Native HTML Splitting Engine
+   // Utilizing CSS Multi-column layout horizontally ensures strings natively break 
+   // line-by-line across bounded areas EXACTLY like Microsoft Word mapping algorithms!
+   const MultiColEngine = React.forwardRef((props, ref) => (
+      <div ref={ref} style={{
+         height: `${CONTENT_H_MM}mm`,
+         columnWidth: `${A4_WIDTH_MM}mm`,
+         columnGap: '30mm', // Unseen natively but perfectly dictates scrollWidth expansion
+         columnFill: 'auto',
+      }}>
+         <ResumeContent {...props} ref={props.innerRef} />
+      </div>
+   ));
 
    return (
       <div className="resume-container">
          {/*
-        Measurement Layer:
-        Renders the full continuous resume completely hidden, so the ResizeObserver
-        can read its true 'scrollHeight' and divide by A4 height to get the page count.
-      */}
-         <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', zIndex: -100, width: '210mm' }}>
-            <div className="global-paper-flow" style={{ height: 'auto', overflow: 'visible' }}>
-               <ResumeContent data={data} template={template} ref={measureRef} />
-            </div>
+          Measurement Layer:
+          The native CSS multi-column forces horizontal fragmentation. 
+          We read how wide it generated to precisely extract vertical pages sequentially!
+         */}
+         <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', zIndex: -100 }}>
+            <MultiColEngine data={data} template={template} ref={measureRef} innerRef={innerRef} />
          </div>
 
          {/*
-        Physical Pages Layer:
-        Creates distinct, actual DOM divs separated by real CSS gaps.
-        It uses CSS transform (translateY) to perfectly 'scroll' the content up for each page,
-        so text that flows past 297mm on page 1 is seamlessly displayed at the top of page 2.
-      */}
+          True Physical DOM Pages Layer:
+          We apply a positional masking loop to virtually convert the horizontal multi-column renderer 
+          into sequentially stacked physical vertical sheets identically replicating Google Docs.
+          No graphic pixel-slicing logic or text chopping natively exists here!
+         */}
          {Array.from({ length: numPages }).map((_, i) => (
-            <div key={i} className="global-paper-flow" style={{ position: 'relative', overflow: 'hidden' }}>
-               <div style={{ transform: `translateY(calc(-${i} * 297mm))` }}>
-                  <ResumeContent data={data} template={template} />
+            <div key={i} className="physical-paper-sheet">
+               <div style={{ height: `${TOP_PAD_MM}mm`, backgroundColor: 'transparent', width: '100%' }} />
+
+               <div style={{ height: `${CONTENT_H_MM}mm`, width: `${A4_WIDTH_MM}mm`, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ 
+                     position: 'absolute', 
+                     top: 0, 
+                     left: 0,
+                     transform: `translateX(calc(-${i} * (${A4_WIDTH_MM}mm + 30mm)))` 
+                  }}>
+                     <MultiColEngine data={data} template={template} />
+                  </div>
                </div>
+
+               <div style={{ height: `${BOT_PAD_MM}mm`, backgroundColor: 'transparent', width: '100%' }} />
             </div>
          ))}
       </div>
