@@ -85,10 +85,28 @@
 
 /* ── MODERN ── */
 .resume-modern { width: 100%; }
-.resume-modern .rm-header { background: #1A1714; padding: 25px 20mm 20px 20mm; margin: 0 -20mm; text-align: left; }
-.resume-modern .rm-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.8em; color: #FDFAF7; line-height: 1.1; margin-bottom: 6px; }
+.resume-modern .rm-header { 
+  background: #1A1714; 
+  padding: 20mm 20mm 20px 20mm; 
+  margin: 0 -20mm 0 -20mm; 
+  text-align: left; 
+  width: 210mm;
+  max-width: none;
+}
+.resume-modern .rm-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.8em; color: #FFFFFF; line-height: 1.1; margin-bottom: 6px; }
 .resume-modern .rm-title { font-size: 1em; font-weight: 500; letter-spacing: 0.3px; }
-.resume-modern .rm-contact { background: #F0E6DF; padding: 10px 20mm; margin: 0 -20mm 25px -20mm; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 0.9em; color: #6B6460; }
+.resume-modern .rm-contact { 
+  background: #F0E6DF; 
+  padding: 10px 20mm; 
+  margin: 0 -20mm 25px -20mm; 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 4px 24px; 
+  font-size: 0.9em; 
+  color: #6B6460; 
+  width: 210mm;
+  max-width: none;
+}
 .resume-modern .rm-section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #E2DAD4; padding-bottom: 5px; margin: 20px 0 14px 0; break-after: avoid; }
 .resume-modern .rm-skill-pill { background: #F0E6DF; font-size: 0.9em; font-weight: 500; padding: 3px 10px; border-radius: 3px; display: inline-block; margin: 0 6px 6px 0; }
 

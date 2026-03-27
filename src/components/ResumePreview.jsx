@@ -3,7 +3,7 @@ import '../styles/preview.css'
 
 const A4_HEIGHT_MM = 297;
 const A4_WIDTH_MM = 210;
-const TOP_PAD_MM = 20;
+const TOP_PAD_MM = 0;
 const BOT_PAD_MM = 30; 
 const CONTENT_H_MM = A4_HEIGHT_MM - TOP_PAD_MM - BOT_PAD_MM;
 
@@ -12,7 +12,7 @@ const ClassicContent = ({ data, theme, innerRef }) => {
    const accentColor = theme.accentColor || '#C4622D';
 
    return (
-      <div ref={innerRef} className="resume-classic resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize }}>
+      <div ref={innerRef} className="resume-classic resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, paddingTop: '20mm' }}>
          <div className="r-header">
             <h1 className="r-name">{personal.name || 'YOUR NAME'}</h1>
             {personal.title && <div className="r-tagline" style={{ color: accentColor }}>{personal.title}</div>}
@@ -216,7 +216,7 @@ const MinimalContent = ({ data, theme, innerRef }) => {
    const accentColor = theme.accentColor || '#C4622D';
 
    return (
-      <div ref={innerRef} className="resume-minimal resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize }}>
+      <div ref={innerRef} className="resume-minimal resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, paddingTop: '20mm' }}>
          <div className="rmin-header">
             <h1 className="rmin-name" style={{ color: accentColor }}>{personal.name || 'YOUR NAME'}</h1>
             {personal.title && <div className="rmin-title">{personal.title}</div>}
@@ -421,7 +421,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
             <div key={i} className="physical-paper-sheet">
                <div style={{ height: `${TOP_PAD_MM}mm`, backgroundColor: 'transparent', width: '100%' }} />
 
-               <div style={{ height: `${CONTENT_H_MM}mm`, width: `${A4_WIDTH_MM}mm`, overflow: 'hidden', position: 'relative' }}>
+               <div style={{ height: `${CONTENT_H_MM}mm`, width: `${A4_WIDTH_MM}mm`, overflowX: 'hidden', overflowY: 'visible', position: 'relative' }}>
                   <div style={{ 
                      position: 'absolute', 
                      top: 0, 
