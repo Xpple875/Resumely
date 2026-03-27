@@ -8,11 +8,61 @@ const BOT_PAD_MM = 30;
 const CONTENT_H_MM = A4_HEIGHT_MM - TOP_PAD_MM - BOT_PAD_MM;
 
 const ClassicContent = ({ data, theme, innerRef }) => {
-   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+   const { personal, theme: dataTheme, sectionOrder = [], sectionLabels = {} } = data;
    const accentColor = theme.accentColor || '#C4622D';
 
+   const renderSection = (key) => {
+      const label = sectionLabels[key] || key.toUpperCase();
+      const items = data[key] || [];
+      if (items.length === 0) return null;
+
+      const isSimpleList = ['skills', 'interests', 'languages'].includes(key);
+
+      return (
+         <div key={key} style={{ marginBottom: '25px' }}>
+            <div className="r-section-title" style={{ color: accentColor }}>{label}</div>
+            
+            {isSimpleList ? (
+               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {items.map((item, i) => (
+                     <span key={i} className="skill-tag-preview">
+                        {typeof item === 'string' ? item : (item.name + (item.level ? ` (${item.level})` : ''))}
+                     </span>
+                  ))}
+               </div>
+            ) : (
+               items.map((item, i) => (
+                  <div className="r-entry" key={item.id || i}>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>
+                           {item.title || item.degree || item.name || item.role}
+                        </span>
+                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                           {item.startDate ? `${item.startDate} ${item.endDate ? `— ${item.endDate}` : ''}` : item.date}
+                        </span>
+                     </div>
+                     <div style={{ fontStyle: 'italic', color: '#444' }}>
+                        {[item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ')}
+                     </div>
+                     {item.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {item.gpa}</div>}
+                     {item.url && <div style={{ fontSize: '0.85em', color: accentColor }}>{item.url}</div>}
+                     {item.description && <p style={{ margin: '4px 0 0 0' }}>{item.description}</p>}
+                     {item.bullets && item.bullets.length > 0 && item.bullets[0] !== '' && (
+                        <ul className="r-entry-bullets">
+                           {item.bullets.filter(b => b && b.trim()).map((b, idx) => (
+                              <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
+                           ))}
+                        </ul>
+                     )}
+                  </div>
+               ))
+            )}
+         </div>
+      );
+   };
+
    return (
-      <div ref={innerRef} className="resume-classic resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize }}>
+      <div ref={innerRef} className="resume-classic resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, paddingTop: '10mm' }}>
          <div className="r-header">
             <h1 className="r-name">{personal.name || 'YOUR NAME'}</h1>
             {personal.title && <div className="r-tagline" style={{ color: accentColor }}>{personal.title}</div>}
@@ -32,86 +82,64 @@ const ClassicContent = ({ data, theme, innerRef }) => {
             </div>
          )}
 
-         {experience.length > 0 && experience.some(e => e.title || e.company) && (
-            <div style={{ marginBottom: '25px' }}>
-               <div className="r-section-title" style={{ color: accentColor }}>EXPERIENCE</div>
-               {experience.map((exp, i) => (
-                  <div className="r-entry" key={exp.id || i}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
-                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
-                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
-                           {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
-                        </span>
-                     </div>
-                     <div style={{ fontStyle: 'italic', color: '#444' }}>
-                        {exp.company}{exp.location ? ` · ${exp.location}` : ''}
-                     </div>
-                     {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
-                        <ul className="r-entry-bullets">
-                           {exp.bullets.filter(b => b && b.trim()).map((b, idx) => (
-                              <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
-                           ))}
-                        </ul>
-                     )}
-                  </div>
-               ))}
-            </div>
-         )}
-
-         {education.length > 0 && education.some(e => e.degree || e.institution) && (
-            <div style={{ marginBottom: '25px' }}>
-               <div className="r-section-title" style={{ color: accentColor }}>EDUCATION</div>
-               {education.map((edu, i) => (
-                  <div className="r-entry" key={edu.id || i}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
-                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
-                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
-                           {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
-                        </span>
-                     </div>
-                     <div>{edu.institution}</div>
-                     {edu.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {edu.gpa}</div>}
-                  </div>
-               ))}
-            </div>
-         )}
-
-         {skills && skills.length > 0 && (
-            <div style={{ marginBottom: '25px' }}>
-               <div className="r-section-title" style={{ color: accentColor }}>SKILLS</div>
-               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {skills.map((skill, i) => (
-                     <span key={i} className="skill-tag-preview">{skill}</span>
-                  ))}
-               </div>
-            </div>
-         )}
-
-         {projects && projects.length > 0 && projects.some(p => p.name) && (
-            <div>
-               <div className="r-section-title" style={{ color: accentColor }}>PROJECTS</div>
-               {projects.map((proj, i) => (
-                  <div className="r-entry" key={proj.id || i}>
-                     <div style={{ fontWeight: 'bold', fontSize: '1.05em', overflowWrap: 'break-word' }}>
-                        {proj.name}
-                        {proj.url && (
-                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '0.85em', color: accentColor, marginTop: '2px', overflowWrap: 'break-word' }}>
-                              {proj.url}
-                           </span>
-                        )}
-                     </div>
-                     <p style={{ margin: '4px 0 0 0' }}>{proj.description}</p>
-                  </div>
-               ))}
-            </div>
-         )}
+         {sectionOrder.map(key => renderSection(key))}
       </div>
    );
 };
 
 const ModernContent = ({ data, theme, innerRef }) => {
-   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+   const { personal, sectionOrder = [], sectionLabels = {} } = data;
    const accentColor = theme.accentColor || '#C4622D';
+
+   const renderSection = (key) => {
+      const label = sectionLabels[key] || key.toUpperCase();
+      const items = data[key] || [];
+      if (items.length === 0) return null;
+
+      const isSimpleList = ['skills', 'interests', 'languages'].includes(key);
+
+      return (
+         <div key={key} style={{ marginBottom: '25px' }}>
+            <div className="rm-section-title" style={{ color: accentColor }}>{label}</div>
+            
+            {isSimpleList ? (
+               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {items.map((item, i) => (
+                     <span key={i} className="rm-skill-pill" style={{ color: accentColor }}>
+                        {typeof item === 'string' ? item : (item.name + (item.level ? ` (${item.level})` : ''))}
+                     </span>
+                  ))}
+               </div>
+            ) : (
+               items.map((item, i) => (
+                  <div className="r-entry" key={item.id || i}>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>
+                           {item.title || item.degree || item.name || item.role}
+                        </span>
+                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                           {item.startDate ? `${item.startDate} ${item.endDate ? `— ${item.endDate}` : ''}` : item.date}
+                        </span>
+                     </div>
+                     <div style={{ fontStyle: 'italic', color: '#444' }}>
+                        {[item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ')}
+                     </div>
+                     {item.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {item.gpa}</div>}
+                     {item.url && <div style={{ fontSize: '0.85em', color: accentColor }}>{item.url}</div>}
+                     {item.description && <p style={{ margin: '4px 0 0 0' }}>{item.description}</p>}
+                     {item.bullets && item.bullets.length > 0 && item.bullets[0] !== '' && (
+                        <ul className="r-entry-bullets">
+                           {item.bullets.filter(b => b && b.trim()).map((b, idx) => (
+                              <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
+                           ))}
+                        </ul>
+                     )}
+                  </div>
+               ))
+            )}
+         </div>
+      );
+   };
 
    return (
       <div ref={innerRef} className="resume-modern resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize }}>
@@ -134,89 +162,69 @@ const ModernContent = ({ data, theme, innerRef }) => {
             </div>
          )}
 
-         {experience.length > 0 && experience.some(e => e.title || e.company) && (
-            <div style={{ marginBottom: '25px' }}>
-               <div className="rm-section-title" style={{ color: accentColor }}>EXPERIENCE</div>
-               {experience.map((exp, i) => (
-                  <div className="r-entry" key={exp.id || i}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
-                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
-                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
-                           {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
-                        </span>
-                     </div>
-                     <div style={{ fontStyle: 'italic', color: '#444' }}>
-                        {exp.company}{exp.location ? ` · ${exp.location}` : ''}
-                     </div>
-                     {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
-                        <ul className="r-entry-bullets">
-                           {exp.bullets.filter(b => b && b.trim()).map((b, idx) => (
-                              <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
-                           ))}
-                        </ul>
-                     )}
-                  </div>
-               ))}
-            </div>
-         )}
-
-         {education.length > 0 && education.some(e => e.degree || e.institution) && (
-            <div style={{ marginBottom: '25px' }}>
-               <div className="rm-section-title" style={{ color: accentColor }}>EDUCATION</div>
-               {education.map((edu, i) => (
-                  <div className="r-entry" key={edu.id || i}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
-                        <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
-                        <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
-                           {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
-                        </span>
-                     </div>
-                     <div>{edu.institution}</div>
-                     {edu.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {edu.gpa}</div>}
-                  </div>
-               ))}
-            </div>
-         )}
-
-         {skills && skills.length > 0 && (
-            <div style={{ marginBottom: '25px' }}>
-               <div className="rm-section-title" style={{ color: accentColor }}>SKILLS</div>
-               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                  {skills.map((skill, i) => (
-                     <span key={i} className="rm-skill-pill" style={{ color: accentColor }}>{skill}</span>
-                  ))}
-               </div>
-            </div>
-         )}
-
-         {projects && projects.length > 0 && projects.some(p => p.name) && (
-            <div>
-               <div className="rm-section-title" style={{ color: accentColor }}>PROJECTS</div>
-               {projects.map((proj, i) => (
-                  <div className="r-entry" key={proj.id || i}>
-                     <div style={{ fontWeight: 'bold', fontSize: '1.05em', overflowWrap: 'break-word' }}>
-                        {proj.name}
-                        {proj.url && (
-                           <span style={{ display: 'block', fontWeight: 'normal', fontSize: '0.85em', color: accentColor, marginTop: '2px', overflowWrap: 'break-word' }}>
-                              {proj.url}
-                           </span>
-                        )}
-                     </div>
-                     <p style={{ margin: '4px 0 0 0' }}>{proj.description}</p>
-                  </div>
-               ))}
-            </div>
-         )}
+         {sectionOrder.map(key => renderSection(key))}
       </div>
    );
 };
 
 const MinimalContent = ({ data, theme, innerRef }) => {
-   const { personal, experience = [], education = [], skills = [], projects = [] } = data;
+   const { personal, sectionOrder = [], sectionLabels = {} } = data;
    const accentColor = theme.accentColor || '#C4622D';
 
+   const renderSection = (key) => {
+      const label = sectionLabels[key] || key.toUpperCase();
+      const items = data[key] || [];
+      if (items.length === 0) return null;
+
+      const isSimpleList = ['skills', 'interests', 'languages'].includes(key);
+
+      return (
+         <div className="rmin-section" key={key}>
+            <div className="rmin-section-title" style={{ color: accentColor }}>{label}</div>
+            <div>
+               {isSimpleList ? (
+                  <div className="rmin-skills">
+                     {items.map((item, i) => (
+                        <span key={i}>
+                           {typeof item === 'string' ? item : (item.name + (item.level ? ` (${item.level})` : ''))}
+                           {i < items.length - 1 ? '  ·  ' : ''}
+                        </span>
+                     ))}
+                  </div>
+               ) : (
+                  items.map((item, i) => (
+                     <div className="r-entry" key={item.id || i}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
+                           <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>
+                              {item.title || item.degree || item.name || item.role}
+                           </span>
+                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                              {item.startDate ? `${item.startDate} ${item.endDate ? `— ${item.endDate}` : ''}` : item.date}
+                           </span>
+                        </div>
+                        <div style={{ fontStyle: 'italic', color: '#444' }}>
+                           {[item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ')}
+                        </div>
+                        {item.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {item.gpa}</div>}
+                        {item.url && <div style={{ fontSize: '0.85em', color: accentColor }}>{item.url}</div>}
+                        {item.description && <p style={{ margin: '4px 0 0 0' }}>{item.description}</p>}
+                        {item.bullets && item.bullets.length > 0 && item.bullets[0] !== '' && (
+                           <ul className="r-entry-bullets">
+                              {item.bullets.filter(b => b && b.trim()).map((b, idx) => (
+                                 <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
+                              ))}
+                           </ul>
+                        )}
+                     </div>
+                  ))
+               )}
+            </div>
+         </div>
+      );
+   };
+
    return (
-      <div ref={innerRef} className="resume-minimal resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize }}>
+      <div ref={innerRef} className="resume-minimal resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, paddingTop: '10mm' }}>
          <div className="rmin-header">
             <h1 className="rmin-name" style={{ color: accentColor }}>{personal.name || 'YOUR NAME'}</h1>
             {personal.title && <div className="rmin-title">{personal.title}</div>}
@@ -236,81 +244,7 @@ const MinimalContent = ({ data, theme, innerRef }) => {
             </div>
          )}
 
-         {experience.length > 0 && experience.some(e => e.title || e.company) && (
-            <div className="rmin-section">
-               <div className="rmin-section-title" style={{ color: accentColor }}>EXPERIENCE</div>
-               <div>
-                  {experience.map((exp, i) => (
-                     <div className="r-entry" key={exp.id || i}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
-                           <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{exp.title}</span>
-                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
-                              {exp.startDate} {exp.endDate ? `— ${exp.endDate}` : ''}
-                           </span>
-                        </div>
-                        <div style={{ fontStyle: 'italic', color: '#444' }}>
-                           {exp.company}{exp.location ? ` · ${exp.location}` : ''}
-                        </div>
-                        {exp.bullets && exp.bullets.length > 0 && exp.bullets[0] !== '' && (
-                           <ul className="r-entry-bullets">
-                              {exp.bullets.filter(b => b && b.trim()).map((b, idx) => (
-                                 <li key={idx} style={{ lineHeight: '1.5' }}>{b}</li>
-                              ))}
-                           </ul>
-                        )}
-                     </div>
-                  ))}
-               </div>
-            </div>
-         )}
-
-         {education.length > 0 && education.some(e => e.degree || e.institution) && (
-            <div className="rmin-section">
-               <div className="rmin-section-title" style={{ color: accentColor }}>EDUCATION</div>
-               <div>
-                  {education.map((edu, i) => (
-                     <div className="r-entry" key={edu.id || i}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '4px', fontWeight: 'bold', fontSize: '1.05em' }}>
-                           <span style={{ minWidth: 0, overflowWrap: 'break-word' }}>{edu.degree}</span>
-                           <span style={{ flexShrink: 0, fontWeight: 'normal', color: '#666', fontSize: '0.9em', whiteSpace: 'nowrap' }}>
-                              {edu.startDate} {edu.endDate ? `— ${edu.endDate}` : ''}
-                           </span>
-                        </div>
-                        <div>{edu.institution}</div>
-                        {edu.gpa && <div style={{ fontSize: '0.9em', color: '#666' }}>GPA: {edu.gpa}</div>}
-                     </div>
-                  ))}
-               </div>
-            </div>
-         )}
-
-         {skills && skills.length > 0 && (
-            <div className="rmin-section">
-               <div className="rmin-section-title" style={{ color: accentColor }}>SKILLS</div>
-               <div className="rmin-skills">{skills.join('  ·  ')}</div>
-            </div>
-         )}
-
-         {projects && projects.length > 0 && projects.some(p => p.name) && (
-            <div className="rmin-section">
-               <div className="rmin-section-title" style={{ color: accentColor }}>PROJECTS</div>
-               <div>
-                  {projects.map((proj, i) => (
-                     <div className="r-entry" key={proj.id || i}>
-                        <div style={{ fontWeight: 'bold', fontSize: '1.05em', overflowWrap: 'break-word' }}>
-                           {proj.name}
-                           {proj.url && (
-                              <span style={{ display: 'block', fontWeight: 'normal', fontSize: '0.85em', color: accentColor, marginTop: '2px', overflowWrap: 'break-word' }}>
-                                 {proj.url}
-                              </span>
-                           )}
-                        </div>
-                        <p style={{ margin: '4px 0 0 0' }}>{proj.description}</p>
-                     </div>
-                  ))}
-               </div>
-            </div>
-         )}
+         {sectionOrder.map(key => renderSection(key))}
       </div>
    );
 };

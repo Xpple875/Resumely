@@ -11,7 +11,19 @@ import { syncResumeToCloud } from '../services/supabaseClient'
 import '../styles/builder.css'
 
 export default function BuilderPage({ template, onChangeTemplate, unlocked, user, onSignOut }) {
-   const [resumeData, setResumeData] = useState(() => loadDraft() || defaultResumeData)
+   const [resumeData, setResumeData] = useState(() => {
+      const draft = loadDraft();
+      if (!draft) return defaultResumeData;
+      // Merge with defaults to ensure new fields like sectionOrder exist for legacy drafts
+      return {
+         ...defaultResumeData,
+         ...draft,
+         personal: { ...defaultResumeData.personal, ...draft.personal },
+         theme: { ...defaultResumeData.theme, ...draft.theme },
+         sectionOrder: draft.sectionOrder || defaultResumeData.sectionOrder,
+         sectionLabels: { ...defaultResumeData.sectionLabels, ...(draft.sectionLabels || {}) }
+      }
+   })
    const [syncStatus, setSyncStatus] = useState('idle')
    const { toasts, showToast } = useToast()
 

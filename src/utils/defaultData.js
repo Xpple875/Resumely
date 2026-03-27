@@ -40,6 +40,23 @@ export const defaultResumeData = {
   ],
   skills: [],
   projects: [],
+  certifications: [],
+  languages: [],
+  volunteering: [],
+  interests: [],
+  references: [],
+  sectionOrder: ['experience', 'education', 'skills', 'projects', 'certifications', 'languages', 'volunteering', 'interests', 'references'],
+  sectionLabels: {
+    experience: 'Experience',
+    education: 'Education',
+    skills: 'Skills',
+    projects: 'Projects',
+    certifications: 'Certifications',
+    languages: 'Languages',
+    volunteering: 'Volunteering',
+    interests: 'Interests',
+    references: 'References',
+  }
 }
 
 export const newExperienceEntry = () => ({
@@ -66,4 +83,38 @@ export const newProjectEntry = () => ({
   name: '',
   url: '',
   description: '',
+})
+
+export const newCertificationEntry = () => ({
+  id: uid(),
+  name: '',
+  issuer: '',
+  date: '',
+})
+
+export const newLanguageEntry = () => ({
+  id: uid(),
+  name: '',
+  level: '',
+})
+
+export const newVolunteerEntry = () => ({
+  id: uid(),
+  role: '',
+  organization: '',
+  date: '',
+  description: '',
+})
+
+export const newInterestEntry = () => ({
+  id: uid(),
+  name: '',
+})
+
+export const newReferenceEntry = () => ({
+  id: uid(),
+  name: '',
+  title: '',
+  company: '',
+  contact: '',
 })
