@@ -99,7 +99,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
                   {syncStatus === 'syncing' ? 'Saving...' : (syncStatus === 'success' ? '✓ Saved' : 'Save to Cloud')}
                </button>
 
-               <button className="btn btn-secondary" onClick={() => generatePDF(null, resumeData)}>
+               <button className="btn btn-secondary" onClick={() => generatePDF(null, resumeData, template)}>
                   Download
                </button>
             </div>
