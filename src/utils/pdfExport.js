@@ -82,11 +82,12 @@ class PDFWriter {
 }
 
 export async function generatePDF(_element, resumeData, filename = 'resume') {
-    const { personal, experience, education, skills, projects, theme } = resumeData;
+    const { personal, theme: dataTheme } = resumeData;
+    const sectionOrder = resumeData.sectionOrder || ['summary', 'experience', 'education', 'skills', 'projects'];
+    const sectionLabels = resumeData.sectionLabels || {};
+
     const pages = []; let ops = []; let y = PH - MT;
-    
-    // Evaluate dynamic color from theme properties mapped natively to stream format
-    const dynamicAccentColor = hexToPdfColor(theme?.accentColor);
+    const dynamicAccentColor = hexToPdfColor(dataTheme?.accentColor);
 
     const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = PH - MT; };
     const checkBreak = (needed = 40) => { if (y - needed < MB) newPage(); };
@@ -103,7 +104,7 @@ export async function generatePDF(_element, resumeData, filename = 'resume') {
     const thinLine = (py) => { ops.push('0.886 0.855 0.831 RG', '0.3 w', `${ML} ${py} m`, `${PW - MR} ${py} l`, 'S'); };
     const sectionTitle = (label) => { checkBreak(30); y -= 8; drawText(label.toUpperCase(), ML, y, 'F2', 8.5, C_DARK); y -= 4; thinLine(y); y -= 7; };
 
-    // HEADER
+    // HEADER - Constant for all templates in PDF for now to ensure consistency
     const nameLines = wrapText(personal.name || 'Your Name', CW, false, 28);
     for (const line of nameLines) { checkBreak(35); drawText(line, ML, y, 'F1', 28, C_DARK); y -= 32; }
     if (personal.title) { checkBreak(20); drawText(personal.title, ML, y, 'F2', 11, dynamicAccentColor); y -= 14; }
@@ -111,47 +112,56 @@ export async function generatePDF(_element, resumeData, filename = 'resume') {
     if (contactParts.length) { drawWrapped(contactParts.join('  |  '), ML, CW, 'F1', 9, C_MID, 12); }
     y -= 4; hline(y, 0.8); y -= 10;
 
-    // CONTENT
-    if (personal.summary) { sectionTitle('Summary'); drawWrapped(personal.summary, ML, CW, 'F1', 10, C_DARK, 14); y -= 6; }
-    if (experience?.length) {
-        sectionTitle('Experience');
-        for (const e of experience) {
-            if (!e.title && !e.company) continue;
-            checkBreak(40);
-            const d = [e.startDate, e.endDate].filter(Boolean).join(' – ');
-            drawText(e.title || '', ML, y, 'F2', 10.5, C_DARK);
-            if (d) drawTextRight(d, PW - MR, y, 'F1', 9, C_LIGHT);
-            y -= 13;
-            const sub = [e.company, e.location].filter(Boolean).join(' · ');
-            if (sub) { drawText(sub, ML, y, 'F1', 9.5, C_MID); y -= 12; }
-            for (const b of (e.bullets || [])) { if (b?.trim()) drawWrapped('• ' + b, ML, CW, 'F1', 10, C_DARK, 13); }
-            y -= 4;
+    // DATA-DRIVEN CONTENT LOOP
+    for (const key of sectionOrder) {
+        const label = sectionLabels[key] || key.toUpperCase();
+        
+        if (key === 'summary') {
+            if (personal.summary) {
+                sectionTitle(label);
+                drawWrapped(personal.summary, ML, CW, 'F1', 10, C_DARK, 14);
+                y -= 6;
+            }
+            continue;
         }
-    }
-    if (education?.length) {
-        sectionTitle('Education');
-        for (const e of education) {
-            if (!e.degree && !e.institution) continue;
-            checkBreak(30);
-            const d = [e.startDate, e.endDate].filter(Boolean).join(' – ');
-            drawText(e.degree || '', ML, y, 'F2', 10.5, C_DARK);
-            if (d) drawTextRight(d, PW - MR, y, 'F1', 9, C_LIGHT);
-            y -= 13;
-            if (e.institution) { drawText(e.institution, ML, y, 'F1', 9.5, C_MID); y -= 12; }
-            y -= 2;
+
+        const items = resumeData[key] || [];
+        if (!items || items.length === 0) continue;
+
+        sectionTitle(label);
+        const isSimpleList = ['skills', 'interests', 'languages'].includes(key);
+
+        if (isSimpleList) {
+            const names = items.map(it => typeof it === 'string' ? it : (it.name + (it.level ? ` (${it.level})` : ''))).join('  ·  ');
+            drawWrapped(names, ML, CW, 'F1', 10, C_DARK, 14);
+            y -= 6;
+        } else {
+            for (const item of items) {
+                checkBreak(item.bullets?.length ? (item.bullets.length * 15 + 30) : 40);
+                const title = item.title || item.degree || item.name || item.role;
+                const d = [item.startDate, item.endDate].filter(Boolean).join(' – ') || item.date;
+                
+                if (title) {
+                    drawText(title, ML, y, 'F2', 10.5, C_DARK);
+                    if (d) drawTextRight(d, PW - MR, y, 'F1', 9, C_LIGHT);
+                    y -= 13;
+                }
+                
+                const meta = [item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ');
+                if (meta) { drawText(meta, ML, y, 'F1', 9.5, C_MID); y -= 12; }
+                
+                if (item.url) { drawText(item.url, ML, y, 'F1', 8, dynamicAccentColor); y -= 11; }
+                if (item.description) { drawWrapped(item.description, ML, CW, 'F1', 10, C_DARK, 13); }
+                
+                if (item.bullets && item.bullets.length > 0 && item.bullets[0] !== '') {
+                    for (const b of item.bullets) {
+                        if (b?.trim()) drawWrapped('• ' + b, ML + 10, CW - 10, 'F1', 10, C_DARK, 13);
+                    }
+                }
+                y -= 4;
+            }
         }
-    }
-    if (skills?.length) { sectionTitle('Skills'); drawWrapped(skills.join('  ·  '), ML, CW, 'F1', 10, C_DARK, 14); y -= 6; }
-    if (projects?.length) {
-        sectionTitle('Projects');
-        for (const p of projects) {
-            if (!p.name) continue;
-            checkBreak(30);
-            drawText(p.url ? `${p.name}  —  ${p.url}` : p.name, ML, y, 'F2', 10.5, C_DARK);
-            y -= 13;
-            if (p.description) { drawWrapped(p.description, ML, CW, 'F1', 10, C_DARK, 13); }
-            y -= 4;
-        }
+        y -= 4;
     }
 
     if (ops.length) pages.push(ops);
@@ -159,8 +169,15 @@ export async function generatePDF(_element, resumeData, filename = 'resume') {
     const pdf = writer.serialise();
     const bytes = new Uint8Array(pdf.length);
     for (let i = 0; i < pdf.length; i++) { bytes[i] = pdf.charCodeAt(i) & 0xff; }
+    
+    const finalFilename = `${(personal.name || 'resume').replace(/\s+/g, '-').toLowerCase()}-resume.pdf`;
     const blob = new Blob([bytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `${filename}-resume.pdf`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = finalFilename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }

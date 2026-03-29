@@ -49,7 +49,7 @@
 
 /* ── Preview Panel ── */
 .preview-panel {
-   background: #D9D3CC;
+   background: var(--bg-preview);
    overflow-y: auto;
    overflow-x: hidden;
    display: flex;
@@ -106,6 +106,26 @@
 
 .btn-ghost:hover {
    color: var(--text);
+   background: var(--accent-soft);
+}
+
+.theme-toggle {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 32px;
+   height: 32px;
+   border-radius: 50%;
+   border: 1px solid var(--border);
+   background: var(--bg-card);
+   color: var(--text-mid);
+   cursor: pointer;
+   transition: all var(--transition);
+}
+
+.theme-toggle:hover {
+   color: var(--accent);
+   border-color: var(--accent);
    background: var(--accent-soft);
 }
 
@@ -438,5 +458,58 @@ textarea {
    .resume-preview-wrapper {
       transform: scale(0.38);
       margin-bottom: -62%;
+   }
+}
+@media print {
+   @page {
+      size: A4;
+      margin: 0;
+   }
+   
+   body {
+      background: #fff !important;
+      overflow: visible !important;
+   }
+
+   .builder-header, 
+   .form-panel, 
+   .mobile-tabs, 
+   .toast-container,
+   .mobile-tabs {
+      display: none !important;
+   }
+
+   .builder-layout {
+      display: block !important;
+      height: auto !important;
+      overflow: visible !important;
+   }
+
+   .preview-panel {
+      padding: 0 !important;
+      margin: 0 !important;
+      background: #fff !important;
+      overflow: visible !important;
+      display: block !important;
+      height: auto !important;
+   }
+
+   .resume-preview-wrapper {
+      transform: none !important;
+      width: 210mm !important;
+      margin: 0 auto !important;
+      border: none !important;
+   }
+
+   .resume-container {
+      padding: 0 !important;
+      background: #fff !important;
+   }
+
+   .physical-paper-sheet {
+      box-shadow: none !important;
+      margin: 0 !important;
+      page-break-after: always;
+      break-after: page;
    }
 }

@@ -12,6 +12,13 @@ export default function App() {
   const [template, setTemplate] = useState('classic')
   const [unlocked, setUnlocked] = useState(isUnlocked())
   const [user, setUser] = useState(null)
+  
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
 
   useEffect(() => {
     // Check for existing session
@@ -59,6 +66,8 @@ export default function App() {
           unlocked={unlocked}
           user={user}
           onSignOut={handleSignOut}
+          theme={theme}
+          setTheme={setTheme}
         />
       )}
     </div>
