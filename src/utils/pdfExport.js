@@ -149,38 +149,38 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
 
     // RENDER HEADER
     if (template === 'modern') {
-       fillRect(0, PH - 110, PW, 110, C_BLACK);
-       y = PH - 50;
-       drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, 'F4', 28, C_WHITE);
-       y -= 26;
+       fillRect(0, PH - 140, PW, 140, C_BLACK);
+       y = PH - 65;
+       drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, 'F4', 32, C_WHITE);
+       y -= 32;
        drawText(personal.title || '', ML, y, 'F1', 12, accent);
        
-       y = PH - 110 - 24;
-       fillRect(0, y, PW, 24, '0.94 0.90 0.87');
+       y = PH - 140 - 34; // Contact bar position
+       fillRect(0, y, PW, 34, '0.94 0.90 0.87');
        const contactParts = [personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean);
-       drawText(contactParts.join('  |  '), ML, y + 8, 'F1', 8.5, C_MID);
-       y = PH - 110 - 24 - 30;
+       drawText(contactParts.join('     \xb7     '), ML, y + 13, 'F1', 8.5, C_MID);
+       y = PH - 140 - 34 - 35;
     } else if (template === 'minimal') {
        y = PH - 60;
-       drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, 'F4', 26, accent);
+       drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, 'F4', 28, accent);
        y -= 24;
        drawText(personal.title || '', ML, y, 'F1', 11, C_MID);
        y -= 16;
        const cp = [personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean);
-       const cpLine = cp.join('  \xb7  ');
+       const cpLine = cp.join('     \xb7     ');
        drawText(cpLine, ML, y, 'F1', 9.5, C_LIGHT);
        y -= 12; hline(y, 0.3, '0.88 0.85 0.83'); y -= 32;
     } else {
        y = PH - 60;
        // Centered Name - Using Serif (F4) to match Instrument Serif
-       drawText((personal.name || 'YOUR NAME').toUpperCase(), PW/2 - strWidth(personal.name, true, 26)/2, y, 'F4', 26, C_BLACK);
-       y -= 24;
+       drawText((personal.name || 'YOUR NAME').toUpperCase(), PW/2 - strWidth(personal.name, true, 28)/2, y, 'F4', 28, C_BLACK);
+       y -= 28;
        if (personal.title) {
           drawText(personal.title.toUpperCase(), PW/2 - strWidth(personal.title, true, 11)/2, y, 'F2', 11, accent);
-          y -= 18;
+          y -= 20;
        }
        const cp = [personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean);
-       const cpText = cp.join('  \xb7  ');
+       const cpText = cp.join('     \xb7     ');
        drawText(cpText, PW/2 - strWidth(cpText, false, 9.5)/2, y, 'F1', 9.5, C_MID);
        y -= 14; hline(y, 1.2, C_BLACK); y -= 24;
     }
@@ -205,34 +205,47 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
         const colW = (template === 'minimal' ? CW - 115 : CW);
         
         if (['skills', 'interests', 'languages'].includes(key)) {
-            let chunk = []; let rowW = 0;
-            const skillAccent = (template === 'modern' ? accent : C_MID);
-            const pillBg = (template === 'modern' ? '0.94 0.90 0.87' : '0.96 0.96 0.96');
-            
-            for (let it of items) {
-                const s = typeof it === 'string' ? it : (it.name + (it.level ? ` (${it.level})` : ''));
-                const w = strWidth(s, false, 9) + 14; // Horizontal pill width with padding
-                if (rowW + w > colW) {
-                   checkBreak(20);
-                   let curX = startX;
-                   for (let bit of chunk) {
-                      fillRect(curX, y - 2, bit.w - 4, 13, pillBg);
-                      drawText(bit.s, curX + 5, y + 1.2, 'F1', 9, skillAccent);
-                      curX += bit.w;
-                   }
-                   y -= 18; rowW = 0; chunk = [];
+            const isMinimal = template === 'minimal';
+            if (isMinimal) {
+                // Minimal template: Bullet-separated text list
+                let text = items.map(it => typeof it === 'string' ? it : (it.name + (it.level ? ` (${it.level})` : ''))).join('   \xb7   ');
+                drawWrapped(text, startX, colW, 'F1', 10, C_MID, 13.5);
+                y -= 8;
+            } else {
+                // Classic/Modern templates: Pill/Box UI
+                let chunk = []; let rowW = 0;
+                const skillAccent = (template === 'modern' ? accent : C_BLACK);
+                const pillBg = (template === 'modern' ? '0.94 0.90 0.87' : '0.98 0.98 0.98');
+                const strokeCol = (template === 'modern' ? '0.88 0.85 0.83' : '0.90 0.90 0.90');
+                
+                for (let it of items) {
+                    const s = typeof it === 'string' ? it : (it.name + (it.level ? ` (${it.level})` : ''));
+                    const w = strWidth(s, false, 8.5) + 20; // Slightly more padding
+                    if (rowW + w > colW) {
+                        checkBreak(20);
+                        let curX = startX;
+                        for (let bit of chunk) {
+                            // Pill/Box with border
+                            ops.push(`${pillBg} rg`, `${curX} ${y - 2} ${bit.w - 6} 14 re`, 'f'); // Fill
+                            ops.push(`${strokeCol} RG`, '0.3 w', `${curX} ${y - 2} ${bit.w - 6} 14 re`, 'S'); // Stroke
+                            drawText(bit.s, curX + 7, y + 1.2, 'F1', 8.5, skillAccent);
+                            curX += bit.w;
+                        }
+                        y -= 20; rowW = 0; chunk = [];
+                    }
+                    chunk.push({s, w}); rowW += w;
                 }
-                chunk.push({s, w}); rowW += w;
-            }
-            if (chunk.length) {
-               checkBreak(20);
-               let curX = startX;
-               for (let bit of chunk) {
-                  fillRect(curX, y - 2, bit.w - 4, 13, pillBg);
-                  drawText(bit.s, curX + 5, y + 1.2, 'F1', 9, skillAccent);
-                  curX += bit.w;
-               }
-               y -= 18;
+                if (chunk.length) {
+                    checkBreak(20);
+                    let curX = startX;
+                    for (let bit of chunk) {
+                       ops.push(`${pillBg} rg`, `${curX} ${y - 2} ${bit.w - 6} 14 re`, 'f');
+                       ops.push(`${strokeCol} RG`, '0.3 w', `${curX} ${y - 2} ${bit.w - 6} 14 re`, 'S');
+                       drawText(bit.s, curX + 7, y + 1.2, 'F1', 8.5, skillAccent);
+                       curX += bit.w;
+                    }
+                    y -= 20;
+                }
             }
         } else {
             for (const item of items) {
@@ -246,13 +259,13 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
                 }
                 const meta = [item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ');
                 if (meta) { drawText(meta, startX, y, 'F2', 10, C_MID); y -= 13; }
-                if (item.url) { drawWrapped(item.url, startX, colW, 'F1', 8.5, accent, 11); }
+                if (item.url) { drawWrapped(item.url, startX, colW, 'F1', 8.5, accent, 11); y -= 2; }
                 if (item.description) { drawWrapped(item.description, startX, colW, 'F1', 10.5, C_BLACK, 14); }
                 for (const b of (item.bullets || [])) { 
                     if (b?.trim()) {
                         checkBreak(15);
                         drawText('-', startX, y, 'F1', 10.5, C_BLACK); 
-                        drawWrapped(b, startX + 10, colW - 10, 'F1', 10.5, C_BLACK, 14); 
+                        drawWrapped(b, startX + 14, colW - 14, 'F1', 10.5, C_BLACK, 14); 
                     }
                 }
                 y -= 8;
