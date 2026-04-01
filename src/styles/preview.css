@@ -117,6 +117,29 @@
 .resume-minimal .rmin-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.8em; line-height: 1.1; margin-bottom: 6px; }
 .resume-minimal .rmin-title { font-size: 1em; color: #6B6460; margin-bottom: 12px; }
 .resume-minimal .rmin-contact { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 0.9em; color: #A09894; }
-.resume-minimal .rmin-section { margin-bottom: 28px; display: grid; grid-template-columns: 110px 1fr; gap: 0 24px; }
-.resume-minimal .rmin-section-title { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #A09894; padding-top: 2px; break-after: avoid; }
+.resume-minimal .rmin-section { 
+  margin-bottom: 28px; 
+  display: block; 
+  position: relative;
+}
+.resume-minimal .rmin-section-title { 
+  float: left;
+  width: 110px;
+  font-size: 11px; 
+  font-weight: 600; 
+  letter-spacing: 1.5px; 
+  text-transform: uppercase; 
+  color: #A09894; 
+  padding-top: 2px; 
+}
+.resume-minimal .rmin-section > *:not(.rmin-section-title) {
+  margin-left: 134px; 
+  display: block;
+  min-width: 0;
+}
+.resume-minimal .rmin-section::after {
+  content: "";
+  display: table;
+  clear: both;
+}
 .resume-minimal .rmin-skills { font-size: 1em; color: #6B6460; }
