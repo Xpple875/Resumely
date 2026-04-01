@@ -19,13 +19,16 @@ function esc(str) {
         .replace(/\\/g, '\\\\')
         .replace(/\(/g, '\\(')
         .replace(/\)/g, '\\)')
-        .replace(/📧/g, '(E)')
-        .replace(/📞/g, '(P)')
-        .replace(/📍/g, '(L)')
-        .replace(/🔗/g, '(LI)')
-        .replace(/🌐/g, '(W)')
+        // Pre-process common icons/emojis before cleaning
+        .replace(/📧/g, 'Email: ')
+        .replace(/📞/g, 'Tel: ')
+        .replace(/📍/g, 'Loc: ')
+        .replace(/🔗/g, 'LinkedIn: ')
+        .replace(/🌐/g, 'Web: ')
         .replace(/•/g, '-')
-        .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/g, ''); 
+        // Allow common WinAnsi characters: middot (\xb7), en-dash (\x96), em-dash (\x97)
+        // Adjusting regex to allow printable ASCII + common extension chars
+        .replace(/[^\x20-\x7e\xb7\x96\x97]/g, ''); 
 }
 
 const WIDTHS = { default: 278, ' ': 278, '!': 278, '"': 355, '#': 556, '$': 556, '%': 889, '&': 667, "'": 191, '(': 333, ')': 333, '*': 389, '+': 584, ',': 278, '-': 333, '.': 278, '/': 278, '0': 556, '1': 556, '2': 556, '3': 556, '4': 556, '5': 556, '6': 556, '7': 556, '8': 556, '9': 556, ':': 278, ';': 278, '<': 584, '=': 584, '>': 584, '?': 556, '@': 1015, 'a': 556, 'b': 556, 'c': 500, 'd': 556, 'e': 556, 'f': 278, 'g': 556, 'h': 556, 'i': 222, 'j': 222, 'k': 500, 'l': 222, 'm': 833, 'n': 556, 'o': 556, 'p': 556, 'q': 556, 'r': 333, 's': 500, 't': 278, 'u': 556, 'v': 500, 'w': 722, 'x': 500, 'y': 500, 'z': 500, 'A': 667, 'B': 667, 'C': 722, 'D': 722, 'E': 667, 'F': 611, 'G': 778, 'H': 722, 'I': 278, 'J': 500, 'K': 667, 'L': 556, 'M': 833, 'N': 722, 'O': 778, 'P': 667, 'Q': 778, 'R': 722, 'S': 667, 'T': 611, 'U': 722, 'V': 667, 'W': 944, 'X': 667, 'Y': 667, 'Z': 611};
@@ -46,7 +49,6 @@ function wrapText(str, maxPt, bold, size) {
         for (const word of words) {
             const wordW = strWidth(word, bold, size);
             if (wordW > maxPt) {
-                // Word is too long to fit on a line by itself. Break it character by character.
                 if (currentLine) { lines.push(currentLine); currentLine = ''; }
                 let temp = '';
                 for (const char of word) {
@@ -86,11 +88,14 @@ class PDFWriter {
     serialise() {
         const f1 = this.newObj(); this.objects.find(o => o.id === f1).lines = [`${f1} 0 obj`, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>', 'endobj'];
         const f2 = this.newObj(); this.objects.find(o => o.id === f2).lines = [`${f2} 0 obj`, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>', 'endobj'];
+        const f3 = this.newObj(); this.objects.find(o => o.id === f3).lines = [`${f3} 0 obj`, '<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding /WinAnsiEncoding >>', 'endobj'];
+        const f4 = this.newObj(); this.objects.find(o => o.id === f4).lines = [`${f4} 0 obj`, '<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold /Encoding /WinAnsiEncoding >>', 'endobj'];
+        
         const pgid = this.newObj();
         const catsid = this.newObj();
         this.objects.find(o => o.id === pgid).lines = [`${pgid} 0 obj`, `<< /Type /Pages /Kids [${this.pages.map(p => `${p.pid} 0 R`).join(' ')}] /Count ${this.pages.length} >>`, 'endobj'];
         this.pages.forEach(p => {
-            this.objects.find(o => o.id === p.pid).lines = [`${p.pid} 0 obj`, `<< /Type /Page /Parent ${pgid} 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${p.sid} 0 R >>`, 'endobj'];
+            this.objects.find(o => o.id === p.pid).lines = [`${p.pid} 0 obj`, `<< /Type /Page /Parent ${pgid} 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R /F3 ${f3} 0 R /F4 ${f4} 0 R >> >> /Contents ${p.sid} 0 R >>`, 'endobj'];
         });
         this.objects.find(o => o.id === catsid).lines = [`${catsid} 0 obj`, `<< /Type /Catalog /Pages ${pgid} 0 R >>`, 'endobj'];
         const lines = ['%PDF-1.4', '%\xE2\xE3\xCF\xD3'];
@@ -131,13 +136,14 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
     const drawSectionTitle = (label) => {
         checkBreak(35); y -= 16;
         if (template === 'minimal') {
-            drawText(label.toUpperCase(), ML, y + 2, 'F2', 8.5, accent);
+            drawText(label.toUpperCase(), ML, y, 'F2', 8.5, accent);
+            // Don't subtract Y here as content goes to the right of it
         } else if (template === 'modern') {
             drawText(label.toUpperCase(), ML, y, 'F2', 10, accent);
             y -= 4; ops.push('0.88 0.85 0.83 RG', '0.3 w', `${ML} ${y} m`, `${PW-MR} ${y} l`, 'S'); y -= 12;
         } else {
-            drawText(label.toUpperCase(), ML, y, 'F2', 11, C_BLACK);
-            y -= 4; hline(y, 0.8, C_BLACK); y -= 12;
+            drawText(label.toUpperCase(), ML, y, 'F2', 11, accent);
+            y -= 4; hline(y, 0.4, '0.90 0.90 0.90'); y -= 12;
         }
     };
 
@@ -145,7 +151,7 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
     if (template === 'modern') {
        fillRect(0, PH - 110, PW, 110, C_BLACK);
        y = PH - 50;
-       drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, 'F2', 28, C_WHITE);
+       drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, 'F4', 28, C_WHITE);
        y -= 26;
        drawText(personal.title || '', ML, y, 'F1', 12, accent);
        
@@ -153,27 +159,28 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
        fillRect(0, y, PW, 24, '0.94 0.90 0.87');
        const contactParts = [personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean);
        drawText(contactParts.join('  |  '), ML, y + 8, 'F1', 8.5, C_MID);
-       y -= 30;
+       y = PH - 110 - 24 - 30;
     } else if (template === 'minimal') {
        y = PH - 60;
-       drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, 'F2', 26, C_BLACK);
+       drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, 'F4', 26, accent);
        y -= 24;
        drawText(personal.title || '', ML, y, 'F1', 11, C_MID);
        y -= 16;
        const cp = [personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean);
-       const cpLine = cp.join('  ·  ');
+       const cpLine = cp.join('  \xb7  ');
        drawText(cpLine, ML, y, 'F1', 9.5, C_LIGHT);
        y -= 12; hline(y, 0.3, '0.88 0.85 0.83'); y -= 32;
     } else {
        y = PH - 60;
-       drawText((personal.name || 'YOUR NAME').toUpperCase(), PW/2 - strWidth(personal.name, true, 26)/2, y, 'F2', 26, C_BLACK);
+       // Centered Name - Using Serif (F4) to match Instrument Serif
+       drawText((personal.name || 'YOUR NAME').toUpperCase(), PW/2 - strWidth(personal.name, true, 26)/2, y, 'F4', 26, C_BLACK);
        y -= 24;
        if (personal.title) {
           drawText(personal.title.toUpperCase(), PW/2 - strWidth(personal.title, true, 11)/2, y, 'F2', 11, accent);
           y -= 18;
        }
        const cp = [personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean);
-       const cpText = cp.join('  ·  ');
+       const cpText = cp.join('  \xb7  ');
        drawText(cpText, PW/2 - strWidth(cpText, false, 9.5)/2, y, 'F1', 9.5, C_MID);
        y -= 14; hline(y, 1.2, C_BLACK); y -= 24;
     }
@@ -186,7 +193,7 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
         if (key === 'summary') {
             if (personal.summary) {
                 drawSectionTitle(label);
-                drawWrapped(personal.summary, (template === 'minimal' ? ML + 115 : ML), (template === 'minimal' ? CW - 115 : CW), 'F1', 10.5, C_BLACK, 14.5);
+                drawWrapped(personal.summary, (template === 'minimal' ? ML + 115 : ML), (template === 'minimal' ? CW - 110 : CW), 'F1', 10.5, C_BLACK, 14.5);
                 y -= 8;
             }
             continue;
@@ -199,15 +206,18 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
         
         if (['skills', 'interests', 'languages'].includes(key)) {
             let chunk = []; let rowW = 0;
+            const skillAccent = (template === 'modern' ? accent : C_MID);
+            const pillBg = (template === 'modern' ? '0.94 0.90 0.87' : '0.96 0.96 0.96');
+            
             for (let it of items) {
                 const s = typeof it === 'string' ? it : (it.name + (it.level ? ` (${it.level})` : ''));
-                const w = strWidth(s, false, 9) + 16;
+                const w = strWidth(s, false, 9) + 14; // Horizontal pill width with padding
                 if (rowW + w > colW) {
                    checkBreak(20);
                    let curX = startX;
                    for (let bit of chunk) {
-                      fillRect(curX, y - 2, bit.w - 4, 13, '0.96 0.96 0.96');
-                      drawText(bit.s, curX + 4, y + 1, 'F1', 9, C_MID);
+                      fillRect(curX, y - 2, bit.w - 4, 13, pillBg);
+                      drawText(bit.s, curX + 5, y + 1.2, 'F1', 9, skillAccent);
                       curX += bit.w;
                    }
                    y -= 18; rowW = 0; chunk = [];
@@ -218,8 +228,8 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
                checkBreak(20);
                let curX = startX;
                for (let bit of chunk) {
-                  fillRect(curX, y - 2, bit.w - 4, 13, '0.96 0.96 0.96');
-                  drawText(bit.s, curX + 4, y + 1, 'F1', 9, C_MID);
+                  fillRect(curX, y - 2, bit.w - 4, 13, pillBg);
+                  drawText(bit.s, curX + 5, y + 1.2, 'F1', 9, skillAccent);
                   curX += bit.w;
                }
                y -= 18;
@@ -236,7 +246,7 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
                 }
                 const meta = [item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ');
                 if (meta) { drawText(meta, startX, y, 'F2', 10, C_MID); y -= 13; }
-                if (item.url) { drawText(item.url, startX, y, 'F1', 8.5, accent); y -= 12; }
+                if (item.url) { drawWrapped(item.url, startX, colW, 'F1', 8.5, accent, 11); }
                 if (item.description) { drawWrapped(item.description, startX, colW, 'F1', 10.5, C_BLACK, 14); }
                 for (const b of (item.bullets || [])) { 
                     if (b?.trim()) {
