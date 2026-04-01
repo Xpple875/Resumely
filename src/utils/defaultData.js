@@ -45,7 +45,7 @@ export const defaultResumeData = {
   volunteering: [],
   interests: [],
   references: [],
-  sectionOrder: ['experience', 'education', 'skills', 'projects', 'certifications', 'languages', 'volunteering', 'interests', 'references'],
+  sectionOrder: ['summary', 'experience', 'education', 'skills', 'projects', 'certifications', 'languages', 'volunteering', 'interests', 'references'],
   sectionLabels: {
     experience: 'Experience',
     education: 'Education',
