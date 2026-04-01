@@ -240,7 +240,9 @@ const MinimalContent = ({ data, theme, innerRef }) => {
          {personal.summary && (
             <div className="rmin-section">
                <div className="rmin-section-title" style={{ color: accentColor }}>SUMMARY</div>
-               <p style={{ lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
+               <div>
+                  <p style={{ lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
+               </div>
             </div>
          )}
 
