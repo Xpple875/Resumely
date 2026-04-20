@@ -33,7 +33,7 @@ export default function ProjectsSection({ data, onChange, onToast }) {
   }
 
   return (
-    <SectionWrapper title="Projects (Optional)" icon={<ProjectIcon />} defaultOpen={false}>
+    <SectionWrapper title="Projects (Optional)" icon={<ProjectIcon />} defaultOpen={false} badge={data.length}>
       {data.map((entry, idx) => (
         <div className="entry-card" key={entry.id}>
           <button className="entry-card__remove" onClick={() => removeEntry(idx)} title="Remove">

@@ -8,7 +8,7 @@ export default function InterestSection({ data, onChange }) {
   const update = (idx, val) => onChange(data.map((e, i) => i === idx ? { ...e, name: val } : e))
 
   return (
-    <SectionWrapper title="Interests" icon={<CoffeeIcon />} defaultOpen={false}>
+    <SectionWrapper title="Interests" icon={<CoffeeIcon />} defaultOpen={false} badge={data.length}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
          {data.map((entry, idx) => (
             <div key={entry.id} className="skill-tag" style={{ paddingLeft: '12px' }}>

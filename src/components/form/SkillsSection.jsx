@@ -21,7 +21,7 @@ export default function SkillsSection({ data, onChange }) {
   }
 
   return (
-    <SectionWrapper title="Skills" icon={<SkillIcon />} defaultOpen={true}>
+    <SectionWrapper title="Skills" icon={<SkillIcon />} defaultOpen={true} badge={data.length}>
       <div className="field">
         <label>Add Skills (press Enter or comma to add)</label>
         <div className="skills-input-row">

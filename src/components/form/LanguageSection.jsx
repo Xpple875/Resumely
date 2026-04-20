@@ -8,7 +8,7 @@ export default function LanguageSection({ data, onChange }) {
   const update = (idx, key, val) => onChange(data.map((e, i) => i === idx ? { ...e, [key]: val } : e))
 
   return (
-    <SectionWrapper title="Languages" icon={<GlobeIcon />} defaultOpen={false}>
+    <SectionWrapper title="Languages" icon={<GlobeIcon />} defaultOpen={false} badge={data.length}>
       {data.map((entry, idx) => (
         <div className="entry-card" key={entry.id}>
           <button className="entry-card__remove" onClick={() => remove(idx)} title="Remove"><CloseIcon /></button>

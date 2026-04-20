@@ -10,7 +10,7 @@ export default function EducationSection({ data, onChange }) {
   }
 
   return (
-    <SectionWrapper title="Education" icon={<GradIcon />} defaultOpen={true}>
+    <SectionWrapper title="Education" icon={<GradIcon />} defaultOpen={true} badge={data.length}>
       {data.map((entry, idx) => (
         <div className="entry-card" key={entry.id}>
           <button className="entry-card__remove" onClick={() => removeEntry(idx)} title="Remove">

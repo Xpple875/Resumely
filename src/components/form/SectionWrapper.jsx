@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function SectionWrapper({ title, icon, children, defaultOpen = true }) {
+export default function SectionWrapper({ title, icon, children, defaultOpen = true, badge }) {
   const [open, setOpen] = useState(defaultOpen)
 
   return (
@@ -9,6 +9,9 @@ export default function SectionWrapper({ title, icon, children, defaultOpen = tr
         <div className="form-section__title">
           {icon}
           {title}
+          {badge !== undefined && badge > 0 && (
+            <span className="section-badge">{badge}</span>
+          )}
         </div>
         <svg
           className={`form-section__chevron ${open ? 'open' : ''}`}

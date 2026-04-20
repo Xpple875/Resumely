@@ -31,7 +31,7 @@ export default function CertificationSection({ data, onChange, onToast }) {
   }
 
   return (
-    <SectionWrapper title="Certifications" icon={<AwardIcon />} defaultOpen={false}>
+    <SectionWrapper title="Certifications" icon={<AwardIcon />} defaultOpen={false} badge={data.length}>
       {data.map((entry, idx) => (
         <div className="entry-card" key={entry.id}>
           <button className="entry-card__remove" onClick={() => remove(idx)} title="Remove"><CloseIcon /></button>

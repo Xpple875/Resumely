@@ -52,7 +52,7 @@ export default function ExperienceSection({ data, onChange, onToast }) {
   }
 
   return (
-    <SectionWrapper title="Work Experience" icon={<BriefcaseIcon />} defaultOpen={true}>
+    <SectionWrapper title="Work Experience" icon={<BriefcaseIcon />} defaultOpen={true} badge={data.length}>
       {data.map((entry, idx) => (
         <div className="entry-card" key={entry.id}>
           <button className="entry-card__remove" onClick={() => removeEntry(idx)} title="Remove">
