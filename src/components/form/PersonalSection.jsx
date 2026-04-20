@@ -16,7 +16,8 @@ export default function PersonalSection({ data, onChange, onToast }) {
       const result = await enhanceBullet(
         data.summary,
         data.title,
-        'professional summary'
+        '',
+        true
       )
       set('summary', result)
       const left = getAIUsesLeft()

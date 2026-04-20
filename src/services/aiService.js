@@ -16,7 +16,7 @@ function incrementAIUses() {
    sessionStorage.setItem(SESSION_KEY, String(used + 1))
 }
 
-export async function enhanceBullet(bullet, jobTitle = '', company = '') {
+export async function enhanceBullet(bullet, jobTitle = '', company = '', isSummary = false, mode = null) {
    if (!bullet.trim()) {
       throw new Error('Please write something in the bullet first.')
    }
@@ -28,7 +28,7 @@ export async function enhanceBullet(bullet, jobTitle = '', company = '') {
    const response = await fetch('/api/enhance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bullet, jobTitle, company }),
+      body: JSON.stringify({ bullet, jobTitle, company, isSummary, mode }),
    })
 
    const data = await response.json()

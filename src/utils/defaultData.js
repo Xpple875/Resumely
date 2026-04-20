@@ -90,6 +90,7 @@ export const newCertificationEntry = () => ({
   name: '',
   issuer: '',
   date: '',
+  description: '',
 })
 
 export const newLanguageEntry = () => ({

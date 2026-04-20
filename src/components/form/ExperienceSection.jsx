@@ -97,42 +97,36 @@ export default function ExperienceSection({ data, onChange, onToast }) {
           </div>
 
           <div className="field">
-            <label>Bullet Points</label>
             {entry.bullets.map((bullet, bIdx) => {
               const key = `${idx}-${bIdx}`
               const isLoading = !!enhancing[key]
               return (
-                <div key={bIdx} style={{ marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <textarea
-                      rows={2}
-                      style={{ flex: 1 }}
-                      placeholder="Describe a key achievement or responsibility…"
-                      value={bullet}
-                      onChange={e => updateBullet(idx, bIdx, e.target.value)}
-                    />
-                    <button
-                      style={{ color: 'var(--text-light)', flexShrink: 0, alignSelf: 'flex-start', paddingTop: '8px' }}
-                      onClick={() => removeBullet(idx, bIdx)}
-                      title="Remove bullet"
-                    >
-                      <CloseIcon />
-                    </button>
-                  </div>
-                  {/* Enhance button — sits below the textarea */}
-                  <button
-                    className="enhance-btn"
-                    onClick={() => handleEnhance(idx, bIdx)}
-                    disabled={isLoading}
-                    title="Rewrite with AI"
-                  >
-                    {isLoading ? (
-                      <><SpinnerIcon /> Enhancing…</>
-                    ) : (
-                      <><SparkleIcon /> Enhance with AI</>
-                    )}
-                  </button>
-                </div>
+                        <div key={bIdx} className="bullet-item">
+                            <div className="bullet-item__header">
+                                <label className="bullet-label">Bullet {bIdx + 1}</label>
+                                <button
+                                    className="bullet-item__remove"
+                                    onClick={() => removeBullet(idx, bIdx)}
+                                    title="Remove bullet"
+                                >
+                                    <CloseIcon />
+                                </button>
+                            </div>
+                            <textarea
+                                rows={2}
+                                placeholder="Describe a key achievement or responsibility…"
+                                value={bullet}
+                                onChange={e => updateBullet(idx, bIdx, e.target.value)}
+                            />
+                            <button
+                                className="enhance-btn"
+                                onClick={() => handleEnhance(idx, bIdx)}
+                                disabled={isLoading}
+                                title="Rewrite with AI"
+                            >
+                                {isLoading ? <><SpinnerIcon /> Enhancing…</> : <><SparkleIcon /> Enhance with AI</>}
+                            </button>
+                        </div>
               )
             })}
             <button className="add-entry-btn" onClick={() => addBullet(idx)}>

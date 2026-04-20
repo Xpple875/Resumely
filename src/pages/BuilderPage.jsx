@@ -39,7 +39,8 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
          const scale = Math.min(1, panelW / paperW)
          wrapperRef.current.style.transform = `scale(${scale})`
          wrapperRef.current.style.transformOrigin = 'top center'
-         wrapperRef.current.style.marginBottom = `${(scale - 1) * wrapperRef.current.offsetHeight}px`
+         // Prevent ghost scrollbars by explicitly sizing the invisible wrapper div
+         wrapperRef.current.parentElement.style.height = `${scale * wrapperRef.current.offsetHeight}px`
       }
       scaleToFit()
       const ro = new ResizeObserver(scaleToFit)
@@ -112,8 +113,10 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
 
          {/* Right Side: Preview */}
          <main className="preview-panel" ref={panelRef}>
-            <div className="resume-preview-wrapper" ref={wrapperRef}>
-               <ResumePreview data={resumeData} template={template} />
+            <div className="resume-scale-container" style={{ overflow: 'hidden' }}>
+               <div className="resume-preview-wrapper" ref={wrapperRef}>
+                  <ResumePreview data={resumeData} template={template} />
+               </div>
             </div>
          </main>
 

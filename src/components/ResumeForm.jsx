@@ -54,10 +54,12 @@ export default function ResumeForm({ data, onChange, onToast }) {
       <ProjectsSection
         data={data.projects}
         onChange={val => update('projects', val)}
+        onToast={onToast}
       />
       <CertificationSection 
         data={data.certifications}
         onChange={val => update('certifications', val)}
+        onToast={onToast}
       />
       <LanguageSection 
         data={data.languages}
@@ -66,6 +68,7 @@ export default function ResumeForm({ data, onChange, onToast }) {
       <VolunteerSection 
         data={data.volunteering}
         onChange={val => update('volunteering', val)}
+        onToast={onToast}
       />
       <InterestSection 
         data={data.interests}
