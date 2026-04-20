@@ -62,7 +62,7 @@ export default function App() {
       ) : (
         <BuilderPage
           template={template}
-          onChangeTemplate={() => setView('template')}
+          onChangeTemplate={(id) => id ? handleSelectTemplate(id) : setView('template')}
           unlocked={unlocked}
           user={user}
           onSignOut={handleSignOut}

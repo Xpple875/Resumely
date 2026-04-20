@@ -8,6 +8,7 @@ import { defaultResumeData } from '../utils/defaultData.js'
 import { loadDraft, saveDraft } from '../hooks/useAutosave.js'
 import { useToast } from '../hooks/useToast.js'
 import { syncResumeToCloud } from '../services/supabaseClient'
+import TemplateModal from '../components/TemplateModal.jsx'
 import '../styles/builder.css'
 
 export default function BuilderPage({ template, onChangeTemplate, unlocked, user, onSignOut, theme, setTheme }) {
@@ -25,6 +26,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
       }
    })
    const [syncStatus, setSyncStatus] = useState('idle')
+   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
    const { toasts, showToast } = useToast()
 
    const panelRef = useRef(null)
@@ -47,6 +49,24 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
       if (panelRef.current) ro.observe(panelRef.current)
       return () => ro.disconnect()
    }, [])
+
+   // Textarea auto-resize handler
+   useEffect(() => {
+      const handleInput = (e) => {
+         if (e.target.tagName === 'TEXTAREA') {
+            e.target.style.height = 'auto';
+            e.target.style.height = e.target.scrollHeight + 'px';
+         }
+      }
+      // trigger resize on all existing textareas on mount
+      document.querySelectorAll('textarea').forEach(t => {
+         t.style.height = 'auto';
+         t.style.height = t.scrollHeight + 'px';
+      })
+      
+      document.addEventListener('input', handleInput);
+      return () => document.removeEventListener('input', handleInput);
+   }, [resumeData])
 
    const handleDataChange = (newData) => {
       const nextData = typeof newData === 'function' ? newData(resumeData) : newData
@@ -85,11 +105,22 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
 
             <div className="builder-header__actions">
                {user && (
-                  <button className="btn btn-ghost" style={{ color: '#ff4d4d' }} onClick={onSignOut}>
-                     Sign Out
-                  </button>
+                 <>
+                   <button className="btn btn-ghost" style={{ color: '#ff4d4d' }} onClick={onSignOut}>
+                      Sign Out
+                   </button>
+                   {syncStatus === 'success' && (
+                     <button className="btn btn-ghost" onClick={() => {
+                       navigator.clipboard.writeText(window.location.href);
+                       showToast('Link copied to clipboard', 'success');
+                     }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px'}}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        Copy Link
+                     </button>
+                   )}
+                 </>
                )}
-               <button className="btn btn-ghost" onClick={onChangeTemplate}>Template</button>
+               <button className="btn btn-ghost" onClick={() => setIsTemplateModalOpen(true)}>Template</button>
 
                <button
                   className="btn btn-ghost"
@@ -100,7 +131,22 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
                   {syncStatus === 'syncing' ? 'Saving...' : (syncStatus === 'success' ? '✓ Saved' : 'Save to Cloud')}
                </button>
 
-               <button className="btn btn-secondary" onClick={() => generatePDF(null, resumeData, template)}>
+               <div style={{ display: 'flex', alignItems: 'center', background: 'var(--glass-surface)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md) 0 0 var(--radius-md)', padding: '0 12px', height: '36px', borderRight: 'none' }}>
+                 <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-light)', textTransform: 'capitalize' }}>
+                   {template} <span style={{display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: resumeData.theme?.accentColor || '#C4622D', marginLeft: '6px'}}></span>
+                 </span>
+               </div>
+               <button className="btn btn-secondary" style={{ borderRadius: '0 var(--radius-md) var(--radius-md) 0', MozBorderRadiusLeftbottom: 0, MozBorderRadiusLefttop: 0 }} onClick={() => {
+                 showToast('Generating PDF...', 'info');
+                 // Create skeleton state
+                 const wrapper = wrapperRef.current;
+                 if (wrapper) wrapper.style.filter = 'blur(4px) grayscale(1)';
+                 setTimeout(() => {
+                    generatePDF(null, resumeData, template).finally(() => {
+                       if (wrapper) wrapper.style.filter = 'none';
+                    });
+                 }, 400); // give UI time to blur before freezing thread
+               }}>
                   Download
                </button>
             </div>
@@ -126,13 +172,19 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
          {/* Right Side: Preview */}
          <main className="preview-panel" ref={panelRef}>
             <div className="resume-scale-container" style={{ overflow: 'hidden' }}>
-               <div className="resume-preview-wrapper" ref={wrapperRef}>
+               <div className="resume-preview-wrapper" ref={wrapperRef} style={{ transition: 'filter 0.3s ease' }}>
                   <ResumePreview data={resumeData} template={template} />
                </div>
             </div>
          </main>
 
          <ToastContainer toasts={toasts} />
+         <TemplateModal 
+            isOpen={isTemplateModalOpen} 
+            onClose={() => setIsTemplateModalOpen(false)} 
+            currentTemplate={template} 
+            onSelectTemplate={onChangeTemplate} 
+         />
       </div>
    )
 }

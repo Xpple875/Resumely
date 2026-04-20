@@ -76,7 +76,12 @@ export default function PersonalSection({ data, onChange, onToast }) {
       {/* Summary field with inline visibility toggle */}
       <div className="field">
         <div className="summary-label-row">
-          <label>Summary</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <label>Summary</label>
+            <span style={{ fontSize: '10px', color: 'var(--text-lighter)', fontWeight: 500, paddingTop: '1px' }}>
+              {data.summary.length} / 600
+            </span>
+          </div>
           <button
             className={`summary-toggle-btn ${hideSummary ? 'hidden' : 'visible'}`}
             onClick={() => set('hideSummary', !hideSummary)}

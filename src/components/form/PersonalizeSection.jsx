@@ -95,31 +95,63 @@ export default function PersonalizeSection({ data = {}, onChange }) {
             </div>
          </div>
 
-         <div className="field-row">
-            <div className="field">
-               <label>Font Style</label>
-               <select
-                  value={fontFamily}
-                  onChange={e => set('fontFamily', e.target.value)}
-               >
-                  {FONT_OPTIONS.map(opt => (
-                     <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-               </select>
+         <div className="field" style={{ marginBottom: '16px' }}>
+            <label>Font Style</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '6px' }}>
+               {FONT_OPTIONS.map(opt => {
+                  const isActive = fontFamily === opt.value;
+                  return (
+                     <div 
+                        key={opt.value} 
+                        onClick={() => set('fontFamily', opt.value)}
+                        style={{
+                           padding: '12px',
+                           borderRadius: 'var(--radius-md)',
+                           border: `1.5px solid ${isActive ? 'var(--accent)' : 'var(--glass-border)'}`,
+                           background: isActive ? 'var(--accent-soft)' : 'var(--glass-surface)',
+                           cursor: 'pointer',
+                           display: 'flex',
+                           flexDirection: 'column',
+                           alignItems: 'center',
+                           gap: '6px',
+                           transition: 'all 0.2s ease',
+                           transform: isActive ? 'translateY(-2px)' : 'none',
+                           boxShadow: isActive ? '0 4px 12px rgba(196, 98, 45, 0.15)' : 'none'
+                        }}
+                     >
+                        <span style={{ fontFamily: opt.value, fontSize: '24px', lineHeight: 1, color: isActive ? 'var(--accent)' : 'var(--text)' }}>Aa</span>
+                        <span style={{ fontSize: '11px', fontWeight: isActive ? 600 : 500, color: isActive ? 'var(--accent)' : 'var(--text-light)', textAlign: 'center' }}>
+                           {opt.label.split(' ')[0]} {/* Takes "Sans", "Serif", "Monospace" */}
+                        </span>
+                     </div>
+                  );
+               })}
             </div>
+         </div>
 
-            <div className="field">
-               <label>Font Size ({fontSize}px)</label>
-               <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                  <input
-                     type="range"
-                     min="10"
-                     max="16"
-                     step="1"
-                     value={fontSize}
-                     onChange={e => set('fontSize', parseInt(e.target.value, 10))}
-                     style={{ width: '100%' }}
-                  />
+         <div className="field">
+            <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+               <span>Font Size</span>
+               <span style={{ color: 'var(--text)', fontWeight: 500, textTransform: 'none', letterSpacing: 'normal' }}>{fontSize}px</span>
+            </label>
+            <div style={{ position: 'relative', marginTop: '12px' }}>
+               <input
+                  type="range"
+                  min="10"
+                  max="16"
+                  step="1"
+                  value={fontSize}
+                  onChange={e => set('fontSize', parseInt(e.target.value, 10))}
+                  style={{ 
+                     width: '100%', 
+                     accentColor: 'var(--accent)',
+                     cursor: 'pointer'
+                  }}
+               />
+               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', fontSize: '11px', color: 'var(--text-lighter)' }}>
+                  <span>Small (10)</span>
+                  <span>Normal (13)</span>
+                  <span>Large (16)</span>
                </div>
             </div>
          </div>

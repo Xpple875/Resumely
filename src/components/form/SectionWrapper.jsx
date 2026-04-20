@@ -9,8 +9,10 @@ export default function SectionWrapper({ title, icon, children, defaultOpen = tr
         <div className="form-section__title">
           {icon}
           {title}
-          {badge !== undefined && badge > 0 && (
-            <span className="section-badge">{badge}</span>
+          {badge !== undefined && (
+            badge > 0 
+              ? <span className="section-badge">{badge}</span>
+              : <span className="section-badge section-badge--empty"></span>
           )}
         </div>
         <svg
