@@ -1,86 +1,91 @@
-import React from 'react'
+import React, { useState, useRef } from 'react'
 import SectionWrapper from './SectionWrapper.jsx'
 
 export default function SectionManager({ order, labels, onOrderChange, onLabelChange }) {
-  const move = (idx, direction) => {
-    const newOrder = [...order]
-    const target = idx + direction
-    if (target < 0 || target >= newOrder.length) return
-    [newOrder[idx], newOrder[target]] = [newOrder[target], newOrder[idx]]
-    onOrderChange(newOrder)
-  }
+  const [dragIndex, setDragIndex] = useState(null)
+  const [overIndex, setOverIndex] = useState(null)
+  const dragNode = useRef(null)
 
   const updateLabel = (key, val) => {
     onLabelChange({ ...labels, [key]: val })
   }
 
+  const handleDragStart = (e, idx) => {
+    setDragIndex(idx)
+    dragNode.current = e.currentTarget
+    // Slight delay so the ghost image renders before applying drag styles
+    setTimeout(() => {
+      if (dragNode.current) dragNode.current.classList.add('dragging')
+    }, 0)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragEnter = (e, idx) => {
+    e.preventDefault()
+    if (idx !== dragIndex) setOverIndex(idx)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDrop = (e, idx) => {
+    e.preventDefault()
+    if (dragIndex === null || dragIndex === idx) return
+    const newOrder = [...order]
+    const [removed] = newOrder.splice(dragIndex, 1)
+    newOrder.splice(idx, 0, removed)
+    onOrderChange(newOrder)
+    setDragIndex(null)
+    setOverIndex(null)
+  }
+
+  const handleDragEnd = () => {
+    if (dragNode.current) dragNode.current.classList.remove('dragging')
+    dragNode.current = null
+    setDragIndex(null)
+    setOverIndex(null)
+  }
+
   return (
     <SectionWrapper title="Manage Sections" icon={<SettingsIcon />} defaultOpen={false}>
       <div className="section-manager">
-        <p style={{ fontSize: '0.85em', color: 'var(--text-light)', marginBottom: '16px' }}>
-          Reorder sections or rename headers. Only sections with content will show on the resume.
+        <p className="section-manager__hint">
+          Drag to reorder sections or rename their headers. Only sections with content appear on the resume.
         </p>
-        
-        {order.map((key, idx) => (
-          <div key={key} className="manager-row">
-            <div className="manager-row__drag">
-               <button onClick={() => move(idx, -1)} disabled={idx === 0} title="Move Up">
-                  <ChevronUpIcon />
-               </button>
-               <button onClick={() => move(idx, 1)} disabled={idx === order.length - 1} title="Move Down">
-                  <ChevronDownIcon />
-               </button>
-            </div>
-            
-            <div className="field" style={{ flex: 1, marginBottom: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-               <span style={{ fontSize: '0.75em', color: '#999', textTransform: 'uppercase', minWidth: '40px' }}>Label:</span>
-               <input 
-                  type="text" 
-                  value={labels[key] || ''} 
-                  onChange={e => updateLabel(key, e.target.value)}
-                  placeholder={key.toUpperCase()}
-                  style={{ flex: 1 }}
-               />
-            </div>
-          </div>
-        ))}
-      </div>
 
-      <style>{`
-        .section-manager { display: flex; flex-direction: column; gap: 8px; }
-        .manager-row { 
-          display: flex; 
-          align-items: center; 
-          gap: 12px; 
-          background: var(--bg-card); 
-          padding: 10px 14px; 
-          border-radius: var(--radius-md); 
-          border: 1px solid var(--border); 
-          transition: border-color 0.15s ease;
-        }
-        .manager-row:hover {
-          border-color: var(--accent);
-        }
-        .manager-row__drag { display: flex; flex-direction: column; gap: 4px; }
-        .manager-row__drag button { 
-          background: var(--bg); 
-          border: 1px solid var(--border); 
-          cursor: pointer; 
-          padding: 4px; 
-          border-radius: 4px; 
-          color: var(--text-light); 
-          display: flex; 
-          align-items: center; 
-          justify-content: center;
-          transition: all 0.15s ease;
-        }
-        .manager-row__drag button:hover:not(:disabled) { 
-          background: var(--accent-soft); 
-          color: var(--accent); 
-          border-color: var(--accent); 
-        }
-        .manager-row__drag button:disabled { opacity: 0.3; cursor: not-allowed; }
-      `}</style>
+        <div className="section-manager__list">
+          {order.map((key, idx) => (
+            <div
+              key={key}
+              className={`manager-row${overIndex === idx && dragIndex !== idx ? ' drag-over' : ''}${dragIndex === idx ? ' is-dragging' : ''}`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, idx)}
+              onDragEnter={(e) => handleDragEnter(e, idx)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, idx)}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="manager-row__handle" title="Drag to reorder">
+                <DragIcon />
+              </div>
+
+              <div className="manager-row__label-field">
+                <span className="manager-row__key">{key}</span>
+                <input
+                  type="text"
+                  value={labels[key] || ''}
+                  onChange={e => updateLabel(key, e.target.value)}
+                  placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                  className="manager-row__input"
+                  onClick={e => e.stopPropagation()}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </SectionWrapper>
   )
 }
@@ -93,9 +98,15 @@ function SettingsIcon() {
   )
 }
 
-function ChevronUpIcon() {
-  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-}
-function ChevronDownIcon() {
-  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+function DragIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="9" cy="6" r="1.5"/>
+      <circle cx="15" cy="6" r="1.5"/>
+      <circle cx="9" cy="12" r="1.5"/>
+      <circle cx="15" cy="12" r="1.5"/>
+      <circle cx="9" cy="18" r="1.5"/>
+      <circle cx="15" cy="18" r="1.5"/>
+    </svg>
+  )
 }
