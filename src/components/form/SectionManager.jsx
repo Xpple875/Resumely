@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import SectionWrapper from './SectionWrapper.jsx'
 
-export default function SectionManager({ order, labels, onOrderChange, onLabelChange }) {
+export default function SectionManager({ order, labels, onOrderChange, onLabelChange, hideSummary, onToggleSummary }) {
   const [dragIndex, setDragIndex] = useState(null)
   const [overIndex, setOverIndex] = useState(null)
   const dragNode = useRef(null)
@@ -13,7 +13,6 @@ export default function SectionManager({ order, labels, onOrderChange, onLabelCh
   const handleDragStart = (e, idx) => {
     setDragIndex(idx)
     dragNode.current = e.currentTarget
-    // Slight delay so the ghost image renders before applying drag styles
     setTimeout(() => {
       if (dragNode.current) dragNode.current.classList.add('dragging')
     }, 0)
@@ -73,14 +72,32 @@ export default function SectionManager({ order, labels, onOrderChange, onLabelCh
 
               <div className="manager-row__label-field">
                 <span className="manager-row__key">{key}</span>
-                <input
-                  type="text"
-                  value={labels[key] || ''}
-                  onChange={e => updateLabel(key, e.target.value)}
-                  placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-                  className="manager-row__input"
-                  onClick={e => e.stopPropagation()}
-                />
+
+                {key === 'summary' ? (
+                  /* Summary row: show toggle instead of editable label */
+                  <div className="manager-row__summary-controls">
+                    <span className="manager-row__summary-hint">
+                      {hideSummary ? 'Hidden from resume' : 'Visible on resume'}
+                    </span>
+                    <button
+                      className={`manager-summary-toggle ${hideSummary ? 'hidden' : 'visible'}`}
+                      onClick={(e) => { e.stopPropagation(); onToggleSummary(!hideSummary) }}
+                      title={hideSummary ? 'Show summary' : 'Hide summary'}
+                      type="button"
+                    >
+                      {hideSummary ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value={labels[key] || ''}
+                    onChange={e => updateLabel(key, e.target.value)}
+                    placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                    className="manager-row__input"
+                    onClick={e => e.stopPropagation()}
+                  />
+                )}
               </div>
             </div>
           ))}
@@ -107,6 +124,25 @@ function DragIcon() {
       <circle cx="15" cy="12" r="1.5"/>
       <circle cx="9" cy="18" r="1.5"/>
       <circle cx="15" cy="18" r="1.5"/>
+    </svg>
+  )
+}
+
+function EyeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  )
+}
+
+function EyeOffIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+      <line x1="1" y1="1" x2="23" y2="23"/>
     </svg>
   )
 }

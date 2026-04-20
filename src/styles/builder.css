@@ -42,12 +42,11 @@
 
 /* ── Form Panel ── */
 .form-panel {
-   background: rgba(250, 249, 247, 0.78);
-   backdrop-filter: blur(2px);
-   -webkit-backdrop-filter: blur(2px);
+   background: rgba(250, 249, 247, 0.85);
    border-right: 1px solid var(--glass-border);
    overflow-y: auto;
-   padding: 32px 32px 80px;
+   overflow-x: hidden;
+   padding: 0;
    display: flex;
    flex-direction: column;
    gap: 0;
@@ -56,53 +55,90 @@
 }
 
 [data-theme="dark"] .form-panel {
-   background: rgba(15, 17, 23, 0.68);
+   background: rgba(15, 17, 23, 0.72);
 }
 
-/* ── Background Blobs ── */
-.bg-blobs {
-   position: fixed;
-   top: 56px;
-   left: 0;
-   width: 480px;
-   height: calc(100vh - 56px);
-   pointer-events: none;
-   z-index: 0;
-   overflow: hidden;
+/* ── Form content (sits above blobs) ── */
+.form-content {
+   position: relative;
+   z-index: 2;
+   padding: 32px 32px 80px;
+   display: flex;
+   flex-direction: column;
+   gap: 0;
 }
 
-.bg-blob {
+/* ── Background Blobs (absolute inside form-panel) ── */
+.form-blob {
    position: absolute;
    border-radius: 50%;
-   filter: blur(64px);
+   filter: blur(60px);
+   pointer-events: none;
+   z-index: 1;
    will-change: transform;
 }
 
-.bg-blob--1 {
-   width: 380px;
-   height: 380px;
-   top: -80px;
-   left: -100px;
-   background: radial-gradient(circle, rgba(196, 98, 45, 0.55) 0%, transparent 65%);
+.form-blob--1 {
+   width: 420px;
+   height: 420px;
+   top: -100px;
+   left: -120px;
+   background: radial-gradient(circle, rgba(196, 98, 45, 0.52) 0%, transparent 60%);
    animation: blobDrift1 18s ease-in-out infinite alternate;
 }
 
-.bg-blob--2 {
-   width: 300px;
-   height: 300px;
-   bottom: 60px;
-   right: -60px;
-   background: radial-gradient(circle, rgba(232, 132, 92, 0.45) 0%, transparent 65%);
+.form-blob--2 {
+   width: 320px;
+   height: 320px;
+   bottom: 120px;
+   right: -80px;
+   background: radial-gradient(circle, rgba(232, 132, 92, 0.42) 0%, transparent 60%);
    animation: blobDrift2 22s ease-in-out infinite alternate;
 }
 
-.bg-blob--3 {
-   width: 220px;
-   height: 220px;
-   top: 42%;
-   left: 35%;
-   background: radial-gradient(circle, rgba(196, 98, 45, 0.3) 0%, transparent 65%);
-   animation: blobDrift3 26s ease-in-out infinite alternate;
+.form-blob--3 {
+   width: 240px;
+   height: 240px;
+   top: 48%;
+   left: 30%;
+   background: radial-gradient(circle, rgba(196, 98, 45, 0.28) 0%, transparent 60%);
+   animation: blobDrift3 28s ease-in-out infinite alternate;
+}
+
+/* Mid-scroll blobs */
+.form-blob--4 {
+   width: 360px;
+   height: 360px;
+   top: 620px;
+   left: -120px;
+   background: radial-gradient(circle, rgba(232, 132, 92, 0.38) 0%, transparent 60%);
+   animation: blobDrift2 20s ease-in-out infinite alternate;
+}
+
+.form-blob--5 {
+   width: 280px;
+   height: 280px;
+   top: 1100px;
+   right: -60px;
+   background: radial-gradient(circle, rgba(196, 98, 45, 0.32) 0%, transparent 60%);
+   animation: blobDrift1 24s ease-in-out infinite alternate;
+}
+
+.form-blob--6 {
+   width: 320px;
+   height: 320px;
+   top: 1580px;
+   left: 10%;
+   background: radial-gradient(circle, rgba(232, 132, 92, 0.3) 0%, transparent 60%);
+   animation: blobDrift3 19s ease-in-out infinite alternate;
+}
+
+[data-theme="dark"] .form-blob--1 {
+   background: radial-gradient(circle, rgba(232, 132, 92, 0.45) 0%, transparent 60%);
+}
+
+[data-theme="dark"] .form-blob--2 {
+   background: radial-gradient(circle, rgba(196, 98, 45, 0.38) 0%, transparent 60%);
 }
 
 @keyframes blobDrift1 {
@@ -709,6 +745,96 @@ textarea {
    font-style: italic;
 }
 
+/* ── Summary toggle (in PersonalSection) ── */
+.summary-label-row {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin-bottom: 2px;
+}
+
+.summary-label-row label {
+   margin-bottom: 0;
+}
+
+.summary-toggle-btn {
+   display: inline-flex;
+   align-items: center;
+   gap: 5px;
+   font-size: 11px;
+   font-weight: 600;
+   font-family: var(--font-body);
+   padding: 3px 10px;
+   border-radius: 999px;
+   border: 1px solid transparent;
+   cursor: pointer;
+   transition: all var(--transition-smooth);
+   letter-spacing: 0.4px;
+   text-transform: uppercase;
+}
+
+.summary-toggle-btn.visible {
+   color: var(--accent);
+   background: var(--accent-soft);
+   border-color: rgba(196, 98, 45, 0.2);
+}
+
+.summary-toggle-btn.hidden {
+   color: var(--text-light);
+   background: var(--glass-surface);
+   border-color: var(--glass-border);
+}
+
+.summary-toggle-btn:hover {
+   transform: scale(1.04);
+   box-shadow: var(--shadow-sm);
+}
+
+/* ── Summary controls in manager row ── */
+.manager-row__summary-controls {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   flex: 1;
+   justify-content: flex-end;
+}
+
+.manager-row__summary-hint {
+   font-size: 11px;
+   color: var(--text-light);
+   font-style: italic;
+}
+
+.manager-summary-toggle {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 28px;
+   height: 28px;
+   border-radius: 50%;
+   border: 1px solid var(--glass-border);
+   background: var(--glass-surface);
+   cursor: pointer;
+   transition: all var(--transition-spring);
+   color: var(--text-light);
+   flex-shrink: 0;
+}
+
+.manager-summary-toggle.visible {
+   color: var(--accent);
+   border-color: rgba(196, 98, 45, 0.3);
+   background: var(--accent-soft);
+}
+
+.manager-summary-toggle.hidden {
+   color: var(--text-light);
+   border-color: var(--glass-border);
+}
+
+.manager-summary-toggle:hover {
+   transform: scale(1.15);
+   box-shadow: var(--shadow-sm);
+}
 
 
 /* ── Mobile tabs ── */

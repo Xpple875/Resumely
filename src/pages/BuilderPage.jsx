@@ -71,12 +71,6 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
 
    return (
       <div className="builder-layout">
-         {/* Decorative background blobs behind form panel */}
-         <div className="bg-blobs" aria-hidden="true">
-            <div className="bg-blob bg-blob--1"></div>
-            <div className="bg-blob bg-blob--2"></div>
-            <div className="bg-blob bg-blob--3"></div>
-         </div>
          <header className="builder-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                <div className="builder-header__logo">Resum<span>e</span>ly</div>
@@ -114,7 +108,16 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
 
          {/* Left Side: Form */}
          <aside className="form-panel">
-            <ResumeForm data={resumeData} onChange={handleDataChange} onToast={showToast} />
+            {/* Decorative blobs — absolute within the panel, spread across scroll depth */}
+            <div className="form-blob form-blob--1" aria-hidden="true"></div>
+            <div className="form-blob form-blob--2" aria-hidden="true"></div>
+            <div className="form-blob form-blob--3" aria-hidden="true"></div>
+            <div className="form-blob form-blob--4" aria-hidden="true"></div>
+            <div className="form-blob form-blob--5" aria-hidden="true"></div>
+            <div className="form-blob form-blob--6" aria-hidden="true"></div>
+            <div className="form-content">
+               <ResumeForm data={resumeData} onChange={handleDataChange} onToast={showToast} />
+            </div>
          </aside>
 
          {/* Right Side: Preview */}

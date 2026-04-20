@@ -23,6 +23,8 @@ export default function ResumeForm({ data, onChange, onToast }) {
         labels={data.sectionLabels}
         onOrderChange={val => update('sectionOrder', val)}
         onLabelChange={val => update('sectionLabels', val)}
+        hideSummary={data.personal?.hideSummary ?? false}
+        onToggleSummary={val => update('personal', { ...data.personal, hideSummary: val })}
       />
       <PersonalizeSection
         data={data.theme}

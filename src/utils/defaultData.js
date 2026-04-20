@@ -11,6 +11,7 @@ export const defaultResumeData = {
     linkedin: '',
     website: '',
     summary: '',
+    hideSummary: false,
   },
   theme: {
     accentColor: '#C4622D',
