@@ -27,16 +27,35 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
    })
    const [syncStatus, setSyncStatus] = useState('idle')
    const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
+   const [mobileView, setMobileView] = useState('form') // 'form' | 'preview'
    const { toasts, showToast } = useToast()
 
    const panelRef = useRef(null)
    const wrapperRef = useRef(null)
 
+   // ── Auto-save logic ──
+   const handleCloudSave = async () => {
+      if (!user) {
+         showToast('Create an account to save to the cloud.', 'info')
+         return
+      }
+      setSyncStatus('syncing')
+      try {
+         await syncResumeToCloud(user.id, resumeData, unlocked)
+         setSyncStatus('success')
+         showToast('Saved to cloud.', 'success')
+         setTimeout(() => setSyncStatus('idle'), 2000)
+      } catch (err) {
+         setSyncStatus('error')
+         showToast(err.message, 'error')
+      }
+   }
+
    // Scale the 210mm paper to fit the available panel width
    useEffect(() => {
       function scaleToFit() {
          if (!panelRef.current || !wrapperRef.current) return
-         const panelW = panelRef.current.clientWidth - 32 // minus padding (16px each side)
+         const panelW = panelRef.current.clientWidth - (window.innerWidth <= 768 ? 16 : 32)
          const paperW = wrapperRef.current.offsetWidth     // 210mm in px
          const scale = Math.min(1, panelW / paperW)
          wrapperRef.current.style.transform = `scale(${scale})`
@@ -48,7 +67,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
       const ro = new ResizeObserver(scaleToFit)
       if (panelRef.current) ro.observe(panelRef.current)
       return () => ro.disconnect()
-   }, [])
+   }, [mobileView])
 
    // Textarea auto-resize handler
    useEffect(() => {
@@ -72,25 +91,11 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
       const nextData = typeof newData === 'function' ? newData(resumeData) : newData
       setResumeData(nextData)
       saveDraft(nextData)
-      if (syncStatus === 'success') setSyncStatus('idle')
-   }
-
-   const handleCloudSave = async () => {
-      if (!user) { showToast('Sign in to save to cloud', 'info'); return; }
-      setSyncStatus('syncing')
-      try {
-         await syncResumeToCloud(user.id, resumeData, unlocked)
-         setSyncStatus('success')
-         showToast('Cloud sync successful', 'success')
-         setTimeout(() => setSyncStatus('idle'), 3000)
-      } catch (err) {
-         setSyncStatus('idle')
-         showToast('Cloud save failed', 'error')
-      }
    }
 
    return (
       <div className="builder-layout">
+         {/* Navigation Header */}
          <header className="builder-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                <div className="builder-header__logo">Resum<span>e</span>ly</div>
@@ -99,7 +104,11 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
                   onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
                   title="Toggle Light/Dark Mode"
                >
-                  {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+                  {theme === 'light' ? (
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                  ) : (
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                  )}
                </button>
             </div>
 
@@ -152,8 +161,24 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
             </div>
          </header>
 
+         {/* Mobile Tab Switcher */}
+         <div className="mobile-tabs">
+            <button 
+               className={`mobile-tab ${mobileView === 'form' ? 'active' : ''}`}
+               onClick={() => setMobileView('form')}
+            >
+               Edit Form
+            </button>
+            <button 
+               className={`mobile-tab ${mobileView === 'preview' ? 'active' : ''}`}
+               onClick={() => setMobileView('preview')}
+            >
+               View Resume
+            </button>
+         </div>
+
          {/* Left Side: Form */}
-         <aside className="form-panel">
+         <aside className={`form-panel ${mobileView === 'form' ? 'mobile-visible' : 'mobile-hidden'}`}>
             {/* Non-scrolling blob layer — stays fixed over panel viewport */}
             <div className="form-blob-layer" aria-hidden="true">
                <div className="form-blob form-blob--1"></div>
@@ -170,7 +195,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
          </aside>
 
          {/* Right Side: Preview */}
-         <main className="preview-panel" ref={panelRef}>
+         <main className={`preview-panel ${mobileView === 'preview' ? 'mobile-visible' : 'mobile-hidden'}`} ref={panelRef}>
             <div className="resume-scale-container" style={{ overflow: 'hidden' }}>
                <div className="resume-preview-wrapper" ref={wrapperRef} style={{ transition: 'filter 0.3s ease' }}>
                   <ResumePreview data={resumeData} template={template} />

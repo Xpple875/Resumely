@@ -1,14 +1,14 @@
-
 import React, { useState, useEffect } from 'react'
 import BuilderPage from './pages/BuilderPage'
 import TemplatePage from './pages/TemplatePage'
+import LandingPage from './pages/LandingPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import { isUnlocked } from './services/paymentService'
 import { loadDraft } from './hooks/useAutosave'
 import { supabase } from './services/supabaseClient'
 
 export default function App() {
-  const [view, setView] = useState(!!loadDraft() ? 'builder' : 'template')
+  const [view, setView] = useState('landing')
   const [template, setTemplate] = useState('classic')
   const [unlocked, setUnlocked] = useState(isUnlocked())
   const [user, setUser] = useState(null)
@@ -34,6 +34,11 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
+  const handleStart = () => {
+     if (loadDraft()) setView('builder')
+     else setView('template')
+  }
+
   const handleSelectTemplate = (id) => {
     setTemplate(id)
     setView('builder')
@@ -57,8 +62,10 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {view === 'template' ? (
-        <TemplatePage onSelect={handleSelectTemplate} />
+      {view === 'landing' ? (
+         <LandingPage onStart={handleStart} />
+      ) : view === 'template' ? (
+        <TemplatePage onSelect={handleSelectTemplate} onContinue={() => setView('builder')} selected={template} />
       ) : (
         <BuilderPage
           template={template}

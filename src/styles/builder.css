@@ -1350,6 +1350,259 @@ select:focus {
    box-shadow: 0 2px 8px rgba(196, 98, 45, 0.3);
 }
 
+@media (max-width: 480px) {
+   .resume-preview-wrapper {
+      transform: scale(0.38);
+      margin-bottom: -62%;
+   }
+}
+
+/* ── Mobile Layout (< 768px) ── */
+.mobile-tabs {
+   display: none;
+}
+
+@media (max-width: 768px) {
+   .builder-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr;
+      overflow: hidden;
+   }
+   
+   .builder-header {
+      padding: 12px 16px;
+      flex-wrap: wrap;
+   }
+   .builder-header .btn-secondary {
+      padding: 0 16px;
+      height: 36px;
+   }
+
+   .mobile-tabs {
+      display: flex;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      gap: 0;
+   }
+   .mobile-tab {
+      flex: 1;
+      padding: 12px 0;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-light);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+   }
+   .mobile-tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      background: var(--accent-light);
+   }
+
+   .mobile-hidden {
+      display: none !important;
+   }
+   .mobile-visible {
+      display: block !important;
+   }
+
+   .form-panel {
+      border-right: none;
+   }
+}
+@media print {
+   @page {
+      size: A4;
+      margin: 0;
+   }
+   
+   body {
+      background: #fff !important;
+      overflow: visible !important;
+   }
+
+   .builder-header, 
+   .form-panel, 
+   .mobile-tabs, 
+   .toast-container {
+      display: none !important;
+   }
+
+   .builder-layout {
+      display: block !important;
+      height: auto !important;
+      overflow: visible !important;
+   }
+
+   .preview-panel {
+      padding: 0 !important;
+      margin: 0 !important;
+      background: #fff !important;
+      overflow: visible !important;
+      display: block !important;
+      height: auto !important;
+   }
+
+   .resume-preview-wrapper {
+      transform: none !important;
+      width: 210mm !important;
+      margin: 0 auto !important;
+      border: none !important;
+   }
+
+   .resume-container {
+      padding: 0 !important;
+      background: #fff !important;
+   }
+
+   .physical-paper-sheet {
+      box-shadow: none !important;
+      margin: 0 !important;
+      page-break-after: always;
+      break-after: page;
+   }
+}
+
+/* ── Template Switcher Modal ── */
+.template-modal-overlay {
+   position: fixed;
+   inset: 0;
+   background: rgba(10, 8, 6, 0.6);
+   backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px);
+   z-index: 3000;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   animation: modalOverlayFadeIn 0.3s ease;
+}
+
+.template-modal {
+   background: var(--bg);
+   border: 1px solid var(--border);
+   border-radius: var(--radius-lg);
+   width: 90%;
+   max-width: 800px;
+   padding: 32px;
+   box-shadow: var(--shadow-lg);
+   animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.template-modal__header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin-bottom: 24px;
+}
+
+.template-modal__header h2 {
+   font-size: 24px;
+   font-family: var(--font-heading);
+   color: var(--text);
+}
+
+.template-modal__close {
+   background: var(--glass-surface);
+   border: 1px solid var(--glass-border);
+   color: var(--text-light);
+   width: 36px;
+   height: 36px;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+   transition: all 0.2s;
+}
+.template-modal__close:hover {
+   background: var(--glass-bg);
+   color: var(--accent);
+   transform: scale(1.05);
+}
+
+.template-modal__grid {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 20px;
+}
+
+.template-modal__card {
+   background: var(--glass-surface);
+   border: 2px solid var(--glass-border);
+   border-radius: var(--radius-md);
+   padding: 16px;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   cursor: pointer;
+   position: relative;
+   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+   text-align: center;
+}
+
+.template-modal__card:hover {
+   border-color: rgba(196, 98, 45, 0.4);
+   transform: translateY(-4px);
+   box-shadow: var(--shadow-md);
+}
+
+.template-modal__card.selected {
+   border-color: var(--accent);
+   background: var(--accent-soft);
+   box-shadow: 0 4px 16px rgba(196, 98, 45, 0.2);
+}
+
+.template-modal__card-preview {
+   width: 100%;
+   aspect-ratio: 160 / 200;
+   background: #cfbdae; /* Fallback */
+   border-radius: var(--radius-sm);
+   border: 1px solid var(--glass-border);
+   overflow: hidden;
+   margin-bottom: 12px;
+   pointer-events: none;
+}
+
+.template-modal__card-name {
+   font-size: 15px;
+   font-weight: 600;
+   color: var(--text);
+   font-family: var(--font-heading);
+}
+
+.template-modal__card-tag {
+   position: absolute;
+   top: -10px;
+   right: -10px;
+   background: var(--accent);
+   color: #fff;
+   font-size: 11px;
+   font-weight: 700;
+   padding: 4px 10px;
+   border-radius: 999px;
+   box-shadow: 0 2px 8px rgba(196, 98, 45, 0.3);
+   z-index: 2;
+}
+
+.template-modal__card-check {
+   position: absolute;
+   bottom: 12px;
+   right: 12px;
+   width: 28px;
+   height: 28px;
+   background: var(--accent);
+   color: #fff;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   box-shadow: 0 2px 8px rgba(196, 98, 45, 0.3);
+}
+
 @keyframes modalOverlayFadeIn {
    from { opacity: 0; backdrop-filter: blur(0px); }
    to { opacity: 1; backdrop-filter: blur(8px); }
@@ -1358,4 +1611,116 @@ select:focus {
 @keyframes modalSlideUp {
    from { opacity: 0; transform: translateY(20px) scale(0.96); }
    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Completeness Score Widget ── */
+.completeness-widget {
+   background: var(--glass-surface);
+   border: 1px solid var(--glass-border);
+   border-radius: var(--radius-lg);
+   margin-bottom: 24px;
+   overflow: hidden;
+}
+
+.completeness-header {
+   padding: 16px;
+   display: flex;
+   align-items: center;
+   gap: 16px;
+   cursor: pointer;
+   transition: background 0.2s;
+}
+.completeness-header:hover {
+   background: var(--glass-bg);
+}
+
+.completeness-ring {
+   position: relative;
+   width: 40px;
+   height: 40px;
+}
+.completeness-value {
+   position: absolute;
+   inset: 0;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 11px;
+   font-weight: 700;
+   color: var(--text);
+   font-family: var(--font-body);
+}
+
+.completeness-info {
+   flex: 1;
+}
+.completeness-info h4 {
+   font-size: 14.5px;
+   font-weight: 600;
+   color: var(--text);
+   margin: 0 0 2px 0;
+}
+.completeness-info p {
+   font-size: 12.5px;
+   color: var(--text-light);
+   margin: 0;
+}
+
+.completeness-chevron {
+   color: var(--text-lighter);
+   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.completeness-chevron.open {
+   transform: rotate(180deg);
+}
+
+.completeness-dropdown {
+   display: grid;
+   grid-template-rows: 0fr;
+   opacity: 0;
+   transition: grid-template-rows 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+}
+.completeness-dropdown.open {
+   grid-template-rows: 1fr;
+   opacity: 1;
+}
+
+.completeness-checklist {
+   overflow: hidden;
+   padding: 0 16px 16px 16px;
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+}
+
+.checklist-item {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   font-size: 13.5px;
+   color: var(--text-light);
+   padding-left: 56px; /* align with text */
+   transition: color 0.3s;
+}
+.checklist-item.passed {
+   color: var(--text);
+}
+
+.checklist-icon {
+   width: 18px;
+   height: 18px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+.checklist-circle {
+   width: 12px;
+   height: 12px;
+   border-radius: 50%;
+   border: 2px solid var(--text-lighter);
+}
+.checklist-item.passed .checklist-icon svg {
+   width: 16px;
+   height: 16px;
+   color: #4ade80;
 }
