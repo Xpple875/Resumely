@@ -108,13 +108,19 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
 
          {/* Left Side: Form */}
          <aside className="form-panel">
-            {/* Decorative blobs — absolute within the panel, spread across scroll depth */}
+            {/* Blobs spread across full scroll depth (up to ~5000px when all expanded) */}
             <div className="form-blob form-blob--1" aria-hidden="true"></div>
             <div className="form-blob form-blob--2" aria-hidden="true"></div>
             <div className="form-blob form-blob--3" aria-hidden="true"></div>
             <div className="form-blob form-blob--4" aria-hidden="true"></div>
             <div className="form-blob form-blob--5" aria-hidden="true"></div>
             <div className="form-blob form-blob--6" aria-hidden="true"></div>
+            <div className="form-blob form-blob--7" aria-hidden="true"></div>
+            <div className="form-blob form-blob--8" aria-hidden="true"></div>
+            <div className="form-blob form-blob--9" aria-hidden="true"></div>
+            <div className="form-blob form-blob--10" aria-hidden="true"></div>
+            <div className="form-blob form-blob--11" aria-hidden="true"></div>
+            <div className="form-blob form-blob--12" aria-hidden="true"></div>
             <div className="form-content">
                <ResumeForm data={resumeData} onChange={handleDataChange} onToast={showToast} />
             </div>
