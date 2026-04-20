@@ -71,6 +71,12 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, user
 
    return (
       <div className="builder-layout">
+         {/* Decorative background blobs behind form panel */}
+         <div className="bg-blobs" aria-hidden="true">
+            <div className="bg-blob bg-blob--1"></div>
+            <div className="bg-blob bg-blob--2"></div>
+            <div className="bg-blob bg-blob--3"></div>
+         </div>
          <header className="builder-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                <div className="builder-header__logo">Resum<span>e</span>ly</div>

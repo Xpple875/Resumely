@@ -18,11 +18,13 @@ export default function SectionWrapper({ title, icon, children, defaultOpen = tr
           <polyline points="6 9 12 15 18 9"/>
         </svg>
       </div>
-      {open && (
-        <div className="form-section__body">
-          {children}
+      <div className={`form-section__body-wrapper ${open ? 'open' : ''}`}>
+        <div className="form-section__body-inner">
+          <div className="form-section__body">
+            {children}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
