@@ -12,7 +12,7 @@ import VolunteerSection from './form/VolunteerSection.jsx'
 import InterestSection from './form/InterestSection.jsx'
 import ReferenceSection from './form/ReferenceSection.jsx'
 import CompletenessScore from './form/CompletenessScore.jsx'
-import { getAIUsesLeft, enhanceBullet } from '../services/aiService.js'
+import { getAIUsesLeft, enhanceBullet, useAILimits } from '../services/aiService.js'
 
 export default function ResumeForm({ data, onChange, onToast }) {
   const [enhancingAll, setEnhancingAll] = React.useState(false)
@@ -23,7 +23,7 @@ export default function ResumeForm({ data, onChange, onToast }) {
   const handleEnhanceAll = async () => {
     const uses = getAIUsesLeft();
     if (uses <= 0) {
-      onToast("You've used all 15 AI enhancements for this session. Refresh to reset.", 'error');
+      onToast("You've used all 10 AI enhancements for this session. Refresh to reset.", 'error');
       return;
     }
     
@@ -70,7 +70,7 @@ export default function ResumeForm({ data, onChange, onToast }) {
     }
   }
 
-  const aiUses = getAIUsesLeft();
+  const aiUses = useAILimits();
 
   return (
     <div style={{ paddingBottom: '70px' }}>
@@ -79,7 +79,7 @@ export default function ResumeForm({ data, onChange, onToast }) {
       <div className="ai-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--glass-surface)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', marginBottom: '24px' }}>
          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>AI Assistant</span>
-            <div style={{ padding: '4px 8px', background: aiUses > 5 ? 'var(--bg)' : 'var(--accent-soft)', borderRadius: '999px', fontSize: '11px', fontWeight: 700, color: aiUses > 5 ? 'var(--text-light)' : 'var(--accent)', border: '1px solid var(--glass-border)' }}>
+            <div style={{ padding: '4px 8px', background: aiUses > 3 ? 'var(--bg)' : 'var(--accent-soft)', borderRadius: '999px', fontSize: '11px', fontWeight: 700, color: aiUses > 3 ? 'var(--text-light)' : 'var(--accent)', border: '1px solid var(--glass-border)' }}>
                ⚡ {aiUses} uses left
             </div>
          </div>

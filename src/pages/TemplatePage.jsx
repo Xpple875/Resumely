@@ -1,7 +1,7 @@
 import React from 'react'
 import '../styles/template.css'
 
-const TEMPLATES = [
+export const TEMPLATES = [
   {
     id: 'classic',
     name: 'Classic',

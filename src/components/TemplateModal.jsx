@@ -58,11 +58,7 @@ function CheckIcon() {
   )
 }
 
-const TEMPLATES = [
-  { id: 'classic', name: 'Classic', tag: 'Most Popular' },
-  { id: 'modern',  name: 'Modern',  tag: 'New' },
-  { id: 'minimal', name: 'Minimal', tag: null },
-]
+
 
 export default function TemplateModal({ isOpen, onClose, currentTemplate, onSelectTemplate }) {
   if (!isOpen) return null;

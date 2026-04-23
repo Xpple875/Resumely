@@ -1,9 +1,10 @@
 
 import React, { useEffect, useState } from 'react'
 import { verifyAndUnlock } from '../services/paymentService.js'
+import { markUserAsPaid, supabase } from '../services/supabaseClient.js'
 import '../styles/payment.css'
 
-export default function PaymentSuccessPage({ sessionId, onUnlocked }) {
+export default function PaymentSuccessPage({ sessionId, onUnlocked, user }) {
   const [status, setStatus] = useState('verifying')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -16,7 +17,26 @@ export default function PaymentSuccessPage({ sessionId, onUnlocked }) {
       return
     }
 
-    verifyAndUnlock(sessionId)
+    const verifyAndUpdateUser = async () => {
+      // 1. Verify payment with our backend (validates session with Stripe)
+      await verifyAndUnlock(sessionId)
+      
+      // 2. Ensure we have the user to link payment to
+      let currentUserId = user?.id
+      if (!currentUserId) {
+        const { data: { session } } = await supabase.auth.getSession()
+        currentUserId = session?.user?.id
+      }
+      
+      // 3. Mark the account as paid in Supabase
+      if (currentUserId) {
+        await markUserAsPaid(currentUserId)
+      } else {
+         console.warn("Payment verified, but no signed-in user found to upgrade. Status active in local storage only.")
+      }
+    }
+
+    verifyAndUpdateUser()
       .then(() => {
         if (!isMounted) return
         setStatus('success')
@@ -32,7 +52,7 @@ export default function PaymentSuccessPage({ sessionId, onUnlocked }) {
       })
 
     return () => { isMounted = false }
-  }, [sessionId, onUnlocked])
+  }, [sessionId, onUnlocked, user])
 
   return (
     <div className="payment-page">

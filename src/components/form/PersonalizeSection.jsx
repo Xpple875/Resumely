@@ -16,24 +16,39 @@ const PRESET_COLORS = [
    '#16A085'  // Teal
 ];
 
+/* Reusable static field label — does NOT use the floating-label .field system */
+function FieldLabel({ children, right }) {
+   return (
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+         <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
+            {children}
+         </span>
+         {right && <span style={{ fontSize: '12px', color: 'var(--text)', fontWeight: 500 }}>{right}</span>}
+      </div>
+   );
+}
+
 export default function PersonalizeSection({ data = {}, onChange }) {
    const accentColor = data.accentColor || '#C4622D';
    const fontFamily = data.fontFamily || FONT_OPTIONS[0].value;
-   const fontSize = data.fontSize || 13; // Numeric base font size
+   const fontSize = data.fontSize || 13;
 
    const set = (key, val) => onChange({ ...data, [key]: val });
 
    return (
       <SectionWrapper title="Personalize" icon={<PaletteIcon />} defaultOpen={false}>
-         <div className="field">
-            <label>Accent Color</label>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+
+         {/* ── Accent Color ── */}
+         <div style={{ marginBottom: '20px' }}>
+            <FieldLabel>Accent Color</FieldLabel>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                {/* Custom Color Picker Circle */}
-               <div style={{ 
-                  position: 'relative', 
-                  width: '32px', 
-                  height: '32px', 
+               <div style={{
+                  position: 'relative',
+                  width: '32px',
+                  height: '32px',
                   marginRight: '12px',
+                  flexShrink: 0,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -42,14 +57,7 @@ export default function PersonalizeSection({ data = {}, onChange }) {
                      type="color"
                      value={accentColor}
                      onChange={e => set('accentColor', e.target.value)}
-                     style={{
-                        position: 'absolute',
-                        opacity: 0,
-                        width: '100%',
-                        height: '100%',
-                        cursor: 'pointer',
-                        zIndex: 2
-                     }}
+                     style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: 'pointer', zIndex: 2 }}
                      title="Choose custom color"
                   />
                   <div style={{
@@ -95,14 +103,15 @@ export default function PersonalizeSection({ data = {}, onChange }) {
             </div>
          </div>
 
-         <div className="field" style={{ marginBottom: '16px' }}>
-            <label>Font Style</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '6px' }}>
+         {/* ── Font Style ── */}
+         <div style={{ marginBottom: '20px' }}>
+            <FieldLabel>Font Style</FieldLabel>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                {FONT_OPTIONS.map(opt => {
                   const isActive = fontFamily === opt.value;
                   return (
-                     <div 
-                        key={opt.value} 
+                     <div
+                        key={opt.value}
                         onClick={() => set('fontFamily', opt.value)}
                         style={{
                            padding: '12px',
@@ -121,7 +130,7 @@ export default function PersonalizeSection({ data = {}, onChange }) {
                      >
                         <span style={{ fontFamily: opt.value, fontSize: '24px', lineHeight: 1, color: isActive ? 'var(--accent)' : 'var(--text)' }}>Aa</span>
                         <span style={{ fontSize: '11px', fontWeight: isActive ? 600 : 500, color: isActive ? 'var(--accent)' : 'var(--text-light)', textAlign: 'center' }}>
-                           {opt.label.split(' ')[0]} {/* Takes "Sans", "Serif", "Monospace" */}
+                           {opt.label.split(' ')[0]}
                         </span>
                      </div>
                   );
@@ -129,12 +138,10 @@ export default function PersonalizeSection({ data = {}, onChange }) {
             </div>
          </div>
 
-         <div className="field">
-            <label style={{ display: 'flex', justifyContent: 'space-between' }}>
-               <span>Font Size</span>
-               <span style={{ color: 'var(--text)', fontWeight: 500, textTransform: 'none', letterSpacing: 'normal' }}>{fontSize}px</span>
-            </label>
-            <div style={{ position: 'relative', marginTop: '12px' }}>
+         {/* ── Font Size ── */}
+         <div>
+            <FieldLabel right={`${fontSize}px`}>Font Size</FieldLabel>
+            <div style={{ position: 'relative' }}>
                <input
                   type="range"
                   min="10"
@@ -142,19 +149,16 @@ export default function PersonalizeSection({ data = {}, onChange }) {
                   step="1"
                   value={fontSize}
                   onChange={e => set('fontSize', parseInt(e.target.value, 10))}
-                  style={{ 
-                     width: '100%', 
-                     accentColor: 'var(--accent)',
-                     cursor: 'pointer'
-                  }}
+                  style={{ width: '100%', accentColor: 'var(--accent)', cursor: 'pointer' }}
                />
-               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', fontSize: '11px', color: 'var(--text-lighter)' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '4px', fontSize: '11px', color: 'var(--text-light)' }}>
                   <span>Small (10)</span>
                   <span>Normal (13)</span>
                   <span>Large (16)</span>
                </div>
             </div>
          </div>
+
       </SectionWrapper>
    )
 }

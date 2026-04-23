@@ -1724,3 +1724,12 @@ select:focus {
    height: 16px;
    color: #4ade80;
 }
+
+/* Sign-out icon button — red tint on hover */
+.signout-btn:hover {
+   color: #ef4444 !important;
+   border-color: rgba(239, 68, 68, 0.4) !important;
+   background: rgba(239, 68, 68, 0.08) !important;
+   box-shadow: none;
+   transform: scale(1.08);
+}

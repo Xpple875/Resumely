@@ -337,7 +337,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
    ));
 
    return (
-      <div className="resume-container">
+      <div className="resume-container" style={{ userSelect: 'none' }}>
          {/*
           Measurement Layer:
           The native CSS multi-column forces horizontal fragmentation. 

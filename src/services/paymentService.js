@@ -22,6 +22,12 @@ export function storeToken(token) {
   localStorage.setItem(TOKEN_KEY, token)
 }
 
+/** Wipe the token (called on sign-out so accounts can't share unlock status). */
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY)
+}
+
+
 export async function verifyAndUnlock(sessionId, retries = 2) {
   try {
     const response = await fetch('/api/verify-payment', {
