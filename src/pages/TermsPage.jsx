@@ -10,22 +10,32 @@ export default function TermsPage({ onBack }) {
 
       <section style={{ marginBottom: '30px' }}>
         <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>1. Acceptance of Terms</h2>
-        <p>By accessing and using Resumely ("we", "our", "us"), you accept and agree to be bound by the terms and provision of this agreement. Our resume building services and site infrastructure are provided strictly under these terms.</p>
+        <p>By accessing and using Resumely ("we", "our", "us"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
       </section>
 
       <section style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>2. Use License & Payments</h2>
-        <p>Resumely operates on a simple flat-fee system. By paying the specified processing fee ($8), you are granted a lifetime right to download the final generated PDF without watermarks. However, this does not grant you rights to replicate, copy, or redistribute the internal software, codebase, or proprietary templates of Resumely itself outside the scope of your personal resume.</p>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>2. Description of Service</h2>
+        <p>Resumely is an AI-powered resume building platform. We provide tools for users to create, preview, share, and export resumes. While in "Early Access," some or all features may be provided free of charge at our discretion.</p>
       </section>
 
       <section style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>3. AI Generation Usage</h2>
-        <p>We provide access to an AI assistant to enhance resume bullet points. To prevent abuse, each user is strictly limited to an anti-abuse threshold per session. Attempts to bypass, automate, or flood our enhancement APIs will result in immediate IP banning or account suspension without refund.</p>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>3. User Accounts & Data</h2>
+        <p>You are responsible for maintaining the confidentiality of your account and for all activities that occur under your account. You retain full ownership of the content (resume data) you input into Resumely. By using our service, you grant us a license to host and process this data as necessary to provide the service.</p>
       </section>
 
       <section style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>4. Disclaimer of Warranties</h2>
-        <p>Your use of the service is at your sole risk. The service is provided on an "AS IS" and "AS AVAILABLE" basis. We do not guarantee that the utilization of our resumes will result in employment, as hiring decisions are strictly governed by external employers.</p>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>4. AI Enhancement Services</h2>
+        <p>The "Enhance with AI" feature utilizes third-party large language models (LLMs) to process text. We cannot guarantee the accuracy, professional suitability, or total safety of the AI-generated output. Use AI suggestions at your own discretion.</p>
+      </section>
+
+      <section style={{ marginBottom: '30px' }}>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>5. Limitation of Liability</h2>
+        <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, RESUMELY SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM (i) YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICES; (ii) ANY CONDUCT OR CONTENT OF ANY THIRD PARTY ON THE SERVICES.</p>
+      </section>
+
+      <section style={{ marginBottom: '30px' }}>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>6. Termination</h2>
+        <p>We reserve the right to terminate or suspend your account and access to our services at any time, without prior notice, for conduct that we believe violates these Terms or is harmful to other users of the service, us, or third parties, or for any other reason.</p>
       </section>
     </div>
   );

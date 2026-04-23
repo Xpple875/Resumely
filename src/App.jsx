@@ -86,6 +86,16 @@ export default function App() {
   }
 
   const params = new URLSearchParams(window.location.search)
+  const shareId = params.get('share')
+  
+  // If we have a share ID and no user, we force the builder view to show the public resume
+  useEffect(() => {
+     if (shareId && !activeDocumentId) {
+        setActiveDocumentId(shareId)
+        setView('builder')
+     }
+  }, [shareId, activeDocumentId])
+
   if (params.get('payment') === 'success' && !unlocked) {
     return (
       <PaymentSuccessPage

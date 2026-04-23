@@ -9,23 +9,23 @@ export default function PrivacyPage({ onBack }) {
       <p style={{ color: 'var(--text-light)', marginBottom: '40px' }}>Last Updated: {new Date().toLocaleDateString()}</p>
 
       <section style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>1. Information We Collect</h2>
-        <p>When you use Resumely, you provide us with personal information strictly related to your professional career (e.g., your name, email, work history, and contact details) which is used solely to generate your resume document. If you choose to create an account, we store this securely in our encrypted database so you can access it later.</p>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>1. Data Collection</h2>
+        <p>We collect information you explicitly provide: email address for account management, and resume content (work history, skills, etc.) for document generation. We also collect basic usage analytics (e.g., number of AI enhancements used) and standard server logs (IP addresses) to prevent abuse.</p>
       </section>
 
       <section style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>2. How We Use Your Data</h2>
-        <p>Your data is used entirely to formulate your document. We process your raw bullet points through a secure third-party AI provider strictly for the purpose of grammar and syntax enrichment. We do NOT sell, lease, or rent your personal information to recruiters, advertisers, or any third parties.</p>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>2. Third-Party AI Processing</h2>
+        <p>To provide "AI Enhancement" features, we securely transmit the text of your resume bullet points to third-party providers (such as Groq or OpenAI). This data is transmitted anonymously without your name or email. These providers are prohibited from using your data to train their models.</p>
       </section>
 
       <section style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>3. Financial Data</h2>
-        <p>All payment processing is handled securely and off-site. We do not store, process, or ever see your raw credit card numbers or financial details.</p>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>3. Data Storage & Security</h2>
+        <p>We use industry-standard encryption and secure cloud providers (Supabase/PostgreSQL) to store your account and resume data. Your data is protected by Row Level Security (RLS), ensuring only you can access your own documents.</p>
       </section>
 
       <section style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>4. Your Rights (Account Deletion)</h2>
-        <p>You have the absolute right to have your data erased. Since your documents are tied specifically to your dashboard, deleting a document instantly scrubs it from our active database. If you wish to permanently delete your entire account, contact us and we will promptly execute a hard delete of your UUID and all associated records.</p>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>4. Your Rights (Deletion & Access)</h2>
+        <p>You have full control over your data. You can delete individual documents at any time. We also provide a "Delete Account" feature in your profile settings which permanently purges your account, email, and all associated resume data from our servers and authentication systems. This action is irreversible.</p>
       </section>
     </div>
   );

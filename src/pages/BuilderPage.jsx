@@ -46,6 +46,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    const [showRenameModal, setShowRenameModal] = useState(false)
    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
    const [isProfileOpen, setIsProfileOpen] = useState(false)
+   const [isPublicSharing, setIsPublicSharing] = useState(false)
    const { toasts, showToast } = useToast()
 
    const panelRef = useRef(null)
@@ -55,14 +56,15 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
 
    // ── Auto-load resume from cloud when a session is detected on mount ──
    useEffect(() => {
-      if (!user?.id || cloudLoadAttempted.current) return
+      if ((!user?.id && !activeDocumentId) || cloudLoadAttempted.current) return
       cloudLoadAttempted.current = true
       setIsCloudLoading(true)
 
-      // Always load profile status explicitly so they keep their paid status
-      loadResumeFromCloud(user.id).then(profile => {
-         if (profile?.is_paid === true && setUnlocked) setUnlocked(true)
-      }).catch(err => console.error("Profile load failed", err))
+      if (user?.id) {
+         loadResumeFromCloud(user.id).then(profile => {
+            if (profile?.is_paid === true && setUnlocked) setUnlocked(true)
+         }).catch(err => console.error("Profile load failed", err))
+      }
 
       // Only attempt to hydrate specific document if we were routed one explicitly
       if (activeDocumentId) {
@@ -71,6 +73,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                const merged = mergeWithDefaults(doc.resume_data)
                setResumeData(merged)
                setDocumentName(doc.name || 'Untitled Resume')
+               setIsPublicSharing(!!doc.is_public)
                saveDraft(merged)
                showToast('Document loaded ✓', 'success')
             }
@@ -122,7 +125,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       setSyncStatus('syncing')
       try {
          if (activeDocumentId) {
-            await updateDocument(activeDocumentId, documentName, resumeData)
+            await updateDocument(activeDocumentId, documentName, resumeData, isPublicSharing)
          } else {
             const newId = await createDocument(currentUser.id, documentName, resumeData)
             if (onDocumentCreated) onDocumentCreated(newId)
@@ -191,16 +194,26 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
          if (!panelRef.current || !wrapperRef.current) return
          const panelW = panelRef.current.clientWidth - (window.innerWidth <= 768 ? 16 : 32)
          const paperW = wrapperRef.current.offsetWidth
+         if (paperW === 0) return // Avoid division by zero
+         
          const scale = Math.min(1, panelW / paperW)
          wrapperRef.current.style.transform = `scale(${scale})`
          wrapperRef.current.style.transformOrigin = 'top center'
          wrapperRef.current.parentElement.style.height = `${scale * wrapperRef.current.offsetHeight}px`
       }
-      scaleToFit()
+
+      // Initial scale
+      setTimeout(scaleToFit, 100)
+      
       const ro = new ResizeObserver(scaleToFit)
       if (panelRef.current) ro.observe(panelRef.current)
-      return () => ro.disconnect()
-   }, [mobileView])
+      window.addEventListener('resize', scaleToFit)
+      
+      return () => {
+         ro.disconnect()
+         window.removeEventListener('resize', scaleToFit)
+      }
+   }, [mobileView, user, resumeData])
 
    // Textarea auto-resize
    useEffect(() => {
@@ -233,13 +246,13 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       }, 5000) // 5 second debounce
 
       return () => clearTimeout(timer)
-   }, [resumeData, user?.id, activeDocumentId])
+   }, [resumeData, isPublicSharing, user?.id, activeDocumentId])
 
    return (
       <div className="builder-layout">
          <header className="builder-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-               <div className="builder-header__logo">Resum<span>e</span>ly</div>
+               <div className="builder-header__logo">Resum<span>ely</span></div>
 
                <button
                   className="theme-toggle"
@@ -355,10 +368,57 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
             </div>
 
             <div className="builder-header__actions">
-               {syncStatus === 'success' && user && (
+               {activeDocumentId && user && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '10px', paddingRight: '15px', borderRight: '1px solid var(--glass-border)' }}>
+                     <span style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: 500 }}>
+                        {isPublicSharing ? 'Public Link ON' : 'Private'}
+                     </span>
+                     <button 
+                        onClick={async () => {
+                           const newVal = !isPublicSharing
+                           setIsPublicSharing(newVal)
+                           if (activeDocumentId) {
+                              try {
+                                 // We use undefined so the database knows NOT to touch those columns
+                                 await updateDocument(activeDocumentId, undefined, undefined, newVal)
+                                 showToast(newVal ? 'Resume is now public' : 'Resume is now private', 'info')
+                              } catch(e) { 
+                                 console.error("Toggle failed:", e) 
+                                 setIsPublicSharing(!newVal)
+                                 showToast(`Failed: ${e.message || 'Database error'}`, 'error')
+                              }
+                           }
+                        }}
+                        style={{
+                           width: '32px',
+                           height: '18px',
+                           borderRadius: '10px',
+                           background: isPublicSharing ? 'var(--accent)' : 'rgba(255,255,255,0.1)',
+                           border: '1px solid var(--glass-border)',
+                           position: 'relative',
+                           cursor: 'pointer',
+                           transition: 'all 0.3s ease'
+                        }}
+                     >
+                        <div style={{
+                           width: '12px',
+                           height: '12px',
+                           borderRadius: '50%',
+                           background: '#fff',
+                           position: 'absolute',
+                           top: '2px',
+                           left: isPublicSharing ? '16px' : '2px',
+                           transition: 'all 0.3s ease'
+                        }} />
+                     </button>
+                  </div>
+               )}
+
+               {activeDocumentId && user && (
                   <button className="btn btn-ghost" onClick={() => {
-                     navigator.clipboard.writeText(window.location.href)
-                     showToast('Link copied to clipboard', 'success')
+                     const url = `${window.location.origin}${window.location.pathname}?share=${activeDocumentId}`
+                     navigator.clipboard.writeText(url)
+                     showToast('Public link copied!', 'success')
                   }}>
                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:'4px'}}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                      Copy Link
@@ -392,21 +452,31 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   ) : 'Save Changes'}
                </button>
 
-               <button
-                  className="btn btn-secondary"
-                  onClick={handleDownload}
-               >
-                  {unlocked ? 'Download' : '🔒 Download'}
-               </button>
+               {user && (
+                  <button
+                     className="btn btn-secondary"
+                     onClick={handleDownload}
+                  >
+                     {unlocked ? 'Download' : '🔒 Download'}
+                  </button>
+               )}
+
+               {!user && activeDocumentId && (
+                  <button className="btn btn-primary" onClick={() => window.location.href = '/'}>
+                     Create My Own
+                  </button>
+               )}
             </div>
          </header>
 
-         <div className="mobile-tabs">
-            <button className={`mobile-tab ${mobileView==='form'?'active':''}`} onClick={() => setMobileView('form')}>Edit Form</button>
-            <button className={`mobile-tab ${mobileView==='preview'?'active':''}`} onClick={() => setMobileView('preview')}>View Resume</button>
-         </div>
+         {user && (
+            <div className="mobile-tabs">
+               <button className={`mobile-tab ${mobileView==='form'?'active':''}`} onClick={() => setMobileView('form')}>Edit Form</button>
+               <button className={`mobile-tab ${mobileView==='preview'?'active':''}`} onClick={() => setMobileView('preview')}>View Resume</button>
+            </div>
+         )}
 
-         <aside className={`form-panel ${mobileView==='form'?'mobile-visible':'mobile-hidden'}`}>
+         <aside className={`form-panel ${mobileView==='form'?'mobile-visible':'mobile-hidden'} ${!user ? 'hidden-viewer' : ''}`}>
             <div className="form-blob-layer" aria-hidden="true">
                {[1,2,3,4,5,6].map(n => <div key={n} className={`form-blob form-blob--${n}`}/>)}
             </div>
@@ -415,7 +485,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
             </div>
          </aside>
 
-         <main className={`preview-panel ${mobileView==='preview'?'mobile-visible':'mobile-hidden'}`} ref={panelRef}>
+         <main className={`preview-panel ${mobileView==='preview'?'mobile-visible':'mobile-hidden'} ${!user ? 'full-width-viewer' : ''}`} ref={panelRef}>
             <div className="resume-scale-container" style={{ overflow: 'hidden' }}>
                <div className="resume-preview-wrapper" ref={wrapperRef} style={{ transition: 'filter 0.3s ease', position: 'relative' }}>
                   <ResumePreview data={resumeData} template={template} />

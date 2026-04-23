@@ -55,9 +55,9 @@ export default function LandingPage({ onStart, user, onSignIn, onShowTerms, onSh
       <main>
         <section className="hero-section" id="early-access">
           <div className="hero-content">
-            <div className="eyebrow">Build your professional resume today</div>
+            <div className="eyebrow">Early Access — Limited Time</div>
             <h1>Your resume, <em>finally</em><br/>working for you</h1>
-            <p className="hero-sub">ATS-ready resume in 15 minutes. No subscription. No watermarks. Pay once — $8 — and it's yours.</p>
+            <p className="hero-sub">ATS-ready resume in 15 minutes. No subscription traps. No watermarks. <strong>Free for now</strong> while we're in early access.</p>
 
             <div className="form-wrap" style={{ marginTop: '2rem' }}>
               <button 
@@ -144,7 +144,7 @@ export default function LandingPage({ onStart, user, onSignIn, onShowTerms, onSh
               <div className="step reveal">
                 <div className="step-num">03</div>
                 <div className="step-title">Download your PDF</div>
-                <div className="step-body">Pay once — $8. Download a clean, ATS-safe PDF. No watermark, no monthly charge, no account required to start.</div>
+                <div className="step-body">Get a clean, ATS-safe PDF instantly. It's free while we're in early access — if it helps you, a small donation is appreciated!</div>
               </div>
             </div>
           </div>
@@ -177,12 +177,12 @@ export default function LandingPage({ onStart, user, onSignIn, onShowTerms, onSh
             <div className="feature-card wide reveal">
               <div style={{flex:1}}>
                 <div className="feature-icon">◻</div>
-                <div className="feature-title">One honest price</div>
-                <div className="feature-body">$8 once. Not $8 a month. Not a free trial that expires. You pay when you download. The PDF is yours forever.</div>
+                <div className="feature-title">Early access pricing</div>
+                <div className="feature-body">Resumely is free while we polish the platform. No credit card required. No catch. All we ask is for your feedback.</div>
               </div>
               <div style={{textAlign:'right', flexShrink:0}}>
-                <div style={{fontFamily:'var(--serif)', fontSize:'3rem', color:'var(--accent)', lineHeight:1}}>$8</div>
-                <div style={{fontSize:'0.75rem', color:'var(--text-light)', marginTop:'0.2rem'}}>one-time · no subscription</div>
+                <div style={{fontFamily:'var(--serif)', fontSize:'2.5rem', color:'var(--accent)', lineHeight:1}}>Free</div>
+                <div style={{fontSize:'0.75rem', color:'var(--text-light)', marginTop:'0.2rem'}}>for early adopters</div>
               </div>
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function LandingPage({ onStart, user, onSignIn, onShowTerms, onSh
               <tr><th>Tool</th><th>Price</th><th>ATS safe</th><th>AI writing</th></tr>
             </thead>
             <tbody>
-              <tr className="ours"><td>Resumely</td><td>$8 once</td><td className="tick">✓</td><td className="tick">✓</td></tr>
+              <tr className="ours"><td>Resumely</td><td>Free*</td><td className="tick">✓</td><td className="tick">✓</td></tr>
               <tr><td>Zety</td><td>$23.70/mo</td><td className="partial">~</td><td className="tick">✓</td></tr>
               <tr><td>Novoresume</td><td>$19.99/mo</td><td className="partial">~</td><td className="cross">✗</td></tr>
               <tr><td>Canva (free)</td><td>Free</td><td className="cross">✗</td><td className="cross">✗</td></tr>
@@ -207,27 +207,30 @@ export default function LandingPage({ onStart, user, onSignIn, onShowTerms, onSh
 
         <section className="pricing-section" id="pricing">
           <div className="pricing-inner">
-            <p className="section-label">Pricing</p>
-            <h2 className="section-title">Simple. No catch.</h2>
+            <p className="section-label">Early Access</p>
+            <h2 className="section-title">Free for now.</h2>
             <div className="pricing-card reveal">
               <div className="price-row">
-                <div className="price-amount">$8</div>
-                <div className="price-label">one-time</div>
+                <div className="price-amount">$0</div>
+                <div className="price-label">while in beta</div>
               </div>
-              <p className="price-desc">Pay once when you download. Free to build, free to preview.</p>
+              <p className="price-desc">Build, preview, and download your perfect resume for free. We'll be moving to an honest one-time price later this year.</p>
               <ul className="price-features">
-                <li>Full resume editor — all sections, all fields</li>
-                <li>3 ATS-tested templates</li>
-                <li>Live preview as you type</li>
+                <li>Full AI-powered resume editor</li>
+                <li>Multiple professional templates</li>
+                <li>Public sharing (Recruiter links)</li>
                 <li>Unlimited AI bullet point rewrites</li>
-                <li>Clean PDF — no watermark</li>
-                <li>Autosave — your work is never lost</li>
-                <li>All future templates included</li>
+                <li>Clean PDF — no watermarks</li>
+                <li>No credit card or subscription required</li>
               </ul>
-              <button onClick={handleStartBuildingClick} className="pricing-cta">Start Building →</button>
+              <div style={{marginTop:'1.5rem', padding:'1rem', borderRadius:'var(--radius-md)', background:'rgba(255,255,255,0.05)', fontSize:'0.9rem', color:'var(--text-mid)', border:'1px dashed var(--glass-border)' }}>
+                 <strong>Optional Donation:</strong> If Resumely helps you get a job, consider buying me a coffee to keep the servers running.
+              </div>
+              <button onClick={handleStartBuildingClick} className="pricing-cta" style={{marginTop:'1.5rem'}}>Start Building — Free →</button>
             </div>
           </div>
         </section>
+
       </main>
 
       <footer style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

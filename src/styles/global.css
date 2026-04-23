@@ -91,3 +91,32 @@ h1, h2, h3 {
   clip: rect(0,0,0,0);
   border: 0;
 }
+
+/* ── Viewer Mode Helpers ── */
+.hidden-viewer {
+  display: none !important;
+}
+
+.full-width-viewer {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  flex: 1 !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  overflow-y: auto !important;
+  background: var(--bg-preview) !important;
+}
+
+.full-width-viewer .resume-scale-container {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+@media (min-width: 1024px) {
+  .full-width-viewer {
+    padding-top: 40px !important;
+  }
+}

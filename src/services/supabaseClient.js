@@ -108,10 +108,11 @@ export async function createDocument(userId, name, resumeData) {
   return data.id
 }
 
-export async function updateDocument(docId, name, resumeData) {
+export async function updateDocument(docId, name, resumeData, isPublic) {
   const payload = { updated_at: new Date().toISOString() }
   if (name !== undefined && name !== null) payload.name = name
   if (resumeData !== undefined) payload.resume_data = resumeData
+  if (isPublic !== undefined) payload.is_public = isPublic
 
   const { error } = await supabase
     .from('documents')

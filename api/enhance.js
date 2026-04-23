@@ -24,12 +24,13 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'System configuration error' })
    }
 
-   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Supabase keys missing in API route. Ensure SUPABASE_SERVICE_ROLE_KEY is set in Vercel.');
-      return res.status(500).json({ error: 'Database configuration error' })
+      const missing = !supabaseUrl ? 'SUPABASE_URL' : 'SUPABASE_SERVICE_ROLE_KEY';
+      console.error(`Supabase keys missing: ${missing}`);
+      return res.status(500).json({ error: `System Configuration: ${missing} is missing in Vercel.` })
    }
 
    // Using Service Role Key to bypass RLS for usage tracking
@@ -46,6 +47,7 @@ export default async function handler(req, res) {
    }
 
    // 2. Enforce 10 usage limit
+   let count = 0
    try {
       const { data: usageData, error: fetchErr } = await supabase
          .from('ai_usage')
@@ -53,7 +55,7 @@ export default async function handler(req, res) {
          .eq('id', identityId)
          .single()
 
-      let count = usageData?.uses_count || 0
+      count = usageData?.uses_count || 0
 
       if (count >= 10) {
          return res.status(429).json({ error: 'Free limit reached. You have used all 10 AI boosts.' })
@@ -134,12 +136,15 @@ Rewritten version:`
       }
 
       const data = JSON.parse(responseText)
-      const result = data?.choices?.[0]?.message?.content?.trim()
+      let result = data?.choices?.[0]?.message?.content?.trim()
 
       if (!result) {
          console.error('Empty Groq response:', responseText)
          return res.status(502).json({ error: 'Empty response from AI' })
       }
+
+      // Clean up the result by removing common prefixes
+      result = result.replace(/^(BULLET POINT|SUMMARY|DESCRIPTION):\s*/i, '')
 
       return res.status(200).json({
          result,
