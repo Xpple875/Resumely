@@ -1,4 +1,4 @@
-/* ── Builder Layout ── */
+/* â”€â”€ Builder Layout â”€â”€ */
 .builder-layout {
    display: grid;
    grid-template-columns: 480px 1fr;
@@ -7,7 +7,7 @@
    overflow: hidden;
 }
 
-/* ── Header ── */
+/* â”€â”€ Header â”€â”€ */
 .builder-header {
    grid-column: 1 / -1;
    display: flex;
@@ -40,7 +40,7 @@
    align-items: center;
 }
 
-/* ── Form Panel ── */
+/* â”€â”€ Form Panel â”€â”€ */
 .form-panel {
    background: rgba(250, 249, 247, 0.85);
    border-right: 1px solid var(--glass-border);
@@ -56,7 +56,7 @@
    background: rgba(15, 17, 23, 0.72);
 }
 
-/* ── Blob layer — pinned to visible panel, does not scroll ── */
+/* â”€â”€ Blob layer â€” pinned to visible panel, does not scroll â”€â”€ */
 .form-blob-layer {
    position: absolute;
    inset: 0;
@@ -65,7 +65,7 @@
    overflow: hidden;
 }
 
-/* ── Scrollable content — sits on top of blob layer ── */
+/* â”€â”€ Scrollable content â€” sits on top of blob layer â”€â”€ */
 .form-content {
    position: relative;
    z-index: 2;
@@ -78,7 +78,7 @@
    gap: 0;
 }
 
-/* Individual blobs — % positions relative to the visible panel */
+/* Individual blobs â€” % positions relative to the visible panel */
 .form-blob {
    position: absolute;
    border-radius: 50%;
@@ -164,7 +164,7 @@
 }
 
 
-/* ── Preview Panel ── */
+/* â”€â”€ Preview Panel â”€â”€ */
 .preview-panel {
    background: var(--bg-preview);
    overflow-y: auto;
@@ -181,7 +181,7 @@
    width: 210mm;
 }
 
-/* ── Buttons ── */
+/* â”€â”€ Buttons â”€â”€ */
 .btn {
    display: inline-flex;
    align-items: center;
@@ -266,7 +266,7 @@
    transform: scale(0.9);
 }
 
-/* ── Form Sections ── */
+/* â”€â”€ Form Sections â”€â”€ */
 .form-section {
    background: var(--glass-bg);
    backdrop-filter: var(--glass-blur);
@@ -326,7 +326,7 @@
    transform: rotate(180deg);
 }
 
-/* ── Accordion body animation (CSS grid 0fr→1fr trick) ── */
+/* â”€â”€ Accordion body animation (CSS grid 0frâ†’1fr trick) â”€â”€ */
 .form-section__body-wrapper {
    display: grid;
    grid-template-rows: 0fr;
@@ -367,7 +367,7 @@
    to { transform: rotate(360deg); }
 }
 
-/* ── Form Fields ── */
+/* â”€â”€ Form Fields â”€â”€ */
 .field {
    display: flex;
    flex-direction: column;
@@ -437,7 +437,8 @@ textarea,
 select {
    width: 100%;
    background: var(--glass-surface);
-   border: 1px solid var(--glass-border);
+   border: 1px solid var(--border);
+   box-shadow: var(--shadow-sm);
    border-radius: var(--radius-md);
    padding: 10px 14px;
    font-size: 14px;
@@ -486,7 +487,7 @@ select:focus {
 }
 
 
-/* ── Entry cards (work, education) ── */
+/* â”€â”€ Entry cards (work, education) â”€â”€ */
 .entry-card {
    background: var(--glass-surface);
    border: 1px solid var(--glass-border);
@@ -646,7 +647,7 @@ select:focus {
    opacity: 1;
 }
 
-/* ── Download bar ── */
+/* â”€â”€ Download bar â”€â”€ */
 .download-bar {
    position: fixed;
    bottom: 0;
@@ -662,7 +663,7 @@ select:focus {
    z-index: 20;
 }
 
-/* ── Enhance button ── */
+/* â”€â”€ Enhance button â”€â”€ */
 .enhance-btn {
    display: flex;
    width: 100%;
@@ -699,7 +700,7 @@ select:focus {
    cursor: not-allowed;
 }
 
-/* ── Section Manager (Drag & Drop) ── */
+/* â”€â”€ Section Manager (Drag & Drop) â”€â”€ */
 .section-manager__hint {
    font-size: 12px;
    color: var(--text-light);
@@ -804,7 +805,7 @@ select:focus {
    font-style: italic;
 }
 
-/* ── Summary toggle (in PersonalSection) ── */
+/* â”€â”€ Summary toggle (in PersonalSection) â”€â”€ */
 .summary-label-row {
    display: flex;
    align-items: center;
@@ -840,7 +841,7 @@ select:focus {
 
 .summary-toggle-btn.is-hidden {
    color: var(--text-light);
-   background: var(--glass-surface);
+   background: var(--border);
    border-color: var(--glass-border);
 }
 
@@ -849,7 +850,7 @@ select:focus {
    box-shadow: var(--shadow-sm);
 }
 
-/* ── Summary controls in manager row ── */
+/* â”€â”€ Summary controls in manager row â”€â”€ */
 .manager-row__summary-controls {
    display: flex;
    align-items: center;
@@ -895,7 +896,7 @@ select:focus {
    box-shadow: var(--shadow-sm);
 }
 
-/* ── Section entry count badge ── */
+/* â”€â”€ Section entry count badge â”€â”€ */
 .section-badge {
    display: inline-flex;
    align-items: center;
@@ -927,7 +928,7 @@ select:focus {
    transform: scale(1.12);
 }
 
-/* ── Entry card polish ── */
+/* â”€â”€ Entry card polish â”€â”€ */
 .entry-card {
    position: relative;
    background: var(--glass-surface);
@@ -990,7 +991,7 @@ select:focus {
    transform: scale(1.1);
 }
 
-/* ── Page load entrance animation ── */
+/* â”€â”€ Page load entrance animation â”€â”€ */
 @keyframes sectionEnter {
    from {
       opacity: 0;
@@ -1019,7 +1020,7 @@ select:focus {
 .form-section:nth-child(11) { animation-delay: 0.55s; }
 .form-section:nth-child(12) { animation-delay: 0.60s; }
 
-/* ── Toast container ── */
+/* â”€â”€ Toast container â”€â”€ */
 .toast-container {
    position: fixed;
    bottom: 88px;
@@ -1085,11 +1086,14 @@ select:focus {
    to   { opacity: 0; transform: translateY(-8px) scale(0.95); }
 }
 
-/* ── Mobile tabs ── */
+/* â”€â”€ Mobile tabs â”€â”€ */
 .mobile-tabs {
    display: none;
    background: var(--bg);
    border: 1px solid var(--border);
+   box-shadow: var(--shadow-sm);
+   box-shadow: var(--shadow-sm);
+   box-shadow: var(--shadow-sm);
    border-radius: var(--radius-md);
    padding: 2px;
    gap: 2px;
@@ -1114,7 +1118,7 @@ select:focus {
    box-shadow: var(--shadow-sm);
 }
 
-/* ── Responsive ── */
+/* â”€â”€ Responsive â”€â”€ */
 @media (max-width: 900px) {
    .builder-layout {
       grid-template-columns: 1fr;
@@ -1214,7 +1218,7 @@ select:focus {
    }
 }
 
-/* ── Template Switcher Modal ── */
+/* â”€â”€ Template Switcher Modal â”€â”€ */
 .template-modal-overlay {
    position: fixed;
    inset: 0;
@@ -1231,6 +1235,9 @@ select:focus {
 .template-modal {
    background: var(--bg);
    border: 1px solid var(--border);
+   box-shadow: var(--shadow-sm);
+   box-shadow: var(--shadow-sm);
+   box-shadow: var(--shadow-sm);
    border-radius: var(--radius-lg);
    width: 90%;
    max-width: 800px;
@@ -1357,7 +1364,7 @@ select:focus {
    }
 }
 
-/* ── Mobile Layout (< 768px) ── */
+/* â”€â”€ Mobile Layout (< 768px) â”€â”€ */
 .mobile-tabs {
    display: none;
 }
@@ -1467,7 +1474,7 @@ select:focus {
    }
 }
 
-/* ── Template Switcher Modal ── */
+/* â”€â”€ Template Switcher Modal â”€â”€ */
 .template-modal-overlay {
    position: fixed;
    inset: 0;
@@ -1484,6 +1491,9 @@ select:focus {
 .template-modal {
    background: var(--bg);
    border: 1px solid var(--border);
+   box-shadow: var(--shadow-sm);
+   box-shadow: var(--shadow-sm);
+   box-shadow: var(--shadow-sm);
    border-radius: var(--radius-lg);
    width: 90%;
    max-width: 800px;
@@ -1613,7 +1623,7 @@ select:focus {
    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ── Completeness Score Widget ── */
+/* â”€â”€ Completeness Score Widget â”€â”€ */
 .completeness-widget {
    background: var(--glass-surface);
    border: 1px solid var(--glass-border);
@@ -1725,7 +1735,7 @@ select:focus {
    color: #4ade80;
 }
 
-/* Sign-out icon button � red tint on hover */
+/* Sign-out icon button — red tint on hover */
 .signout-btn:hover {
    color: #ef4444 !important;
    border-color: rgba(239, 68, 68, 0.4) !important;
@@ -1733,3 +1743,9 @@ select:focus {
    box-shadow: none;
    transform: scale(1.08);
 }
+
+
+
+
+
+

@@ -4,9 +4,10 @@ import ResumeForm from '../components/ResumeForm.jsx'
 import ResumePreview from '../components/ResumePreview.jsx'
 import ToastContainer from '../components/ToastContainer.jsx'
 import PayGateModal from '../components/PayGateModal.jsx'
-import DonationModal from '../components/DonationModal.jsx'
+import DownloadOptionsModal from '../components/DownloadOptionsModal.jsx'
 import AuthModal from '../components/AuthModal.jsx'
 import { generatePDF } from '../utils/pdfExport.js'
+import { generateDOCX } from '../utils/docxExport.js'
 import { defaultResumeData } from '../utils/defaultData.js'
 import { loadDraft, saveDraft } from '../hooks/useAutosave.js'
 import { useToast } from '../hooks/useToast.js'
@@ -37,7 +38,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    const [isCloudLoading, setIsCloudLoading] = useState(false)
    const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
    const [showPayGate, setShowPayGate] = useState(false)
-   const [showDonationModal, setShowDonationModal] = useState(false)
+   const [showDownloadOptions, setShowDownloadOptions] = useState(false)
    const [showAuthModal, setShowAuthModal] = useState(false)
    // What was the user trying to do when they weren't signed in?
    const [pendingAction, setPendingAction] = useState(null) // null | 'save' | 'download'
@@ -103,27 +104,29 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       }, 800) // Slightly longer to feel deliberate and premium
    }
 
-   // ── Download — requires sign-in, then checks premium ──
+   const doDownloadDocx = () => {
+      generateDOCX(resumeData)
+   }
+
    const handleDownload = () => {
       if (!user) {
-         // Step 1: must be signed in before we can check/grant premium
          setPendingAction('download')
          setShowAuthModal(true)
          return
       }
-      if (!unlocked) {
-         // Signed in but not paid → show promotion/donation modal
-         setShowDonationModal(true)
-         return
-      }
-      doDownload()
+      setShowDownloadOptions(true)
    }
 
-   const handleFreeDownload = async () => {
-      setShowDonationModal(false)
-      // We don't mark as paid in DB, just allow this one download
-      doDownload()
+   const handleDownloadAction = (format) => {
+      setShowDownloadOptions(false)
+      if (format === 'pdf') {
+         doDownload()
+      } else {
+         doDownloadDocx()
+      }
    }
+
+
 
    // ── Cloud Save ──
    const doCloudSave = async (currentUser, silent = false) => {
@@ -185,11 +188,11 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                if (setUnlocked) setUnlocked(true)
                doDownload()
             } else {
-               setShowDonationModal(true)
+               setShowDownloadOptions(true)
             }
          } catch (err) {
             console.error('Could not check paid status:', err)
-            setShowDonationModal(true)
+            setShowDownloadOptions(true)
          } finally {
             setIsCloudLoading(false)
          }
@@ -401,7 +404,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                            width: '32px',
                            height: '18px',
                            borderRadius: '10px',
-                           background: isPublicSharing ? 'var(--accent)' : 'rgba(255,255,255,0.1)',
+                           background: isPublicSharing ? 'var(--accent)' : 'var(--border)',
                            border: '1px solid var(--glass-border)',
                            position: 'relative',
                            cursor: 'pointer',
@@ -498,41 +501,21 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                <div className="resume-preview-wrapper" ref={wrapperRef} style={{ transition: 'filter 0.3s ease', position: 'relative' }}>
                   <ResumePreview data={resumeData} template={template} />
                   
-                  {/* Watermark overlay to prevent screenshots */}
+                  {/* Watermark overlay to prevent screenshots - Infinite SVG Pattern */}
                   <div 
                      aria-hidden="true"
                      style={{
                         position: 'absolute',
                         top: 0, left: 0, right: 0, bottom: 0,
                         pointerEvents: 'none',
-                        overflow: 'hidden',
-                        zIndex: 50,
-                        userSelect: 'none'
+                        zIndex: 1000,
+                        userSelect: 'none',
+                        opacity: 1,
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='32' fill='rgba(0,0,0,0.07)' transform='rotate(-35 150 100)'%3ERESUMELY RESUMELY RESUMELY%3C/text%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'repeat',
+                        backgroundSize: '300px 200px'
                      }}
-                  >
-                     <div style={{
-                        position: 'absolute',
-                        top: '-50%', left: '-50%', right: '-50%', bottom: '-50%',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        alignContent: 'center',
-                        justifyContent: 'center',
-                        gap: '40px 60px',
-                        transform: 'rotate(-45deg)',
-                        opacity: 0.08
-                     }}>
-                        {Array.from({ length: 150 }).map((_, i) => (
-                           <span key={i} style={{
-                              fontSize: '48px',
-                              fontWeight: '900',
-                              color: '#000',
-                              letterSpacing: '0.15em',
-                           }}>
-                              RESUMELY
-                           </span>
-                        ))}
-                     </div>
-                  </div>
+                  />
                </div>
             </div>
          </main>
@@ -541,10 +524,11 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
          <TemplateModal isOpen={isTemplateModalOpen} onClose={() => setIsTemplateModalOpen(false)} currentTemplate={template} onSelectTemplate={onChangeTemplate} />
 
          {showPayGate && <PayGateModal onDismiss={() => setShowPayGate(false)} />}
-         {showDonationModal && (
-            <DonationModal 
-               onDismiss={() => setShowDonationModal(false)} 
-               onContinueFree={handleFreeDownload}
+         {showDownloadOptions && (
+            <DownloadOptionsModal 
+               onDismiss={() => setShowDownloadOptions(false)} 
+               onDownload={handleDownloadAction}
+               unlocked={unlocked}
                userId={user?.id}
             />
          )}

@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { matchJobDescription, getAIUsesLeft } from '../../services/aiService'
+import SectionWrapper from './SectionWrapper.jsx'
 
 export default function JDMatcher({ resumeData, onToast }) {
   const [jd, setJd] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
-  const [isOpen, setIsOpen] = useState(false)
 
   const handleMatch = async () => {
     if (!jd.trim()) {
@@ -34,31 +34,12 @@ export default function JDMatcher({ resumeData, onToast }) {
     }
   }
 
-  if (!isOpen) {
-    return (
-      <div className="jd-matcher-collapsed" onClick={() => setIsOpen(true)}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div className="jd-matcher-icon">🎯</div>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: '14px' }}>Optimize for a Job</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-light)' }}>Paste a job description to see missing keywords.</div>
-          </div>
-        </div>
-        <button className="btn btn-ghost" style={{ padding: '4px 12px', fontSize: '12px' }}>Open Matcher</button>
-      </div>
-    )
-  }
-
   return (
-    <div className="jd-matcher-expanded">
-      <div className="jd-matcher-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '18px' }}>🎯</span>
-          <span style={{ fontWeight: 600 }}>Job Description Matcher</span>
-        </div>
-        <button className="btn-close-sm" onClick={() => setIsOpen(false)}>×</button>
-      </div>
-
+    <SectionWrapper 
+      title="Optimize for a Job" 
+      icon={<span className="matcher-section-icon">🎯</span>} 
+      defaultOpen={false}
+    >
       <div className="jd-matcher-content">
         <p style={{ fontSize: '13px', color: 'var(--text-light)', marginBottom: '12px' }}>
           Paste the job description below. Our AI will analyze your resume against these requirements.
@@ -105,52 +86,12 @@ export default function JDMatcher({ resumeData, onToast }) {
       </div>
 
       <style>{`
-        .jd-matcher-collapsed {
-          background: var(--glass-surface);
-          border: 1px solid var(--glass-border);
-          border-radius: var(--radius-lg);
-          padding: 16px 20px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          cursor: pointer;
-          transition: var(--transition);
-          margin-bottom: 24px;
-        }
-        .jd-matcher-collapsed:hover {
-          border-color: var(--accent);
-          background: var(--glass-bg);
-          transform: translateY(-2px);
-        }
-        .jd-matcher-icon {
-          width: 36px;
-          height: 36px;
-          background: var(--accent-soft);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 20px;
-        }
-        .jd-matcher-expanded {
-          background: var(--glass-bg);
-          backdrop-filter: blur(20px);
-          border: 1px solid var(--glass-border);
-          border-radius: var(--radius-lg);
-          margin-bottom: 24px;
-          overflow: hidden;
-          animation: slideDown 0.3s ease;
-        }
-        .jd-matcher-header {
-          padding: 12px 20px;
-          background: rgba(255,255,255,0.03);
-          border-bottom: 1px solid var(--glass-border);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+        .matcher-section-icon {
+          font-size: 18px;
+          margin-right: 2px;
         }
         .jd-matcher-content {
-          padding: 20px;
+          padding: 8px 4px;
         }
         .jd-textarea {
           width: 100%;
@@ -161,14 +102,12 @@ export default function JDMatcher({ resumeData, onToast }) {
           color: var(--text);
           font-size: 13px;
           resize: vertical;
+          transition: var(--transition);
         }
-        .btn-close-sm {
-          background: none;
-          border: none;
-          color: var(--text-light);
-          font-size: 20px;
-          cursor: pointer;
-          padding: 0 5px;
+        .jd-textarea:focus {
+          border-color: var(--accent);
+          outline: none;
+          box-shadow: 0 0 0 2px var(--accent-soft);
         }
         .jd-results {
           margin-top: 20px;
@@ -211,15 +150,11 @@ export default function JDMatcher({ resumeData, onToast }) {
           margin-bottom: 6px;
           line-height: 1.4;
         }
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
       `}</style>
-    </div>
+    </SectionWrapper>
   )
 }

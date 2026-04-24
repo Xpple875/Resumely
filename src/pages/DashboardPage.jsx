@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { getUserDocuments, createDocument, deleteDocument, deleteUserAccount, duplicateDocument, getDocumentById } from '../services/supabaseClient'
 import { defaultResumeData } from '../utils/defaultData'
 import { generatePDF } from '../utils/pdfExport'
+import { generateDOCX } from '../utils/docxExport'
+import DownloadOptionsModal from '../components/DownloadOptionsModal'
 import '../styles/landing.css'
 
 export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
@@ -10,6 +12,8 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
   const [isCreating, setIsCreating] = useState(false)
   const [isDuplicating, setIsDuplicating] = useState(null) // docId being duplicated
   const [isDownloading, setIsDownloading] = useState(null) // docId being downloaded
+  const [showDownloadOptions, setShowDownloadOptions] = useState(false)
+  const [selectedDoc, setSelectedDoc] = useState(null)
   const [deleteModalDoc, setDeleteModalDoc] = useState(null)
 
   useEffect(() => {
@@ -58,20 +62,32 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
     }
   }
 
-  const handleDirectDownload = async (e, doc) => {
+  const handleDownloadClick = (e, doc) => {
     e.stopPropagation()
+    setSelectedDoc(doc)
+    setShowDownloadOptions(true)
+  }
+
+  const handleDownloadAction = async (format) => {
+    if (!selectedDoc) return
+    setShowDownloadOptions(false)
+    
     try {
-      setIsDownloading(doc.id)
-      // We need the full resume_data to generate PDF
-      const fullDoc = await getDocumentById(doc.id)
+      setIsDownloading(selectedDoc.id)
+      const fullDoc = await getDocumentById(selectedDoc.id)
       if (fullDoc?.resume_data) {
-        await generatePDF(null, fullDoc.resume_data, fullDoc.template || 'classic')
+        if (format === 'pdf') {
+          await generatePDF(null, fullDoc.resume_data, fullDoc.template || 'classic')
+        } else {
+          await generateDOCX(fullDoc.resume_data)
+        }
       }
     } catch (err) {
       console.error("Direct download failed", err)
-      alert("Failed to download PDF.")
+      alert(`Failed to download ${format.toUpperCase()}.`)
     } finally {
       setIsDownloading(null)
+      setSelectedDoc(null)
     }
   }
 
@@ -261,10 +277,10 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
                      <div className="resume-card-actions" style={{ display: 'flex', gap: '8px', marginBottom: '15px' }}>
                         <button 
                            className="btn btn-ghost" 
-                           onClick={(e) => handleDirectDownload(e, doc)}
+                           onClick={(e) => handleDownloadClick(e, doc)}
                            disabled={isDownloading === doc.id}
                            style={{ flex: 1, fontSize: '0.75rem', padding: '6px' }}
-                           title="Download PDF"
+                           title="Download Options"
                         >
                            {isDownloading === doc.id ? '...' : 'Download'}
                         </button>
@@ -367,6 +383,15 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
               </div>
            </div>
         </div>
+      )}
+
+      {showDownloadOptions && (
+        <DownloadOptionsModal 
+          onDismiss={() => setShowDownloadOptions(false)} 
+          onDownload={handleDownloadAction}
+          unlocked={false} 
+          userId={user?.id}
+        />
       )}
     </div>
   )
