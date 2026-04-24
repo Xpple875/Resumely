@@ -6,7 +6,7 @@ import { generateDOCX } from '../utils/docxExport'
 import DownloadOptionsModal from '../components/DownloadOptionsModal'
 import '../styles/landing.css'
 
-export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
+export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreateNew }) {
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
@@ -35,17 +35,8 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
     }
   }
 
-  const handleCreateNew = async () => {
-    try {
-      setIsCreating(true)
-      const newId = await createDocument(user.id, "Untitled Resume", defaultResumeData)
-      onOpenDocument(newId)
-    } catch (err) {
-      console.error("Failed to create document", err)
-      alert("Database Error: " + (err.message || 'Check browser console'))
-    } finally {
-      setIsCreating(false)
-    }
+  const handleCreateNew = () => {
+    if (onCreateNew) onCreateNew()
   }
 
   const handleDuplicate = async (e, docId) => {

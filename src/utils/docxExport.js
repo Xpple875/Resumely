@@ -63,6 +63,7 @@ export async function generateDOCX(resumeData) {
 
   // ─── DYNAMIC SECTIONS ───
   for (const key of sectionOrder) {
+    if (key === 'summary') continue;
     const label = sectionLabels[key] || key.toUpperCase();
     const items = resumeData[key] || [];
     if (items.length === 0) continue;

@@ -45,7 +45,8 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    const [mobileView, setMobileView] = useState('form')
    const [documentName, setDocumentName] = useState('Untitled Resume')
    const [showRenameModal, setShowRenameModal] = useState(false)
-   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+   const [isGenerating, setIsGenerating] = useState(false)
+   const [genType, setGenType] = useState('PDF')
    const [isProfileOpen, setIsProfileOpen] = useState(false)
    const [isPublicSharing, setIsPublicSharing] = useState(false)
    const { toasts, showToast } = useToast()
@@ -92,20 +93,33 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
 
    // ── Actual PDF generation ──
    const doDownload = () => {
-      setIsGeneratingPDF(true)
+      setGenType('PDF')
+      setIsGenerating(true)
       const wrapper = wrapperRef.current
       if (wrapper) wrapper.style.filter = 'blur(10px) grayscale(1)'
       
       setTimeout(() => {
          generatePDF(null, resumeData, template).finally(() => {
             if (wrapper) wrapper.style.filter = 'none'
-            setIsGeneratingPDF(false)
+            setIsGenerating(false)
          })
       }, 800) // Slightly longer to feel deliberate and premium
    }
 
    const doDownloadDocx = () => {
-      generateDOCX(resumeData)
+      setGenType('DOCX')
+      setIsGenerating(true)
+      const wrapper = wrapperRef.current
+      if (wrapper) wrapper.style.filter = 'blur(10px) grayscale(1)'
+
+      setTimeout(() => {
+         try {
+            generateDOCX(resumeData)
+         } finally {
+            if (wrapper) wrapper.style.filter = 'none'
+            setIsGenerating(false)
+         }
+      }, 800)
    }
 
    const handleDownload = () => {
@@ -542,8 +556,8 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
             />
          )}
 
-         {/* PDF Generation Overlay */}
-         {isGeneratingPDF && (
+         {/* Generation Overlay */}
+         {isGenerating && (
             <div style={{
                position: 'fixed',
                inset: 0,
@@ -565,8 +579,10 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   boxShadow: 'var(--shadow-lg)',
                   textAlign: 'center'
                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '20px', animation: 'floatMockup 2s ease-in-out infinite' }}>📄</div>
-                  <h2 style={{ marginBottom: '10px' }}>Generating PDF</h2>
+                  <div style={{ fontSize: '48px', marginBottom: '20px', animation: 'floatMockup 2s ease-in-out infinite' }}>
+                     {genType === 'PDF' ? '📄' : '📝'}
+                  </div>
+                  <h2 style={{ marginBottom: '10px' }}>Generating {genType}</h2>
                   <p style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>Tailoring your resume for perfection...</p>
                </div>
             </div>

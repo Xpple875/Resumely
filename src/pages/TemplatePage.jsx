@@ -34,9 +34,9 @@ export const TEMPLATES = [
   },
 ]
 
-export default function TemplatePage({ selected, onSelect, onContinue }) {
+export default function TemplatePage({ selected, onSelect, onContinue, loading = false }) {
   return (
-    <div className="template-page">
+    <div className="template-page" style={loading ? { pointerEvents: 'none', opacity: 0.8 } : {}}>
       <div className="template-page__inner">
         <div className="template-page__header">
           <div className="template-logo">Resum<span>e</span>ly</div>
@@ -72,10 +72,20 @@ export default function TemplatePage({ selected, onSelect, onContinue }) {
           <button
             className="btn btn-primary btn-lg"
             onClick={onContinue}
-            disabled={!selected}
+            disabled={!selected || loading}
+            style={{ minWidth: '220px', justifyContent: 'center' }}
           >
-            Continue with {TEMPLATES.find(t => t.id === selected)?.name || '…'}
-            <ArrowIcon />
+            {loading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                Creating...
+              </span>
+            ) : (
+              <>
+                Continue with {TEMPLATES.find(t => t.id === selected)?.name || '…'}
+                <ArrowIcon />
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -1749,3 +1749,29 @@ select:focus {
 
 
 
+
+/* ── Recommended Badge ── */
+.recommended-badge {
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(196, 98, 45, 0.3);
+  z-index: 10;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: badgePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0) translateY(10px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}

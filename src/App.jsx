@@ -8,8 +8,9 @@ import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
 import UpdatePasswordModal from './components/UpdatePasswordModal'
 import { isUnlocked, clearToken } from './services/paymentService'
-import { supabase } from './services/supabaseClient'
 import { loadDraft } from './hooks/useAutosave'
+import { createDocument, supabase } from './services/supabaseClient'
+import { defaultResumeData } from './utils/defaultData'
 
 export default function App() {
   const [view, setView] = useState('landing')
@@ -22,6 +23,8 @@ export default function App() {
   // Dashboard routing requires us to supply an active document ID to the builder
   const [activeDocumentId, setActiveDocumentId] = useState(null)
   const [showUpdatePassword, setShowUpdatePassword] = useState(false)
+  const [isCreatingFromDashboard, setIsCreatingFromDashboard] = useState(false)
+  const [isCreatingInCloud, setIsCreatingInCloud] = useState(false)
 
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light')
 
@@ -64,7 +67,30 @@ export default function App() {
 
   const handleSelectTemplate = (id) => {
     setTemplate(id)
-    setView('builder')
+  }
+
+  const handleTemplateContinue = async () => {
+    if (isCreatingFromDashboard && user) {
+       setIsCreatingInCloud(true)
+       try {
+          const newId = await createDocument(user.id, "Untitled Resume", defaultResumeData, template)
+          setActiveDocumentId(newId)
+          setIsCreatingFromDashboard(false)
+          setView('builder')
+       } catch (err) {
+          console.error("Failed to create doc:", err)
+          alert("Error creating resume. Please try again.")
+       } finally {
+          setIsCreatingInCloud(false)
+       }
+    } else {
+       setView('builder')
+    }
+  }
+
+  const handleCreateNewFromDashboard = () => {
+    setIsCreatingFromDashboard(true)
+    setView('template')
   }
 
   const handleOpenDocument = (docId) => {
@@ -117,12 +143,18 @@ export default function App() {
           onShowPrivacy={() => setView('privacy')}
         />
       ) : view === 'template' ? (
-        <TemplatePage onSelect={handleSelectTemplate} onContinue={() => setView('builder')} selected={template} />
+        <TemplatePage 
+          onSelect={handleSelectTemplate} 
+          onContinue={handleTemplateContinue} 
+          selected={template} 
+          loading={isCreatingInCloud}
+        />
       ) : view === 'dashboard' ? (
         <DashboardPage 
            user={user} 
            onOpenDocument={handleOpenDocument} 
            onSignOut={handleSignOut} 
+           onCreateNew={handleCreateNewFromDashboard}
         />
       ) : view === 'terms' ? (
         <TermsPage onBack={() => setView('landing')} />

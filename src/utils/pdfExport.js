@@ -37,7 +37,7 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
     try {
         const { personal, theme: dataTheme } = resumeData;
         let sectionOrder = resumeData.sectionOrder || ['summary', 'experience', 'education', 'skills', 'projects'];
-        if (personal.summary && !sectionOrder.includes('summary')) {
+        if (personal.summary && !personal.hideSummary && !sectionOrder.includes('summary')) {
             sectionOrder = ['summary', ...sectionOrder];
         }
         const sectionLabels = resumeData.sectionLabels || {};
@@ -273,7 +273,7 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
             const mainX = 195;
             const mainW = PW - mainX - MR;
 
-            if (personal.summary) {
+            if (!personal.hideSummary && personal.summary) {
                 drawText('PROFILE', mainX, y, mainFontBold, 10, accent);
                 y -= 6; hline(y, 0.3, rgb(0.9, 0.9, 0.9)); y -= 15;
                 drawWrapped(personal.summary, mainX, mainW, mainFont, 10, C_BLACK, 13);
@@ -342,7 +342,7 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
                 : (sectionLabels[key] || (key.charAt(0).toUpperCase() + key.slice(1)));
 
             if (key === 'summary') {
-                if (personal.summary) {
+                if (!personal.hideSummary && personal.summary) {
                     drawSectionTitle(label);
                     const isElegant = template === 'elegant';
                     const sW = isElegant ? CW * 0.85 : (template === 'minimal' ? CW - 110 : CW);

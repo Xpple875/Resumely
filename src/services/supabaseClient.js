@@ -92,13 +92,14 @@ export async function getDocumentById(docId) {
   return data
 }
 
-export async function createDocument(userId, name, resumeData) {
+export async function createDocument(userId, name, resumeData, template = 'classic') {
   const { data, error } = await supabase
     .from('documents')
     .insert([{
       user_id: userId,
       name,
       resume_data: resumeData,
+      template,
       updated_at: new Date().toISOString()
     }])
     .select('id')
