@@ -34,12 +34,18 @@ export const TEMPLATES = [
   },
 ]
 
-export default function TemplatePage({ selected, onSelect, onContinue, loading = false }) {
+export default function TemplatePage({ selected, onSelect, onContinue, onGoToLanding, loading = false }) {
   return (
     <div className="template-page" style={loading ? { pointerEvents: 'none', opacity: 0.8 } : {}}>
       <div className="template-page__inner">
         <div className="template-page__header">
-          <div className="template-logo">Resum<span>e</span>ly</div>
+          <div 
+            className="template-logo" 
+            onClick={onGoToLanding}
+            style={{ cursor: 'pointer' }}
+          >
+            Resum<span>e</span>ly
+          </div>
           <h1 className="template-page__title">Choose your template</h1>
           <p className="template-page__sub">All three are ATS-tested. You can change this later.</p>
         </div>

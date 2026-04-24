@@ -73,7 +73,7 @@ export async function markUserAsPaid(userId) {
 export async function getUserDocuments(userId) {
   const { data, error } = await supabase
     .from('documents')
-    .select('id, name, updated_at, views_count')
+    .select('id, name, updated_at, views_count, template')
     .eq('user_id', userId)
     .order('updated_at', { ascending: false })
 
@@ -126,6 +126,7 @@ export async function duplicateDocument(docId, userId) {
       user_id: userId,
       name: `${original.name || 'Untitled'} (Copy)`,
       resume_data: original.resume_data,
+      template: original.template || 'classic',
       is_public: false, // Default to private for copies
       views_count: 0,   // Reset view count
       updated_at: new Date().toISOString()
@@ -149,11 +150,12 @@ export async function incrementViewCount(docId) {
   }
 }
 
-export async function updateDocument(docId, name, resumeData, isPublic) {
+export async function updateDocument(docId, name, resumeData, isPublic, template) {
   const payload = { updated_at: new Date().toISOString() }
   if (name !== undefined && name !== null) payload.name = name
   if (resumeData !== undefined) payload.resume_data = resumeData
   if (isPublic !== undefined) payload.is_public = isPublic
+  if (template !== undefined) payload.template = template
 
   const { error } = await supabase
     .from('documents')

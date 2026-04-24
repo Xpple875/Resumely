@@ -191,13 +191,33 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
         ].filter(c => c.t);
 
         const drawDynamicContacts = (colW, startX, py, size, col, alignCenter) => {
-            let cx = startX;
             if (alignCenter) {
-                const str = contactSet.map(c => c.t).join('     \xb7     ');
-                const cw = mainFont.widthOfTextAtSize(str, size);
-                drawText(str, startX + (colW / 2) - (cw / 2), py, mainFont, size, col);
-                return;
+                // Centered wrapping logic
+                let lines = [[]];
+                let currentLineWidth = 0;
+                const dot = '   \xb7   ';
+                const dotW = mainFont.widthOfTextAtSize(dot, size);
+
+                contactSet.forEach((c, i) => {
+                    const tw = mainFont.widthOfTextAtSize(cleanText(c.t), size);
+                    if (currentLineWidth + tw + (lines[lines.length-1].length > 0 ? dotW : 0) > colW) {
+                        lines.push([]);
+                        currentLineWidth = 0;
+                    }
+                    lines[lines.length-1].push(c.t);
+                    currentLineWidth += tw + (lines[lines.length-1].length > 1 ? dotW : 0);
+                });
+
+                lines.forEach(line => {
+                    const lineStr = line.join(dot);
+                    const lineW = mainFont.widthOfTextAtSize(lineStr, size);
+                    drawText(lineStr, startX + (colW / 2) - (lineW / 2), py, mainFont, size, col);
+                    py -= size + 6;
+                });
+                return py; // Return new Y
             }
+
+            let cx = startX;
             contactSet.forEach((item) => {
                 const textWidth = mainFont.widthOfTextAtSize(cleanText(item.t), size);
                 const blockWidth = textWidth + 24;
@@ -209,7 +229,9 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
                 drawText(item.t, cx, py, mainFont, size, col);
                 cx += textWidth + 20; 
             });
+            return py;
         };
+
 
         if (template === 'modern') {
             page.drawRectangle({ x: 0, y: PH - 140, width: PW, height: 140, color: rgb(0.102, 0.090, 0.078) });
@@ -233,13 +255,15 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
                 drawText(tText, PW/2 - tW/2, y, mainFont, 11, accent);
                 y -= 22;
             }
-            drawDynamicContacts(CW, ML, y, 9, C_MID, true);
-            y -= 25;
+            y = drawDynamicContacts(CW, ML, y, 9, C_MID, true);
+            y -= 12;
+
             hline(y, 0.3, rgb(0.9, 0.9, 0.9));
             y -= 35;
         } else if (template === 'compact') {
             // Sidebar rectangle background
-            page.drawRectangle({ x: 0, y: 0, width: 170, height: PH, color: rgb(0.96, 0.94, 0.92) });
+            page.drawRectangle({ x: 0, y: 0, width: 160, height: PH, color: rgb(0.96, 0.94, 0.92) });
+
             y = PH - 60;
             drawText((personal.name || 'YOUR NAME').toUpperCase(), 40, y, serifFont, 24, rgb(0.102, 0.090, 0.078));
             y -= 22;
@@ -248,9 +272,13 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
             
             // Sidebar contacts
             contactSet.forEach(c => {
-                drawText(c.t, 40, y, mainFont, 8, C_MID);
+                let val = c.t;
+                if (c.i === I_LINK) val = val.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '');
+                if (c.i === I_WEB) val = val.replace(/^https?:\/\//, '');
+                drawText(val, 40, y, mainFont, 8.5, C_MID);
                 y -= 14;
             });
+
             y -= 20;
 
             // Sidebar sections
@@ -270,7 +298,7 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
 
             // Reset Y for Main Column
             y = PH - 60;
-            const mainX = 195;
+            const mainX = 225;
             const mainW = PW - mainX - MR;
 
             if (!personal.hideSummary && personal.summary) {

@@ -13,7 +13,7 @@ import { createDocument, supabase } from './services/supabaseClient'
 import { defaultResumeData } from './utils/defaultData'
 
 export default function App() {
-  const [view, setView] = useState('landing')
+  const [view, setView] = useState(() => localStorage.getItem('resumely_view') || 'landing')
   const [template, setTemplate] = useState('classic')
   // Initial unlocked = local token check (for non-logged-in users who paid anonymously).
   // When a user logs in, BuilderPage logic or App logic can override this.
@@ -21,7 +21,7 @@ export default function App() {
   const [user, setUser] = useState(null)
   
   // Dashboard routing requires us to supply an active document ID to the builder
-  const [activeDocumentId, setActiveDocumentId] = useState(null)
+  const [activeDocumentId, setActiveDocumentId] = useState(() => localStorage.getItem('resumely_active_doc'))
   const [showUpdatePassword, setShowUpdatePassword] = useState(false)
   const [isCreatingFromDashboard, setIsCreatingFromDashboard] = useState(false)
   const [isCreatingInCloud, setIsCreatingInCloud] = useState(false)
@@ -32,6 +32,15 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
   }, [theme])
+
+  useEffect(() => {
+    localStorage.setItem('resumely_view', view)
+    if (activeDocumentId) {
+       localStorage.setItem('resumely_active_doc', activeDocumentId)
+    } else {
+       localStorage.removeItem('resumely_active_doc')
+    }
+  }, [view, activeDocumentId])
 
   useEffect(() => {
     // Check for existing session on mount
@@ -94,6 +103,7 @@ export default function App() {
   }
 
   const handleOpenDocument = (docId) => {
+    setTemplate('classic') // Reset to default while loading new doc
     setActiveDocumentId(docId)
     setView('builder') // Enter builder for this specific document
   }
@@ -148,6 +158,7 @@ export default function App() {
           onContinue={handleTemplateContinue} 
           selected={template} 
           loading={isCreatingInCloud}
+          onGoToLanding={() => setView('landing')}
         />
       ) : view === 'dashboard' ? (
         <DashboardPage 
@@ -155,6 +166,7 @@ export default function App() {
            onOpenDocument={handleOpenDocument} 
            onSignOut={handleSignOut} 
            onCreateNew={handleCreateNewFromDashboard}
+           onGoToLanding={() => setView('landing')}
         />
       ) : view === 'terms' ? (
         <TermsPage onBack={() => setView('landing')} />
@@ -171,6 +183,7 @@ export default function App() {
           isPublicView={!!shareId}
           onDocumentCreated={setActiveDocumentId}
           onReturnToDashboard={() => setView('dashboard')}
+          onGoToLanding={() => setView('landing')}
           onSignOut={handleSignOut}
           onSignIn={handleSignIn}
           theme={theme}

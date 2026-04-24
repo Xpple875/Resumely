@@ -143,3 +143,36 @@
   clear: both;
 }
 .resume-minimal .rmin-skills { font-size: 1em; color: #6B6460; }
+
+/* ── COMPACT ── */
+.sheet-compact {
+  /* Ensuring background spans full height of every physical page sheet */
+  background: linear-gradient(to right, #F6F1EC 215px, #ffffff 215px) !important;
+}
+
+.resume-compact {
+  width: 100%;
+  min-height: 100%;
+  /* Negative margin to pull sidebar into the colored area of the sheet */
+  margin-left: -20mm;
+  padding-left: 20mm;
+}
+
+.resume-compact .sidebar {
+  width: 140px;
+  flex-shrink: 0;
+  padding-right: 15px;
+  padding-left: 25px;
+  padding-top: 10mm;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ── ELEGANT ── */
+.resume-elegant {
+  width: 100%;
+}
+
+
+

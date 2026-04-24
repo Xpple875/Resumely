@@ -4,7 +4,7 @@ import '../styles/preview.css'
 const A4_HEIGHT_MM = 297;
 const A4_WIDTH_MM = 210;
 const TOP_PAD_MM = 20;
-const BOT_PAD_MM = 30; 
+const BOT_PAD_MM = 30;
 const CONTENT_H_MM = A4_HEIGHT_MM - TOP_PAD_MM - BOT_PAD_MM;
 
 const ClassicContent = ({ data, theme, innerRef }) => {
@@ -21,7 +21,7 @@ const ClassicContent = ({ data, theme, innerRef }) => {
       return (
          <div key={key} style={{ marginBottom: '25px' }}>
             <div className="r-section-title" style={{ color: accentColor }}>{label}</div>
-            
+
             {isSimpleList ? (
                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {items.map((item, i) => (
@@ -101,7 +101,7 @@ const ModernContent = ({ data, theme, innerRef }) => {
       return (
          <div key={key} style={{ marginBottom: '25px' }}>
             <div className="rm-section-title" style={{ color: accentColor }}>{label}</div>
-            
+
             {isSimpleList ? (
                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {items.map((item, i) => (
@@ -264,16 +264,16 @@ const ElegantContent = ({ data, theme, innerRef }) => {
 
       return (
          <div key={key} style={{ marginBottom: '30px', textAlign: 'center' }}>
-            <div style={{ 
-               fontSize: '0.85rem', 
-               letterSpacing: '0.2em', 
-               color: accentColor, 
+            <div style={{
+               fontSize: '0.85rem',
+               letterSpacing: '0.2em',
+               color: accentColor,
                marginBottom: '12px',
                fontWeight: 600
             }}>
                {label}
             </div>
-            
+
             {isSimpleList ? (
                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
                   {items.map((item, i) => (
@@ -291,7 +291,7 @@ const ElegantContent = ({ data, theme, innerRef }) => {
                      </div>
                      <div style={{ color: accentColor, fontSize: '0.9rem', marginBottom: '6px', fontStyle: 'italic' }}>
                         {[item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ')}
-                        { (item.startDate || item.date) && `  |  ${item.startDate ? `${item.startDate} — ${item.endDate || 'Present'}` : item.date}` }
+                        {(item.startDate || item.date) && `  |  ${item.startDate ? `${item.startDate} — ${item.endDate || 'Present'}` : item.date}`}
                      </div>
                      {item.description && <p style={{ margin: '0 auto', maxWidth: '90%', lineHeight: '1.6' }}>{item.description}</p>}
                      {item.bullets && item.bullets.length > 0 && item.bullets[0] !== '' && (
@@ -314,10 +314,12 @@ const ElegantContent = ({ data, theme, innerRef }) => {
          <div style={{ marginBottom: '40px' }}>
             <h1 style={{ fontSize: '2.8rem', fontWeight: 'normal', margin: '0 0 10px 0', letterSpacing: '0.05em' }}>{personal.name || 'YOUR NAME'}</h1>
             {personal.title && <div style={{ fontSize: '1.1rem', color: accentColor, letterSpacing: '0.15em', marginBottom: '20px' }}>{personal.title.toUpperCase()}</div>}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '0.85rem', color: '#666' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '8px 20px', fontSize: '0.85rem', color: '#666' }}>
                {personal.email && <span>{personal.email}</span>}
                {personal.phone && <span>{personal.phone}</span>}
                {personal.location && <span>{personal.location}</span>}
+               {personal.linkedin && <span>{personal.linkedin}</span>}
+               {personal.website && <span>{personal.website}</span>}
             </div>
          </div>
 
@@ -393,9 +395,9 @@ const CompactContent = ({ data, theme, innerRef }) => {
    };
 
    return (
-      <div ref={innerRef} className="resume-compact resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, display: 'flex', gap: '30px', paddingTop: '10mm' }}>
+      <div ref={innerRef} className="resume-compact resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, display: 'flex', gap: '120px', minHeight: '100%' }}>
          {/* Sidebar */}
-         <div style={{ width: '180px', flexShrink: 0 }}>
+         <div className="sidebar">
             <div style={{ marginBottom: '30px' }}>
                <h1 style={{ fontSize: '1.8rem', lineHeight: '1.1', marginBottom: '10px' }}>{personal.name || 'YOUR NAME'}</h1>
                <div style={{ fontSize: '0.9rem', color: accentColor, fontWeight: 500 }}>{personal.title}</div>
@@ -405,6 +407,7 @@ const CompactContent = ({ data, theme, innerRef }) => {
                {personal.email && <div style={{ overflowWrap: 'anywhere' }}>{personal.email}</div>}
                {personal.phone && <div>{personal.phone}</div>}
                {personal.location && <div>{personal.location}</div>}
+               {personal.linkedin && <div style={{ overflowWrap: 'anywhere' }}>{personal.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '')}</div>}
                {personal.website && <div style={{ color: accentColor }}>{personal.website.replace(/^https?:\/\//, '')}</div>}
             </div>
 
@@ -448,10 +451,10 @@ export default function ResumePreview({ data, template = 'classic' }) {
    useLayoutEffect(() => {
       const calculatePages = () => {
          if (!measureRef.current || !innerRef.current) return;
-         
+
          const engineContainer = measureRef.current;
          const innerContainer = innerRef.current;
-         
+
          const engineRect = engineContainer.getBoundingClientRect();
          const scaledColWidth = engineRect.width;
          if (scaledColWidth === 0) return;
@@ -461,21 +464,21 @@ export default function ResumePreview({ data, template = 'classic' }) {
          let maxRight = engineRect.right;
          const children = innerContainer.children;
          for (let i = 0; i < children.length; i++) {
-             const childRect = children[i].getBoundingClientRect();
-             if (childRect.right > maxRight) {
-                 maxRight = childRect.right;
-             }
+            const childRect = children[i].getBoundingClientRect();
+            if (childRect.right > maxRight) {
+               maxRight = childRect.right;
+            }
          }
-         
+
          // Converts proportional 30mm gaps explicitly mapped to the active transformed CSS scaling matrices
-         const scaledGapWidth = scaledColWidth * (30 / A4_WIDTH_MM); 
-         
+         const scaledGapWidth = scaledColWidth * (30 / A4_WIDTH_MM);
+
          const trueTotalWidth = maxRight - engineRect.left;
          const colStride = scaledColWidth + scaledGapWidth;
-         
+
          let calculatedPages = Math.ceil(trueTotalWidth / colStride);
          calculatedPages = Math.max(1, calculatedPages);
-         
+
          setNumPages(prev => (prev !== calculatedPages ? calculatedPages : prev));
       };
 
@@ -499,7 +502,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
    if (!data || !data.personal) return null;
 
    // The Magical Browser-Native HTML Splitting Engine
-   // Utilizing CSS Multi-column layout horizontally ensures strings natively break 
+   // Utilizing CSS Multi-column layout horizontally ensures strings natively break
    // line-by-line across bounded areas EXACTLY like Microsoft Word mapping algorithms!
    const MultiColEngine = React.forwardRef((props, ref) => (
       <div ref={ref} style={{
@@ -516,7 +519,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
       <div className="resume-container" style={{ userSelect: 'none' }}>
          {/*
           Measurement Layer:
-          The native CSS multi-column forces horizontal fragmentation. 
+          The native CSS multi-column forces horizontal fragmentation.
           We read how wide it generated to precisely extract vertical pages sequentially!
          */}
          <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', zIndex: -100 }}>
@@ -525,7 +528,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
 
          {/*
           True Physical DOM Pages Layer:
-          We apply a positional masking loop to virtually convert the horizontal multi-column renderer 
+          We apply a positional masking loop to virtually convert the horizontal multi-column renderer
           into sequentially stacked physical vertical sheets identically replicating Google Docs.
           No graphic pixel-slicing logic or text chopping natively exists here!
          */}
@@ -536,15 +539,15 @@ export default function ResumePreview({ data, template = 'classic' }) {
             }
 
             return (
-               <div key={i} className="physical-paper-sheet">
+               <div key={i} className={`physical-paper-sheet sheet-${template}`}>
                   <div style={{ height: `${pageTopPad}mm`, backgroundColor: 'transparent', width: '100%' }} />
 
                   <div style={{ height: `${CONTENT_H_MM}mm`, width: `${A4_WIDTH_MM}mm`, overflowX: 'hidden', overflowY: 'hidden', position: 'relative' }}>
-                     <div style={{ 
-                        position: 'absolute', 
-                        top: 0, 
+                     <div style={{
+                        position: 'absolute',
+                        top: 0,
                         left: 0,
-                        transform: `translateX(calc(-${i} * (${A4_WIDTH_MM}mm + 30mm)))` 
+                        transform: `translateX(calc(-${i} * (${A4_WIDTH_MM}mm + 30mm)))`
                      }}>
                         <MultiColEngine data={data} template={template} />
                      </div>

@@ -6,7 +6,7 @@ import { generateDOCX } from '../utils/docxExport'
 import DownloadOptionsModal from '../components/DownloadOptionsModal'
 import '../styles/landing.css'
 
-export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreateNew }) {
+export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreateNew, onGoToLanding }) {
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
@@ -103,7 +103,13 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
   return (
     <div className="landing-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <nav>
-        <div className="nav-logo">Resum<span>ely</span></div>
+        <div 
+          className="nav-logo" 
+          onClick={onGoToLanding}
+          style={{ cursor: 'pointer' }}
+        >
+          Resum<span>ely</span>
+        </div>
         <div className="nav-right" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           {user && (
              <div style={{ position: 'relative' }}>

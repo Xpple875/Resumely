@@ -27,8 +27,10 @@ function mergeWithDefaults(cloudData) {
    }
 }
 
-export default function BuilderPage({ template, onChangeTemplate, unlocked, setUnlocked, user, onSignOut, onSignIn, theme, setTheme, activeDocumentId, isPublicView, onDocumentCreated, onReturnToDashboard }) {
+export default function BuilderPage({ template, onChangeTemplate, unlocked, setUnlocked, user, onSignOut, onSignIn, theme, setTheme, activeDocumentId, isPublicView, onDocumentCreated, onReturnToDashboard, onGoToLanding }) {
    const [resumeData, setResumeData] = useState(() => {
+      // If we are opening a specific doc, don't use the generic local draft (avoids state leakage)
+      if (activeDocumentId) return defaultResumeData
       const draft = loadDraft()
       if (!draft) return defaultResumeData
       return mergeWithDefaults(draft)
@@ -76,6 +78,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                setResumeData(merged)
                setDocumentName(doc.name || 'Untitled Resume')
                setIsPublicSharing(!!doc.is_public)
+               if (onChangeTemplate) onChangeTemplate(doc.template || 'classic')
                saveDraft(merged)
                showToast('Document loaded ✓', 'success')
             }
@@ -147,9 +150,9 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       setSyncStatus('syncing')
       try {
          if (activeDocumentId) {
-            await updateDocument(activeDocumentId, documentName, resumeData, isPublicSharing)
+            await updateDocument(activeDocumentId, documentName, resumeData, isPublicSharing, template)
          } else {
-            const newId = await createDocument(currentUser.id, documentName, resumeData)
+            const newId = await createDocument(currentUser.id, documentName, resumeData, template)
             if (onDocumentCreated) onDocumentCreated(newId)
          }
          setSyncStatus('success')
@@ -182,7 +185,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       // 1. Universal Guest Sync: If no cloud doc ID, save local work to account
       if (!activeDocumentId && newUser) {
          try {
-            const newId = await createDocument(newUser.id, documentName, resumeData)
+            const newId = await createDocument(newUser.id, documentName, resumeData, template)
             if (onDocumentCreated) onDocumentCreated(newId)
             localStorage.removeItem('resume_draft')
             showToast('Guest draft synced to account ✓', 'success')
@@ -264,20 +267,26 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
 
    // ── Auto-save Effect ──
    useEffect(() => {
-      if (!user?.id || !activeDocumentId || syncStatus === 'syncing') return
+      if (!user?.id || !activeDocumentId || syncStatus === 'syncing' || isCloudLoading) return
       
       const timer = setTimeout(() => {
          doCloudSave(user, true) // Silent save
       }, 5000) // 5 second debounce
 
       return () => clearTimeout(timer)
-   }, [resumeData, isPublicSharing, user?.id, activeDocumentId])
+   }, [resumeData, isPublicSharing, user?.id, activeDocumentId, isCloudLoading])
 
    return (
       <div className="builder-layout">
          <header className="builder-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-               <div className="builder-header__logo">Resum<span>ely</span></div>
+               <div 
+                  className="builder-header__logo" 
+                  onClick={onGoToLanding}
+                  style={{ cursor: 'pointer' }}
+               >
+                  Resum<span>ely</span>
+               </div>
 
                <button
                   className="theme-toggle"
@@ -516,20 +525,22 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   <ResumePreview data={resumeData} template={template} />
                   
                   {/* Watermark overlay to prevent screenshots - Infinite SVG Pattern */}
-                  <div 
-                     aria-hidden="true"
-                     style={{
-                        position: 'absolute',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        pointerEvents: 'none',
-                        zIndex: 1000,
-                        userSelect: 'none',
-                        opacity: 1,
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='32' fill='rgba(0,0,0,0.07)' transform='rotate(-35 150 100)'%3ERESUMELY RESUMELY RESUMELY%3C/text%3E%3C/svg%3E")`,
-                        backgroundRepeat: 'repeat',
-                        backgroundSize: '300px 200px'
-                     }}
-                  />
+                  {!unlocked && (
+                     <div 
+                        aria-hidden="true"
+                        style={{
+                           position: 'absolute',
+                           top: 0, left: 0, right: 0, bottom: 0,
+                           pointerEvents: 'none',
+                           zIndex: 99999,
+                           userSelect: 'none',
+                           opacity: 1,
+                           backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='32' fill='rgba(0,0,0,0.07)' transform='rotate(-35 150 100)'%3ERESUMELY RESUMELY RESUMELY%3C/text%3E%3C/svg%3E")`,
+                           backgroundRepeat: 'repeat',
+                           backgroundSize: '300px 200px'
+                        }}
+                     />
+                  )}
                </div>
             </div>
          </main>
