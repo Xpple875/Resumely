@@ -136,6 +136,7 @@ export default function App() {
           setUnlocked={setUnlocked}
           user={user}
           activeDocumentId={activeDocumentId}
+          isPublicView={!!shareId}
           onDocumentCreated={setActiveDocumentId}
           onReturnToDashboard={() => setView('dashboard')}
           onSignOut={handleSignOut}

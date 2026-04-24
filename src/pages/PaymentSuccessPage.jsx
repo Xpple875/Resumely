@@ -57,7 +57,7 @@ export default function PaymentSuccessPage({ sessionId, onUnlocked, user }) {
   return (
     <div className="payment-page">
       <div className="payment-card">
-        <div className="payment-logo">Resum<span>e</span>ly</div>
+        <div className="payment-logo">Resum<span>ely</span></div>
 
         {status === 'verifying' && (
           <>

@@ -31,6 +31,59 @@ export function useAILimits() {
    return usesLeft
 }
 
+export async function generateSummary(experience, jobTitle = '') {
+   if (!experience || experience.length === 0) {
+      throw new Error('Please add some work experience first so the AI has context to write a summary.')
+   }
+
+   // Prepare experience data for the AI
+   const expText = experience.map(exp => 
+      `${exp.title} at ${exp.company}${exp.description ? `: ${exp.description}` : ''}`
+   ).join('\n')
+
+   const { data: { session } } = await supabase.auth.getSession()
+   const token = session?.access_token || null
+
+   const response = await fetch('/api/enhance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bullet: expText, jobTitle, mode: 'generate_summary', token }),
+   })
+
+   const data = await response.json()
+   if (!response.ok) throw new Error(data.error || 'Summary generation failed.')
+
+   if (data.uses_left !== undefined) setAIUsesLeft(data.uses_left)
+   return data.result
+}
+
+export async function matchJobDescription(resumeData, jobDescription) {
+   if (!jobDescription.trim()) {
+      throw new Error('Please paste a job description first.')
+   }
+
+   const { data: { session } } = await supabase.auth.getSession()
+   const token = session?.access_token || null
+
+   // We pass the resume data as the "bullet" and JD as "jobTitle" for simplicity in the proxy
+   const response = await fetch('/api/enhance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+         bullet: JSON.stringify(resumeData), 
+         jobTitle: jobDescription, 
+         mode: 'match_jd', 
+         token 
+      }),
+   })
+
+   const data = await response.json()
+   if (!response.ok) throw new Error(data.error || 'Job matching failed.')
+
+   if (data.uses_left !== undefined) setAIUsesLeft(data.uses_left)
+   return data.result
+}
+
 export async function enhanceBullet(bullet, jobTitle = '', company = '', isSummary = false, mode = null) {
    if (!bullet.trim()) {
       throw new Error('Please write something in the bullet first.')

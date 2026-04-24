@@ -91,6 +91,26 @@ Rules:
 - Length: Polished paragraph (2-4 sentences).
 - Focus: Use sophisticated verbs and technical keywords. Highlight "the why" behind the actions.
 - Output ONLY the rewritten paragraph starting with 'DESCRIPTION: '. No explanation, no intro text.`
+   } else if (effectiveMode === 'generate_summary') {
+      prompt = `You are a world-class career coach. Based on the following work experience, write a powerful, 3-sentence professional summary for a resume. 
+Rules:
+- Prefix: Start with 'SUMMARY: '
+- Focus: Highlight key achievements, core skills, and professional value.
+- Style: Professional, punchy, and achievement-oriented.
+- Length: Exactly 3 sentences.
+- Output ONLY the summary starting with 'SUMMARY: '. No explanation.`
+   } else if (effectiveMode === 'match_jd') {
+      prompt = `You are a senior recruitment specialist. Analyze the provided resume (JSON format) against the job description (provided in 'Context').
+Rules:
+1. Identify 5-8 "Missing Keywords" that are in the JD but not prominent in the resume.
+2. Suggest 3 "Suggested Highlights" — specific areas of the user's experience that they should emphasize or add to better match this JD.
+Format the output EXACTLY like this:
+MISSING KEYWORDS: keyword1, keyword2, keyword3, ...
+SUGGESTED HIGHLIGHTS:
+- suggestion 1
+- suggestion 2
+- suggestion 3
+Output ONLY this analysis. No intro or outro.`
    } else {
       prompt = `You are a top-tier career recruitment specialist. Rewrite the following job duty or accomplishment into a high-impact, results-driven resume bullet point.
 Rules:
@@ -144,7 +164,11 @@ Rewritten version:`
       }
 
       // Clean up the result by removing common prefixes
-      result = result.replace(/^(BULLET POINT|SUMMARY|DESCRIPTION):\s*/i, '')
+      result = result.replace(/^(BULLET POINT|SUMMARY|DESCRIPTION|MISSING KEYWORDS|SUGGESTED HIGHLIGHTS):\s*/i, (match) => {
+         // Keep the labels for JD matching since they are part of the structured output
+         if (match.toUpperCase().includes('MISSING') || match.toUpperCase().includes('SUGGESTED')) return match;
+         return '';
+      })
 
       return res.status(200).json({
          result,

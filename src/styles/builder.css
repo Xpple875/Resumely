@@ -832,13 +832,13 @@ select:focus {
    text-transform: uppercase;
 }
 
-.summary-toggle-btn.visible {
+.summary-toggle-btn.is-visible {
    color: var(--accent);
    background: var(--accent-soft);
    border-color: rgba(196, 98, 45, 0.2);
 }
 
-.summary-toggle-btn.hidden {
+.summary-toggle-btn.is-hidden {
    color: var(--text-light);
    background: var(--glass-surface);
    border-color: var(--glass-border);
@@ -879,13 +879,13 @@ select:focus {
    flex-shrink: 0;
 }
 
-.manager-summary-toggle.visible {
+.manager-summary-toggle.is-visible {
    color: var(--accent);
    border-color: rgba(196, 98, 45, 0.3);
    background: var(--accent-soft);
 }
 
-.manager-summary-toggle.hidden {
+.manager-summary-toggle.is-hidden {
    color: var(--text-light);
    border-color: var(--glass-border);
 }

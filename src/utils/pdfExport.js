@@ -192,31 +192,20 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
 
         const drawDynamicContacts = (colW, startX, py, size, col, alignCenter) => {
             let cx = startX;
-            let currentLineTextW = 0;
-            
             if (alignCenter) {
-                // simple centered text
                 const str = contactSet.map(c => c.t).join('     \xb7     ');
                 const cw = mainFont.widthOfTextAtSize(str, size);
                 drawText(str, startX + (colW / 2) - (cw / 2), py, mainFont, size, col);
                 return;
             }
-            
-            // Modern native wrap w/ SVG
             contactSet.forEach((item) => {
                 const textWidth = mainFont.widthOfTextAtSize(cleanText(item.t), size);
-                const blockWidth = textWidth + 24; // text + svg padding
-                
-                if (cx + blockWidth > startX + colW) {
-                    py -= 18; 
-                    cx = startX; 
-                }
-                
+                const blockWidth = textWidth + 24;
+                if (cx + blockWidth > startX + colW) { py -= 18; cx = startX; }
                 if (item.i) {
                    page.drawSvgPath(item.i, { x: cx, y: py + 8, color: col, scale: 0.045 });
                    cx += 14;
                 }
-                
                 drawText(item.t, cx, py, mainFont, size, col);
                 cx += textWidth + 20; 
             });
@@ -228,14 +217,96 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
             drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, serifFont, 32, C_WHITE);
             y -= 32;
             drawText(personal.title || '', ML, y, mainFont, 12, accent);
-            
             y = PH - 140 - 34;
             page.drawRectangle({ x: 0, y, width: PW, height: 34, color: rgb(0.94, 0.90, 0.87) });
-            
-            // dynamically measured contact row
             drawDynamicContacts(CW, ML, y + 13, 8.5, C_MID, false);
-            
             y = PH - 140 - 34 - 35;
+        } else if (template === 'elegant') {
+            y = PH - 60;
+            const name = (personal.name || 'YOUR NAME').toUpperCase();
+            const nameW = serifFont.widthOfTextAtSize(name, 34);
+            drawText(name, PW/2 - nameW/2, y, serifFont, 34, rgb(0.102, 0.090, 0.078));
+            y -= 32;
+            if (personal.title) {
+                const tText = personal.title.toUpperCase();
+                const tW = mainFont.widthOfTextAtSize(tText, 11);
+                drawText(tText, PW/2 - tW/2, y, mainFont, 11, accent);
+                y -= 22;
+            }
+            drawDynamicContacts(CW, ML, y, 9, C_MID, true);
+            y -= 25;
+            hline(y, 0.3, rgb(0.9, 0.9, 0.9));
+            y -= 35;
+        } else if (template === 'compact') {
+            // Sidebar rectangle background
+            page.drawRectangle({ x: 0, y: 0, width: 170, height: PH, color: rgb(0.96, 0.94, 0.92) });
+            y = PH - 60;
+            drawText((personal.name || 'YOUR NAME').toUpperCase(), 40, y, serifFont, 24, rgb(0.102, 0.090, 0.078));
+            y -= 22;
+            drawText(personal.title || '', 40, y, mainFont, 10, accent);
+            y -= 35;
+            
+            // Sidebar contacts
+            contactSet.forEach(c => {
+                drawText(c.t, 40, y, mainFont, 8, C_MID);
+                y -= 14;
+            });
+            y -= 20;
+
+            // Sidebar sections
+            ['skills', 'languages', 'interests'].forEach(key => {
+                const items = resumeData[key] || [];
+                if (!items.length) return;
+                const label = (sectionLabels[key] || key).toUpperCase();
+                drawText(label, 40, y, mainFontBold, 8, accent);
+                y -= 15;
+                items.forEach(it => {
+                    const str = typeof it === 'string' ? it : it.name;
+                    drawWrapped(str, 40, 100, mainFont, 8.5, C_BLACK, 11);
+                    y -= 2;
+                });
+                y -= 15;
+            });
+
+            // Reset Y for Main Column
+            y = PH - 60;
+            const mainX = 195;
+            const mainW = PW - mainX - MR;
+
+            if (personal.summary) {
+                drawText('PROFILE', mainX, y, mainFontBold, 10, accent);
+                y -= 6; hline(y, 0.3, rgb(0.9, 0.9, 0.9)); y -= 15;
+                drawWrapped(personal.summary, mainX, mainW, mainFont, 10, C_BLACK, 13);
+                y -= 20;
+            }
+
+            sectionOrder.filter(k => !['skills', 'languages', 'interests', 'summary'].includes(k)).forEach(key => {
+                const items = resumeData[key] || [];
+                if (!items.length) return;
+                const label = (sectionLabels[key] || key).toUpperCase();
+                drawText(label, mainX, y, mainFontBold, 10, accent);
+                y -= 6; hline(y, 0.3, rgb(0.9, 0.9, 0.9)); y -= 18;
+
+                items.forEach(item => {
+                    const title = item.title || item.degree || item.name || item.role;
+                    const date = [item.startDate, item.endDate].filter(Boolean).join(' – ') || item.date;
+                    if (title) {
+                        drawText(title, mainX, y, mainFontBold, 10, C_BLACK);
+                        if (date) drawTextRight(date, PW - MR, y, mainFont, 8.5, C_LIGHT);
+                        y -= 13;
+                    }
+                    const meta = [item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ');
+                    if (meta) { drawText(meta, mainX, y, mainFont, 9, C_MID); y -= 12; }
+                    if (item.description) { drawWrapped(item.description, mainX, mainW, mainFont, 9.5, C_BLACK, 12); }
+                    (item.bullets || []).forEach(b => {
+                        if (b?.trim()) drawWrapped(b, mainX + 10, mainW - 10, mainFont, 9.5, C_BLACK, 12, '-');
+                    });
+                    y -= 10;
+                });
+            });
+
+            // Skip standard content loop for compact since we handled it above
+            sectionOrder = []; 
         } else if (template === 'minimal') {
             y = PH - 60;
             drawText((personal.name || 'YOUR NAME').toUpperCase(), ML, y, serifFont, 28, accent);
@@ -260,13 +331,12 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
             y -= 14; hline(y, 1.2, rgb(0.102, 0.090, 0.078)); y -= 24;
         }
 
-        // ── CONTENT LOOP ──
+        // ── CONTENT LOOP (For non-compact templates) ──
         console.log('Rendering Content...');
         for (const key of sectionOrder) {
             const items = resumeData[key] || [];
             if (!items.length && key !== 'summary') continue;
             
-            // Graceful missing/cleared section label logic 
             const label = sectionLabels[key] !== undefined && String(sectionLabels[key]).trim() === '' 
                 ? 'GENERAL' 
                 : (sectionLabels[key] || (key.charAt(0).toUpperCase() + key.slice(1)));
@@ -274,15 +344,19 @@ export async function generatePDF(_element, resumeData, template = 'classic') {
             if (key === 'summary') {
                 if (personal.summary) {
                     drawSectionTitle(label);
-                    drawWrapped(personal.summary, (template === 'minimal' ? ML + 115 : ML), (template === 'minimal' ? CW - 110 : CW), mainFont, 10.5, rgb(0.102, 0.090, 0.078), 14.5);
+                    const isElegant = template === 'elegant';
+                    const sW = isElegant ? CW * 0.85 : (template === 'minimal' ? CW - 110 : CW);
+                    const sX = isElegant ? PW/2 - sW/2 : (template === 'minimal' ? ML + 115 : ML);
+                    drawWrapped(personal.summary, sX, sW, mainFont, 10.5, rgb(0.102, 0.090, 0.078), 14.5);
                     y -= 8;
                 }
                 continue;
             }
             
             drawSectionTitle(label);
-            const startX = (template === 'minimal' ? ML + 115 : ML);
-            const colW = (template === 'minimal' ? CW - 110 : CW);
+            const isElegant = template === 'elegant';
+            const startX = isElegant ? ML : (template === 'minimal' ? ML + 115 : ML);
+            const colW = isElegant ? CW : (template === 'minimal' ? CW - 110 : CW);
             
             if (['skills', 'interests', 'languages'].includes(key)) {
                 if (template === 'modern') {

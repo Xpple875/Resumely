@@ -75,7 +75,7 @@ const ClassicContent = ({ data, theme, innerRef }) => {
             </div>
          </div>
 
-         {personal.summary && (
+         {!personal.hideSummary && personal.summary && (
             <div style={{ marginBottom: '25px' }}>
                <div className="r-section-title" style={{ color: accentColor }}>SUMMARY</div>
                <p style={{ lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
@@ -155,7 +155,7 @@ const ModernContent = ({ data, theme, innerRef }) => {
             {personal.website && <span>{personal.website}</span>}
          </div>
 
-         {personal.summary && (
+         {!personal.hideSummary && personal.summary && (
             <div style={{ marginBottom: '25px' }}>
                <div className="rm-section-title" style={{ color: accentColor }}>SUMMARY</div>
                <p style={{ lineHeight: '1.6', margin: 0 }}>{personal.summary}</p>
@@ -237,7 +237,7 @@ const MinimalContent = ({ data, theme, innerRef }) => {
             </div>
          </div>
 
-         {personal.summary && (
+         {!personal.hideSummary && personal.summary && (
             <div className="rmin-section">
                <div className="rmin-section-title" style={{ color: accentColor }}>SUMMARY</div>
                <div>
@@ -247,6 +247,180 @@ const MinimalContent = ({ data, theme, innerRef }) => {
          )}
 
          {sectionOrder.map(key => renderSection(key))}
+      </div>
+   );
+};
+
+const ElegantContent = ({ data, theme, innerRef }) => {
+   const { personal, sectionOrder = [], sectionLabels = {} } = data;
+   const accentColor = theme.accentColor || '#C4622D';
+
+   const renderSection = (key) => {
+      const label = sectionLabels[key] || key.toUpperCase();
+      const items = data[key] || [];
+      if (items.length === 0) return null;
+
+      const isSimpleList = ['skills', 'interests', 'languages'].includes(key);
+
+      return (
+         <div key={key} style={{ marginBottom: '30px', textAlign: 'center' }}>
+            <div style={{ 
+               fontSize: '0.85rem', 
+               letterSpacing: '0.2em', 
+               color: accentColor, 
+               marginBottom: '12px',
+               fontWeight: 600
+            }}>
+               {label}
+            </div>
+            
+            {isSimpleList ? (
+               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+                  {items.map((item, i) => (
+                     <span key={i} style={{ fontSize: '0.95rem', color: '#444' }}>
+                        {typeof item === 'string' ? item : (item.name + (item.level ? ` (${item.level})` : ''))}
+                        {i < items.length - 1 ? '  ·  ' : ''}
+                     </span>
+                  ))}
+               </div>
+            ) : (
+               items.map((item, i) => (
+                  <div key={item.id || i} style={{ marginBottom: '20px' }}>
+                     <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '2px' }}>
+                        {item.title || item.degree || item.name || item.role}
+                     </div>
+                     <div style={{ color: accentColor, fontSize: '0.9rem', marginBottom: '6px', fontStyle: 'italic' }}>
+                        {[item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ')}
+                        { (item.startDate || item.date) && `  |  ${item.startDate ? `${item.startDate} — ${item.endDate || 'Present'}` : item.date}` }
+                     </div>
+                     {item.description && <p style={{ margin: '0 auto', maxWidth: '90%', lineHeight: '1.6' }}>{item.description}</p>}
+                     {item.bullets && item.bullets.length > 0 && item.bullets[0] !== '' && (
+                        <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0 0' }}>
+                           {item.bullets.filter(b => b && b.trim()).map((b, idx) => (
+                              <li key={idx} style={{ lineHeight: '1.5', marginBottom: '4px' }}>— {b}</li>
+                           ))}
+                        </ul>
+                     )}
+                  </div>
+               ))
+            )}
+            <div style={{ width: '40px', height: '1px', background: '#ddd', margin: '25px auto 0' }} />
+         </div>
+      );
+   };
+
+   return (
+      <div ref={innerRef} className="resume-elegant resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, textAlign: 'center', paddingTop: '10mm' }}>
+         <div style={{ marginBottom: '40px' }}>
+            <h1 style={{ fontSize: '2.8rem', fontWeight: 'normal', margin: '0 0 10px 0', letterSpacing: '0.05em' }}>{personal.name || 'YOUR NAME'}</h1>
+            {personal.title && <div style={{ fontSize: '1.1rem', color: accentColor, letterSpacing: '0.15em', marginBottom: '20px' }}>{personal.title.toUpperCase()}</div>}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '0.85rem', color: '#666' }}>
+               {personal.email && <span>{personal.email}</span>}
+               {personal.phone && <span>{personal.phone}</span>}
+               {personal.location && <span>{personal.location}</span>}
+            </div>
+         </div>
+
+         {!personal.hideSummary && personal.summary && (
+            <div style={{ marginBottom: '35px' }}>
+               <p style={{ lineHeight: '1.8', margin: '0 auto', maxWidth: '85%', fontStyle: 'italic', fontSize: '1.05rem' }}>"{personal.summary}"</p>
+               <div style={{ width: '40px', height: '1px', background: '#ddd', margin: '30px auto 0' }} />
+            </div>
+         )}
+
+         {sectionOrder.map(key => renderSection(key))}
+      </div>
+   );
+};
+
+const CompactContent = ({ data, theme, innerRef }) => {
+   const { personal, sectionOrder = [], sectionLabels = {} } = data;
+   const accentColor = theme.accentColor || '#C4622D';
+
+   const renderSidebarSection = (key) => {
+      const label = sectionLabels[key] || key.toUpperCase();
+      const items = data[key] || [];
+      if (items.length === 0) return null;
+
+      return (
+         <div key={key} style={{ marginBottom: '25px' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: accentColor, letterSpacing: '0.1em', marginBottom: '10px' }}>{label}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+               {items.map((item, i) => (
+                  <div key={i} style={{ fontSize: '0.85rem', lineHeight: '1.4' }}>
+                     {typeof item === 'string' ? item : (
+                        <div>
+                           <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                           {item.level && <div style={{ opacity: 0.7, fontSize: '0.75rem' }}>{item.level}</div>}
+                        </div>
+                     )}
+                  </div>
+               ))}
+            </div>
+         </div>
+      );
+   };
+
+   const renderMainSection = (key) => {
+      const label = sectionLabels[key] || key.toUpperCase();
+      const items = data[key] || [];
+      if (items.length === 0 || ['skills', 'languages', 'interests'].includes(key)) return null;
+
+      return (
+         <div key={key} style={{ marginBottom: '25px' }}>
+            <div style={{ fontSize: '1rem', fontWeight: 'bold', borderBottom: `1px solid #eee`, paddingBottom: '4px', marginBottom: '12px' }}>{label}</div>
+            {items.map((item, i) => (
+               <div key={i} style={{ marginBottom: '15px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '0.95rem' }}>
+                     <span>{item.title || item.degree || item.name || item.role}</span>
+                     <span style={{ fontWeight: 'normal', fontSize: '0.8rem', color: '#888' }}>{item.startDate ? `${item.startDate} — ${item.endDate || 'Present'}` : item.date}</span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: accentColor, marginBottom: '4px' }}>
+                     {[item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(' · ')}
+                  </div>
+                  {item.description && <p style={{ fontSize: '0.9rem', margin: '4px 0', lineHeight: '1.4' }}>{item.description}</p>}
+                  {item.bullets && item.bullets.length > 0 && item.bullets[0] !== '' && (
+                     <ul style={{ paddingLeft: '15px', margin: '4px 0', fontSize: '0.88rem' }}>
+                        {item.bullets.filter(b => b && b.trim()).map((b, idx) => (
+                           <li key={idx} style={{ marginBottom: '2px' }}>{b}</li>
+                        ))}
+                     </ul>
+                  )}
+               </div>
+            ))}
+         </div>
+      );
+   };
+
+   return (
+      <div ref={innerRef} className="resume-compact resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, display: 'flex', gap: '30px', paddingTop: '10mm' }}>
+         {/* Sidebar */}
+         <div style={{ width: '180px', flexShrink: 0 }}>
+            <div style={{ marginBottom: '30px' }}>
+               <h1 style={{ fontSize: '1.8rem', lineHeight: '1.1', marginBottom: '10px' }}>{personal.name || 'YOUR NAME'}</h1>
+               <div style={{ fontSize: '0.9rem', color: accentColor, fontWeight: 500 }}>{personal.title}</div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.8rem', color: '#555', marginBottom: '30px' }}>
+               {personal.email && <div style={{ overflowWrap: 'anywhere' }}>{personal.email}</div>}
+               {personal.phone && <div>{personal.phone}</div>}
+               {personal.location && <div>{personal.location}</div>}
+               {personal.website && <div style={{ color: accentColor }}>{personal.website.replace(/^https?:\/\//, '')}</div>}
+            </div>
+
+            {['skills', 'languages', 'interests'].map(key => renderSidebarSection(key))}
+         </div>
+
+         {/* Main Content */}
+         <div style={{ flex: 1 }}>
+            {!personal.hideSummary && personal.summary && (
+               <div style={{ marginBottom: '25px' }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 'bold', borderBottom: `1px solid #eee`, paddingBottom: '4px', marginBottom: '8px' }}>PROFILE</div>
+                  <p style={{ fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>{personal.summary}</p>
+               </div>
+            )}
+            {sectionOrder.map(key => renderMainSection(key))}
+         </div>
       </div>
    );
 };
@@ -261,6 +435,8 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
 
    if (template === 'modern') return <ModernContent data={data} theme={resolvedTheme} innerRef={ref} />;
    if (template === 'minimal') return <MinimalContent data={data} theme={resolvedTheme} innerRef={ref} />;
+   if (template === 'elegant') return <ElegantContent data={data} theme={resolvedTheme} innerRef={ref} />;
+   if (template === 'compact') return <CompactContent data={data} theme={resolvedTheme} innerRef={ref} />;
    return <ClassicContent data={data} theme={resolvedTheme} innerRef={ref} />;
 });
 

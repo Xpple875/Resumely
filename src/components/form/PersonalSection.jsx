@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import SectionWrapper from './SectionWrapper.jsx'
-import { enhanceBullet, getAIUsesLeft } from '../../services/aiService.js'
+import { enhanceBullet, generateSummary, getAIUsesLeft } from '../../services/aiService.js'
 
-export default function PersonalSection({ data, onChange, onToast }) {
+export default function PersonalSection({ data, fullData, onChange, onToast }) {
   const [enhancing, setEnhancing] = useState(false)
+  const [generating, setGenerating] = useState(false)
   const set = (key, val) => onChange({ ...data, [key]: val })
 
   const handleEnhanceSummary = async () => {
@@ -26,6 +27,24 @@ export default function PersonalSection({ data, onChange, onToast }) {
       onToast(err.message || 'Enhancement failed — try again.', 'error')
     } finally {
       setEnhancing(false)
+    }
+  }
+
+  const handleGenerateSummary = async () => {
+    if (!fullData?.experience || fullData.experience.length === 0) {
+      onToast('Please add some work experience first so the AI can write a summary.', 'error')
+      return
+    }
+    setGenerating(true)
+    try {
+      const result = await generateSummary(fullData.experience, data.title)
+      set('summary', result)
+      const left = getAIUsesLeft()
+      onToast(`Summary generated! ${left} AI uses left.`, 'success')
+    } catch (err) {
+      onToast(err.message || 'Generation failed.', 'error')
+    } finally {
+      setGenerating(false)
     }
   }
 
@@ -83,7 +102,7 @@ export default function PersonalSection({ data, onChange, onToast }) {
             </span>
           </div>
           <button
-            className={`summary-toggle-btn ${hideSummary ? 'hidden' : 'visible'}`}
+            className={`summary-toggle-btn ${hideSummary ? 'is-hidden' : 'is-visible'}`}
             onClick={() => set('hideSummary', !hideSummary)}
             title={hideSummary ? 'Show summary on resume' : 'Hide summary from resume'}
             type="button"
@@ -99,14 +118,26 @@ export default function PersonalSection({ data, onChange, onToast }) {
           onChange={e => set('summary', e.target.value)}
           style={{ opacity: hideSummary ? 0.45 : 1, transition: 'opacity 0.2s ease' }}
         />
-        <button
-          className="enhance-btn"
-          onClick={handleEnhanceSummary}
-          disabled={enhancing || hideSummary}
-          title="Rewrite summary with AI"
-        >
-          {enhancing ? <><SpinnerIcon /> Enhancing...</> : <><SparkleIcon /> Enhance with AI</>}
-        </button>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+          <button
+            className="enhance-btn"
+            onClick={handleEnhanceSummary}
+            disabled={enhancing || generating || hideSummary}
+            title="Rewrite current summary with AI"
+            style={{ flex: 1 }}
+          >
+            {enhancing ? <><SpinnerIcon /> Enhancing...</> : <><SparkleIcon /> Enhance with AI</>}
+          </button>
+          <button
+            className="enhance-btn"
+            onClick={handleGenerateSummary}
+            disabled={enhancing || generating || hideSummary}
+            title="Generate a new summary from experience"
+            style={{ flex: 1, background: 'var(--accent-soft)', color: 'var(--accent)' }}
+          >
+            {generating ? <><SpinnerIcon /> Generating...</> : <><SparkleIcon /> Generate with AI</>}
+          </button>
+        </div>
       </div>
     </SectionWrapper>
   )

@@ -9,9 +9,21 @@ export const TEMPLATES = [
     tag: 'Most Popular',
   },
   {
+    id: 'elegant',
+    name: 'Elegant',
+    description: 'Centered luxury layout with sophisticated serif typography. Perfect for executives.',
+    tag: 'Premium',
+  },
+  {
     id: 'modern',
     name: 'Modern',
     description: 'Accent sidebar, bold name treatment. Stands out while staying ATS-safe.',
+    tag: null,
+  },
+  {
+    id: 'compact',
+    name: 'Compact',
+    description: 'Two-column powerhouse. Packs maximum information without looking cluttered.',
     tag: 'New',
   },
   {
@@ -73,6 +85,44 @@ export default function TemplatePage({ selected, onSelect, onContinue }) {
 
 // Tiny SVG sketch of each template layout — purely decorative
 function TemplatePreview({ id }) {
+  if (id === 'elegant') return (
+    <svg viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+      <rect width="160" height="200" fill="#FDFAF7"/>
+      <rect x="35" y="18" width="90" height="8" rx="1" fill="#1A1714"/>
+      <rect x="55" y="30" width="50" height="3" rx="0.5" fill="#C4622D"/>
+      <rect x="40" y="38" width="80" height="2" rx="0.5" fill="#A09894"/>
+      <rect x="65" y="54" width="30" height="3" rx="0.5" fill="#C4622D"/>
+      <line x1="60" y1="62" x2="100" y2="62" stroke="#E2DAD4" strokeWidth="0.5"/>
+      <rect x="30" y="70" width="100" height="3" rx="1" fill="#1A1714"/>
+      <rect x="30" y="78" width="100" height="2" rx="1" fill="#6B6460" opacity="0.6"/>
+      <rect x="30" y="83" width="90" height="2" rx="1" fill="#6B6460" opacity="0.6"/>
+      <rect x="65" y="100" width="30" height="3" rx="0.5" fill="#C4622D"/>
+      <line x1="60" y1="108" x2="100" y2="108" stroke="#E2DAD4" strokeWidth="0.5"/>
+      <rect x="30" y="115" width="100" height="3" rx="1" fill="#1A1714"/>
+    </svg>
+  )
+  if (id === 'compact') return (
+    <svg viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+      <rect width="160" height="200" fill="#FDFAF7"/>
+      <rect width="50" height="200" fill="#F6F1EC"/>
+      <rect x="8" y="15" width="34" height="6" rx="1" fill="#1A1714"/>
+      <rect x="8" y="25" width="25" height="2.5" rx="1" fill="#C4622D"/>
+      <rect x="8" y="35" width="34" height="2" rx="1" fill="#A09894" opacity="0.8"/>
+      <rect x="8" y="40" width="34" height="2" rx="1" fill="#A09894" opacity="0.8"/>
+      <rect x="8" y="55" width="20" height="2.5" rx="1" fill="#C4622D"/>
+      <rect x="8" y="62" width="34" height="2" rx="0.5" fill="#6B6460"/>
+      <rect x="8" y="67" width="30" height="2" rx="0.5" fill="#6B6460"/>
+      <rect x="60" y="15" width="30" height="2.5" rx="1" fill="#A09894"/>
+      <line x1="60" y1="22" x2="150" y2="22" stroke="#E2DAD4" strokeWidth="0.5"/>
+      <rect x="60" y="30" width="80" height="3" rx="1" fill="#1A1714"/>
+      <rect x="60" y="38" width="90" height="2" rx="1" fill="#6B6460" opacity="0.6"/>
+      <rect x="60" y="43" width="70" height="2" rx="1" fill="#6B6460" opacity="0.6"/>
+      <rect x="60" y="55" width="30" height="2.5" rx="1" fill="#A09894"/>
+      <line x1="60" y1="62" x2="150" y2="62" stroke="#E2DAD4" strokeWidth="0.5"/>
+      <rect x="60" y="68" width="50" height="3" rx="1" fill="#1A1714"/>
+      <rect x="130" y="68" width="20" height="2" rx="1" fill="#A09894"/>
+    </svg>
+  )
   if (id === 'classic') return (
     <svg viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
       <rect width="160" height="200" fill="#FDFAF7"/>

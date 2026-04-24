@@ -73,7 +73,7 @@ export async function markUserAsPaid(userId) {
 export async function getUserDocuments(userId) {
   const { data, error } = await supabase
     .from('documents')
-    .select('id, name, updated_at')
+    .select('id, name, updated_at, views_count')
     .eq('user_id', userId)
     .order('updated_at', { ascending: false })
 
@@ -106,6 +106,46 @@ export async function createDocument(userId, name, resumeData) {
 
   if (error) throw error
   return data.id
+}
+
+export async function duplicateDocument(docId, userId) {
+  // 1. Fetch original
+  const { data: original, error: fetchErr } = await supabase
+    .from('documents')
+    .select('*')
+    .eq('id', docId)
+    .single()
+  
+  if (fetchErr) throw fetchErr
+
+  // 2. Insert copy
+  const { data: copy, error: insertErr } = await supabase
+    .from('documents')
+    .insert([{
+      user_id: userId,
+      name: `${original.name || 'Untitled'} (Copy)`,
+      resume_data: original.resume_data,
+      is_public: false, // Default to private for copies
+      views_count: 0,   // Reset view count
+      updated_at: new Date().toISOString()
+    }])
+    .select('id')
+    .single()
+
+  if (insertErr) throw insertErr
+  return copy.id
+}
+
+export async function incrementViewCount(docId) {
+  // We use an RPC or a direct update. Direct update is simpler for now.
+  // Note: This is an optimistic increment.
+  const { data, error } = await supabase.rpc('increment_document_views', { doc_id: docId })
+  
+  // If RPC doesn't exist, fallback to direct update (less atomic but works)
+  if (error) {
+     const { data: current } = await supabase.from('documents').select('views_count').eq('id', docId).single()
+     await supabase.from('documents').update({ views_count: (current?.views_count || 0) + 1 }).eq('id', docId)
+  }
 }
 
 export async function updateDocument(docId, name, resumeData, isPublic) {

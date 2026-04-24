@@ -80,7 +80,7 @@ export default function SectionManager({ order, labels, onOrderChange, onLabelCh
                       {hideSummary ? 'Hidden from resume' : 'Visible on resume'}
                     </span>
                     <button
-                      className={`manager-summary-toggle ${hideSummary ? 'hidden' : 'visible'}`}
+                      className={`manager-summary-toggle ${hideSummary ? 'is-hidden' : 'is-visible'}`}
                       onClick={(e) => { e.stopPropagation(); onToggleSummary(!hideSummary) }}
                       title={hideSummary ? 'Show summary' : 'Hide summary'}
                       type="button"

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { getUserDocuments, createDocument, deleteDocument, deleteUserAccount } from '../services/supabaseClient'
+import { getUserDocuments, createDocument, deleteDocument, deleteUserAccount, duplicateDocument, getDocumentById } from '../services/supabaseClient'
 import { defaultResumeData } from '../utils/defaultData'
-import '../styles/landing.css' // Reuse landing styles or global styles
+import { generatePDF } from '../utils/pdfExport'
+import '../styles/landing.css'
 
 export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
+  const [isDuplicating, setIsDuplicating] = useState(null) // docId being duplicated
+  const [isDownloading, setIsDownloading] = useState(null) // docId being downloaded
   const [deleteModalDoc, setDeleteModalDoc] = useState(null)
 
   useEffect(() => {
@@ -38,6 +41,37 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
       alert("Database Error: " + (err.message || 'Check browser console'))
     } finally {
       setIsCreating(false)
+    }
+  }
+
+  const handleDuplicate = async (e, docId) => {
+    e.stopPropagation()
+    try {
+      setIsDuplicating(docId)
+      const newId = await duplicateDocument(docId, user.id)
+      await loadDocs()
+    } catch (err) {
+      console.error("Duplication failed", err)
+      alert("Failed to duplicate resume.")
+    } finally {
+      setIsDuplicating(null)
+    }
+  }
+
+  const handleDirectDownload = async (e, doc) => {
+    e.stopPropagation()
+    try {
+      setIsDownloading(doc.id)
+      // We need the full resume_data to generate PDF
+      const fullDoc = await getDocumentById(doc.id)
+      if (fullDoc?.resume_data) {
+        await generatePDF(null, fullDoc.resume_data, fullDoc.template || 'classic')
+      }
+    } catch (err) {
+      console.error("Direct download failed", err)
+      alert("Failed to download PDF.")
+    } finally {
+      setIsDownloading(null)
     }
   }
 
@@ -216,9 +250,36 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>
                            Updated: {new Date(doc.updated_at).toLocaleDateString()}
                         </p>
+                        {doc.views_count > 0 && (
+                           <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 600 }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                              {doc.views_count} Views
+                           </div>
+                        )}
                      </div>
                      
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', borderTop: '1px solid var(--glass-border)', paddingTop: '15px' }}>
+                     <div className="resume-card-actions" style={{ display: 'flex', gap: '8px', marginBottom: '15px' }}>
+                        <button 
+                           className="btn btn-ghost" 
+                           onClick={(e) => handleDirectDownload(e, doc)}
+                           disabled={isDownloading === doc.id}
+                           style={{ flex: 1, fontSize: '0.75rem', padding: '6px' }}
+                           title="Download PDF"
+                        >
+                           {isDownloading === doc.id ? '...' : 'Download'}
+                        </button>
+                        <button 
+                           className="btn btn-ghost" 
+                           onClick={(e) => handleDuplicate(e, doc.id)}
+                           disabled={isDuplicating === doc.id}
+                           style={{ flex: 1, fontSize: '0.75rem', padding: '6px' }}
+                           title="Duplicate Resume"
+                        >
+                           {isDuplicating === doc.id ? '...' : 'Duplicate'}
+                        </button>
+                     </div>
+                     
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--glass-border)', paddingTop: '15px' }}>
                         <span style={{ fontSize: '0.9rem', color: 'var(--accent)', fontWeight: 600 }}>Open Editor →</span>
                         <button 
                            onClick={(e) => confirmDelete(e, doc)}
@@ -298,10 +359,10 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut }) {
                  </button>
                  <button 
                     className="btn btn-primary" 
-                    style={{ flex: 1, background: '#e74c3c' }} 
+                    style={{ flex: 1, background: '#e11d48', color: 'white', border: 'none' }} 
                     onClick={handleDelete}
                  >
-                    Delete Forever
+                    Delete
                  </button>
               </div>
            </div>

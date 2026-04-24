@@ -12,6 +12,7 @@ import VolunteerSection from './form/VolunteerSection.jsx'
 import InterestSection from './form/InterestSection.jsx'
 import ReferenceSection from './form/ReferenceSection.jsx'
 import CompletenessScore from './form/CompletenessScore.jsx'
+import JDMatcher from './form/JDMatcher.jsx'
 import { getAIUsesLeft, enhanceBullet, useAILimits } from '../services/aiService.js'
 
 export default function ResumeForm({ data, onChange, onToast }) {
@@ -93,6 +94,8 @@ export default function ResumeForm({ data, onChange, onToast }) {
          </button>
       </div>
 
+      <JDMatcher resumeData={data} onToast={onToast} />
+
       <SectionManager 
         order={data.sectionOrder}
         labels={data.sectionLabels}
@@ -107,6 +110,7 @@ export default function ResumeForm({ data, onChange, onToast }) {
       />
       <PersonalSection
         data={data.personal}
+        fullData={data}
         onChange={val => update('personal', val)}
         onToast={onToast}
       />

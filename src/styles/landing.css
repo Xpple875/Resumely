@@ -180,6 +180,41 @@
   .landing-page .feature-card.wide > div { text-align: left !important; }
 }
 
+/* ── MODALS & OVERLAYS ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeInModal 0.3s ease;
+}
+
+.modal-content {
+  background: var(--lp-bg-card);
+  padding: 40px;
+  border-radius: var(--lp-radius-lg, 12px);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  border: 1px solid var(--lp-border);
+  animation: scaleInModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleInModal {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
 @media (max-width: 680px) {
   .landing-page nav { padding: 0 1.2rem; }
   .landing-page .nav-link { display: none; }

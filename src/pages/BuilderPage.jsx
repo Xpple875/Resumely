@@ -10,7 +10,7 @@ import { generatePDF } from '../utils/pdfExport.js'
 import { defaultResumeData } from '../utils/defaultData.js'
 import { loadDraft, saveDraft } from '../hooks/useAutosave.js'
 import { useToast } from '../hooks/useToast.js'
-import { getDocumentById, createDocument, updateDocument, loadResumeFromCloud, markUserAsPaid, deleteUserAccount } from '../services/supabaseClient'
+import { getDocumentById, createDocument, updateDocument, loadResumeFromCloud, markUserAsPaid, deleteUserAccount, incrementViewCount } from '../services/supabaseClient'
 import TemplateModal from '../components/TemplateModal.jsx'
 import '../styles/builder.css'
 
@@ -26,7 +26,7 @@ function mergeWithDefaults(cloudData) {
    }
 }
 
-export default function BuilderPage({ template, onChangeTemplate, unlocked, setUnlocked, user, onSignOut, onSignIn, theme, setTheme, activeDocumentId, onDocumentCreated, onReturnToDashboard }) {
+export default function BuilderPage({ template, onChangeTemplate, unlocked, setUnlocked, user, onSignOut, onSignIn, theme, setTheme, activeDocumentId, isPublicView, onDocumentCreated, onReturnToDashboard }) {
    const [resumeData, setResumeData] = useState(() => {
       const draft = loadDraft()
       if (!draft) return defaultResumeData
@@ -82,7 +82,12 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       } else {
          setIsCloudLoading(false)
       }
-   }, [user?.id, activeDocumentId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+      // ── Analytics ──
+      if (isPublicView && activeDocumentId) {
+         incrementViewCount(activeDocumentId).catch(e => console.error("Analytics failed:", e))
+      }
+   }, [user?.id, activeDocumentId, isPublicView]) // eslint-disable-line react-hooks/exhaustive-deps
 
    // ── Actual PDF generation ──
    const doDownload = () => {
@@ -157,27 +162,30 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       const action = pendingAction
       setPendingAction(null)
 
-      if (action === 'save') {
-         // Guest user created something locally, signed up, and wants to save it
-         await doCloudSave(newUser)
+      // 1. Universal Guest Sync: If no cloud doc ID, save local work to account
+      if (!activeDocumentId && newUser) {
+         try {
+            const newId = await createDocument(newUser.id, documentName, resumeData)
+            if (onDocumentCreated) onDocumentCreated(newId)
+            localStorage.removeItem('resume_draft')
+            showToast('Guest draft synced to account ✓', 'success')
+         } catch(e) {
+            console.error("Auto-sync failed:", e)
+         }
+      }
 
+      // 2. Handle specific button action
+      if (action === 'save') {
+         await doCloudSave(newUser)
       } else if (action === 'download') {
          setIsCloudLoading(true)
          try {
-            // First time guest logs in to download, check if they are paid on their account profile
             const profile = await loadResumeFromCloud(newUser.id)
             if (profile?.is_paid) {
                if (setUnlocked) setUnlocked(true)
                doDownload()
             } else {
                setShowDonationModal(true)
-            }
-            
-            // Auto-save their guest work as a new document so they don't lose it
-            if (!activeDocumentId) {
-               const newId = await createDocument(newUser.id, documentName, resumeData)
-               if (onDocumentCreated) onDocumentCreated(newId)
-               showToast('Saved to cloud.', 'success')
             }
          } catch (err) {
             console.error('Could not check paid status:', err)

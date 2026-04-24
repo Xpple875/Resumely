@@ -103,7 +103,7 @@ export default function ExperienceSection({ data, onChange, onToast }) {
               return (
                         <div key={bIdx} className="bullet-item">
                             <div className="bullet-item__header">
-                                <label className="bullet-label">Bullet {bIdx + 1}</label>
+                                <span className="bullet-label">Bullet {bIdx + 1}</span>
                                 <button
                                     className="bullet-item__remove"
                                     onClick={() => removeBullet(idx, bIdx)}
