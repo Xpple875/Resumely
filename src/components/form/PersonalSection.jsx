@@ -77,6 +77,7 @@ export default function PersonalSection({ data, fullData, onChange, onToast }) {
       <div className="field-row">
         <div className="field">
           <label>Location</label>
+
           <input type="text" placeholder="New York, NY"
             value={data.location} onChange={e => set('location', e.target.value)} />
         </div>
@@ -86,11 +87,31 @@ export default function PersonalSection({ data, fullData, onChange, onToast }) {
             value={data.linkedin} onChange={e => set('linkedin', e.target.value)} />
         </div>
       </div>
-      <div className="field">
-        <label>Website / Portfolio</label>
-        <input type="url" placeholder="alexjohnson.dev"
-          value={data.website} onChange={e => set('website', e.target.value)} />
+      <div className="field-row">
+        <div className="field">
+          <label>GitHub</label>
+          <input type="url" placeholder="github.com/alex"
+            value={data.github} onChange={e => set('github', e.target.value)} />
+        </div>
+        <div className="field">
+          <label>Twitter / X</label>
+          <input type="url" placeholder="x.com/alex"
+            value={data.twitter} onChange={e => set('twitter', e.target.value)} />
+        </div>
       </div>
+      <div className="field-row">
+        <div className="field">
+          <label>Website / Portfolio</label>
+          <input type="url" placeholder="alexjohnson.dev"
+            value={data.website} onChange={e => set('website', e.target.value)} />
+        </div>
+        <div className="field">
+          <label>Other Portfolio</label>
+          <input type="url" placeholder="behance.net/alex"
+            value={data.portfolio} onChange={e => set('portfolio', e.target.value)} />
+        </div>
+      </div>
+
 
       {/* Summary field with inline visibility toggle */}
       <div className="field">

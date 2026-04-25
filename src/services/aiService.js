@@ -113,3 +113,45 @@ export async function enhanceBullet(bullet, jobTitle = '', company = '', isSumma
 
    return data.result
 }
+export async function parseResumeText(text) {
+   if (!text.trim()) {
+      throw new Error('No text found to parse.')
+   }
+
+   const { data: { session } } = await supabase.auth.getSession()
+   const token = session?.access_token || null
+
+   const response = await fetch('/api/enhance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+         bullet: text, 
+         mode: 'parse_resume', 
+         token 
+      }),
+   })
+
+   const data = await response.json()
+   if (!response.ok) throw new Error(data.error || 'Resume parsing failed.')
+
+   if (data.uses_left !== undefined) setAIUsesLeft(data.uses_left)
+   
+   // The result should be a JSON string that we can parse
+   try {
+      const cleanJson = extractJSON(data.result)
+      return JSON.parse(cleanJson)
+   } catch (e) {
+      console.error("AI returned invalid JSON", data.result)
+      throw new Error("Failed to parse the AI response. Please try again.")
+   }
+}
+
+function extractJSON(str) {
+   if (!str) return ""
+   // Find the first { and the last }
+   const start = str.indexOf('{')
+   const end = str.lastIndexOf('}')
+   if (start === -1 || end === -1) return str
+   return str.substring(start, end + 1)
+}
+

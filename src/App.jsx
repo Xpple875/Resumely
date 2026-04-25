@@ -25,6 +25,9 @@ export default function App() {
    const [showUpdatePassword, setShowUpdatePassword] = useState(false)
    const [isCreatingFromDashboard, setIsCreatingFromDashboard] = useState(false)
    const [isCreatingInCloud, setIsCreatingInCloud] = useState(false)
+   const [importData, setImportData] = useState(null)
+   const [importName, setImportName] = useState('')
+
 
    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light')
 
@@ -57,8 +60,11 @@ export default function App() {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
          setUser(session?.user ?? null)
          if (event === 'SIGNED_IN' && session?.user) {
-            setView('dashboard')
+            // Only redirect to dashboard if we're on landing page. 
+            // This allows builder/template views to persist on refresh.
+            setView(prev => (prev === 'landing' || !prev) ? 'dashboard' : prev)
          }
+
          if (event === 'PASSWORD_RECOVERY') {
             setShowUpdatePassword(true)
          }
@@ -90,9 +96,13 @@ export default function App() {
       if (isCreatingFromDashboard && user) {
          setIsCreatingInCloud(true)
          try {
-            const newId = await createDocument(user.id, "Untitled Resume", defaultResumeData, template)
+            const dataToSave = importData || defaultResumeData
+            const nameToSave = importName || "Untitled Resume"
+            const newId = await createDocument(user.id, nameToSave, dataToSave, template)
             setActiveDocumentId(newId)
             setIsCreatingFromDashboard(false)
+            setImportData(null)
+            setImportName('')
             setView('builder')
          } catch (err) {
             console.error("Failed to create doc:", err)
@@ -104,6 +114,14 @@ export default function App() {
          setView('builder')
       }
    }
+
+   const handleImportComplete = (data, name) => {
+      setImportData(data)
+      setImportName(name)
+      setIsCreatingFromDashboard(true)
+      setView('template')
+   }
+
 
    const handleCreateNewFromDashboard = () => {
       setIsCreatingFromDashboard(true)
@@ -176,8 +194,10 @@ export default function App() {
                onOpenDocument={handleOpenDocument}
                onSignOut={handleSignOut}
                onCreateNew={handleCreateNewFromDashboard}
+               onImportComplete={handleImportComplete}
                onGoToLanding={() => setView('landing')}
             />
+
          ) : view === 'terms' ? (
             <TermsPage onBack={() => setView('landing')} />
          ) : view === 'privacy' ? (

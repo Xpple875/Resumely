@@ -11,12 +11,16 @@ import LanguageSection from './form/LanguageSection.jsx'
 import VolunteerSection from './form/VolunteerSection.jsx'
 import InterestSection from './form/InterestSection.jsx'
 import ReferenceSection from './form/ReferenceSection.jsx'
+import AwardsSection from './form/AwardsSection.jsx'
+import PublicationsSection from './form/PublicationsSection.jsx'
+import CoursesSection from './form/CoursesSection.jsx'
+
 import CompletenessScore from './form/CompletenessScore.jsx'
 import JDMatcher from './form/JDMatcher.jsx'
 import { getAIUsesLeft, enhanceBullet, useAILimits } from '../services/aiService.js'
 
-export default function ResumeForm({ data, onChange, onToast }) {
-  const [enhancingAll, setEnhancingAll] = React.useState(false)
+export default function ResumeForm({ data, onChange, onToast, onAILoadingChange }) {
+
 
   const update = (section, value) =>
     onChange(prev => ({ ...prev, [section]: value }))
@@ -28,7 +32,9 @@ export default function ResumeForm({ data, onChange, onToast }) {
       return;
     }
     
-    setEnhancingAll(true);
+    
+    onAILoadingChange(true);
+
     let enhancementsDone = 0;
     
     // We will clone data and mutate it directly for simplicity, then call onChange once
@@ -67,8 +73,9 @@ export default function ResumeForm({ data, onChange, onToast }) {
     } catch(err) {
        onToast('Batch enhancement failed.', 'error');
     } finally {
-       setEnhancingAll(false);
+       onAILoadingChange(false);
     }
+
   }
 
   const aiUses = useAILimits();
@@ -86,12 +93,13 @@ export default function ResumeForm({ data, onChange, onToast }) {
          </div>
          <button 
            onClick={handleEnhanceAll} 
-           disabled={enhancingAll || aiUses === 0}
+           disabled={aiUses === 0}
            className="btn btn-secondary" 
            style={{ padding: '6px 12px', fontSize: '12px', height: 'auto', background: 'var(--text)', color: 'var(--bg)' }}
          >
-           {enhancingAll ? 'Enhancing...' : 'Enhance All Bullets'}
+           Enhance All Bullets
          </button>
+
       </div>
 
       <JDMatcher resumeData={data} onToast={onToast} />
@@ -142,6 +150,21 @@ export default function ResumeForm({ data, onChange, onToast }) {
         onChange={val => update('certifications', val)}
         onToast={onToast}
       />
+      <AwardsSection 
+        data={data.awards}
+        onChange={val => update('awards', val)}
+        onToast={onToast}
+      />
+      <PublicationsSection 
+        data={data.publications}
+        onChange={val => update('publications', val)}
+        onToast={onToast}
+      />
+      <CoursesSection 
+        data={data.courses}
+        onChange={val => update('courses', val)}
+      />
+
       <LanguageSection 
         data={data.languages}
         onChange={val => update('languages', val)}

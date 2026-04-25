@@ -12,7 +12,8 @@ export default function VolunteerSection({ data, onChange, onToast }) {
 
   const handleEnhance = async (idx) => {
     const entry = data[idx]
-    if (!entry.description.trim()) {
+    if (!entry.description || !entry.description.trim()) {
+
       onToast('Write something in the description first.', 'error')
       return
     }

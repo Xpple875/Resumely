@@ -111,7 +111,56 @@ Rules:
 - Style: Professional, punchy, and achievement-oriented.
 - Length: Exactly 3 sentences.
 - Output ONLY the summary starting with 'SUMMARY: '. No explanation.`
+   } else if (effectiveMode === 'parse_resume') {
+      prompt = `You are an expert resume parser. Extract information from the provided raw text and return it EXACTLY in the following JSON format.
+Rules:
+1. Return ONLY the JSON object. No explanation, no intro.
+2. If a field is missing, use "" for strings or [] for arrays.
+3. Map experience, education, skills, projects, certifications, awards, publications, and courses.
+4. For experience and education, generate a unique "id" (e.g., "id_123") for each entry.
+
+Format:
+{
+  "personal": {
+    "name": "", "title": "", "email": "", "phone": "", "location": "", "linkedin": "", "github": "", "twitter": "", "portfolio": "", "website": "", "summary": ""
+  },
+  "experience": [
+    { "id": "", "title": "", "company": "", "location": "", "startDate": "", "endDate": "", "bullets": [""] }
+  ],
+  "education": [
+    { "id": "", "degree": "", "institution": "", "startDate": "", "endDate": "", "gpa": "" }
+  ],
+  "skills": [""],
+  "projects": [
+    { "id": "", "name": "", "url": "", "description": "" }
+  ],
+  "certifications": [
+    { "id": "", "name": "", "issuer": "", "date": "", "description": "" }
+  ],
+  "awards": [
+    { "id": "", "name": "", "issuer": "", "date": "", "description": "" }
+  ],
+  "publications": [
+    { "id": "", "title": "", "publisher": "", "date": "", "url": "", "description": "" }
+  ],
+  "courses": [
+    { "id": "", "name": "", "institution": "", "date": "" }
+  ],
+  "languages": [
+    { "id": "", "name": "", "level": "" }
+  ],
+  "volunteering": [
+    { "id": "", "role": "", "organization": "", "date": "", "description": "" }
+  ],
+  "interests": [
+    { "id": "", "name": "" }
+  ],
+  "references": [
+    { "id": "", "name": "", "title": "", "company": "", "contact": "" }
+  ]
+}`
    } else if (effectiveMode === 'match_jd') {
+
       prompt = `You are a senior recruitment specialist. Analyze the provided resume (JSON format) against the job description (provided in 'Context').
 Rules:
 1. Identify 5-8 "Missing Keywords" that are in the JD but not prominent in the resume.
@@ -133,12 +182,15 @@ Rules:
 - Output ONLY the rewritten bullet starting with 'BULLET POINT: '. No explanation, no intro text.`
    }
 
-   const finalPrompt = `${prompt}
+   let finalPrompt = `${prompt}
 
 ${context ? `Context: ${context}` : ''}
-Original text: ${bullet.trim()}
+Original text: ${bullet.trim()}`
 
-Rewritten version:`
+   if (effectiveMode !== 'parse_resume') {
+      finalPrompt += `\n\nRewritten version:`
+   }
+
 
    try {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -150,9 +202,10 @@ Rewritten version:`
          body: JSON.stringify({
             model: 'llama-3.3-70b-versatile',
             messages: [{ role: 'user', content: finalPrompt }],
-            temperature: 0.7,
-            max_tokens: 300,
+            temperature: 0.1, // Lower temperature for more consistent JSON
+            max_tokens: effectiveMode === 'parse_resume' ? 4000 : 1000,
          }),
+
       })
 
       const responseText = await response.text()

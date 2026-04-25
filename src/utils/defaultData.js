@@ -9,6 +9,9 @@ export const defaultResumeData = {
     phone: '',
     location: '',
     linkedin: '',
+    github: '',
+    twitter: '',
+    portfolio: '',
     website: '',
     summary: '',
     hideSummary: false,
@@ -42,17 +45,23 @@ export const defaultResumeData = {
   skills: [],
   projects: [],
   certifications: [],
+  awards: [],
+  publications: [],
+  courses: [],
   languages: [],
   volunteering: [],
   interests: [],
   references: [],
-  sectionOrder: ['summary', 'experience', 'education', 'skills', 'projects', 'certifications', 'languages', 'volunteering', 'interests', 'references'],
+  sectionOrder: ['summary', 'experience', 'education', 'skills', 'projects', 'certifications', 'awards', 'publications', 'courses', 'languages', 'volunteering', 'interests', 'references'],
   sectionLabels: {
     experience: 'Experience',
     education: 'Education',
     skills: 'Skills',
     projects: 'Projects',
     certifications: 'Certifications',
+    awards: 'Awards & Honors',
+    publications: 'Publications',
+    courses: 'Relevant Courses',
     languages: 'Languages',
     volunteering: 'Volunteering',
     interests: 'Interests',
@@ -94,6 +103,30 @@ export const newCertificationEntry = () => ({
   description: '',
 })
 
+export const newAwardEntry = () => ({
+  id: uid(),
+  name: '',
+  issuer: '',
+  date: '',
+  description: '',
+})
+
+export const newPublicationEntry = () => ({
+  id: uid(),
+  title: '',
+  publisher: '',
+  date: '',
+  url: '',
+  description: '',
+})
+
+export const newCourseEntry = () => ({
+  id: uid(),
+  name: '',
+  institution: '',
+  date: '',
+})
+
 export const newLanguageEntry = () => ({
   id: uid(),
   name: '',
@@ -120,3 +153,4 @@ export const newReferenceEntry = () => ({
   company: '',
   contact: '',
 })
+

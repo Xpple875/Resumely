@@ -71,7 +71,11 @@ const ClassicContent = ({ data, theme, innerRef }) => {
                {personal.phone && <span>📞 {personal.phone}</span>}
                {personal.location && <span>📍 {personal.location}</span>}
                {personal.linkedin && <span>🔗 {personal.linkedin}</span>}
+               {personal.github && <span>💻 {personal.github}</span>}
+               {personal.twitter && <span>🐦 {personal.twitter}</span>}
+               {personal.portfolio && <span>🎨 {personal.portfolio}</span>}
                {personal.website && <span>🌐 {personal.website}</span>}
+
             </div>
          </div>
 
@@ -152,7 +156,11 @@ const ModernContent = ({ data, theme, innerRef }) => {
             {personal.phone && <span>{personal.phone}</span>}
             {personal.location && <span>{personal.location}</span>}
             {personal.linkedin && <span>{personal.linkedin}</span>}
+            {personal.github && <span>{personal.github}</span>}
+            {personal.twitter && <span>{personal.twitter}</span>}
+            {personal.portfolio && <span>{personal.portfolio}</span>}
             {personal.website && <span>{personal.website}</span>}
+
          </div>
 
          {!personal.hideSummary && personal.summary && (
@@ -233,7 +241,11 @@ const MinimalContent = ({ data, theme, innerRef }) => {
                {personal.phone && <span>{personal.phone}</span>}
                {personal.location && <span>{personal.location}</span>}
                {personal.linkedin && <span>{personal.linkedin}</span>}
+               {personal.github && <span>{personal.github}</span>}
+               {personal.twitter && <span>{personal.twitter}</span>}
+               {personal.portfolio && <span>{personal.portfolio}</span>}
                {personal.website && <span>{personal.website}</span>}
+
             </div>
          </div>
 
@@ -319,7 +331,11 @@ const ElegantContent = ({ data, theme, innerRef }) => {
                {personal.phone && <span>{personal.phone}</span>}
                {personal.location && <span>{personal.location}</span>}
                {personal.linkedin && <span>{personal.linkedin}</span>}
+               {personal.github && <span>{personal.github}</span>}
+               {personal.twitter && <span>{personal.twitter}</span>}
+               {personal.portfolio && <span>{personal.portfolio}</span>}
                {personal.website && <span>{personal.website}</span>}
+
             </div>
          </div>
 
@@ -408,7 +424,11 @@ const CompactContent = ({ data, theme, innerRef }) => {
                {personal.phone && <div>{personal.phone}</div>}
                {personal.location && <div>{personal.location}</div>}
                {personal.linkedin && <div style={{ overflowWrap: 'anywhere' }}>{personal.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '')}</div>}
+               {personal.github && <div style={{ overflowWrap: 'anywhere' }}>{personal.github.replace(/^https?:\/\/github\.com\//, '')}</div>}
+               {personal.twitter && <div style={{ overflowWrap: 'anywhere' }}>{personal.twitter.replace(/^https?:\/\/(x|twitter)\.com\//, '')}</div>}
+               {personal.portfolio && <div style={{ overflowWrap: 'anywhere' }}>{personal.portfolio.replace(/^https?:\/\//, '')}</div>}
                {personal.website && <div style={{ color: accentColor }}>{personal.website.replace(/^https?:\/\//, '')}</div>}
+
             </div>
 
             {['skills', 'languages', 'interests'].map(key => renderSidebarSection(key))}

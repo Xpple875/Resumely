@@ -2,7 +2,8 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Bord
 import { saveAs } from "file-saver";
 
 export async function generateDOCX(resumeData) {
-  const { personal, experience = [], education = [], skills = [], certifications = [], projects = [], volunteer = [], languages = [], interests = [], sectionOrder = [], sectionLabels = {} } = resumeData;
+  const { personal, experience = [], education = [], skills = [], certifications = [], projects = [], volunteering = [], languages = [], interests = [], sectionOrder = [], sectionLabels = {} } = resumeData;
+
 
   const children = [];
 
@@ -41,13 +42,14 @@ export async function generateDOCX(resumeData) {
       alignment: AlignmentType.CENTER,
       children: [
         new TextRun({
-          text: [personal.linkedin, personal.website].filter(Boolean).join("  |  "),
+          text: [personal.linkedin, personal.github, personal.twitter, personal.portfolio, personal.website].filter(Boolean).join("  |  "),
           size: 18,
           color: "C4622D",
         }),
       ],
       spacing: { after: 400 },
     })
+
   );
 
   // ─── SUMMARY ───
@@ -92,8 +94,9 @@ export async function generateDOCX(resumeData) {
           }),
           new Paragraph({
             children: [
-              new TextRun({ text: [item.company, item.organization, item.institution, item.location, item.issuer].filter(Boolean).join(" · "), italic: true, size: 20, color: "444444" }),
+              new TextRun({ text: [item.company, item.organization, item.institution, item.location, item.issuer, item.publisher].filter(Boolean).join(" · "), italic: true, size: 20, color: "444444" }),
             ],
+
             spacing: { after: 120 },
           })
         );

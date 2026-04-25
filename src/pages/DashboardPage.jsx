@@ -3,10 +3,21 @@ import { getUserDocuments, createDocument, deleteDocument, deleteUserAccount, du
 import { defaultResumeData } from '../utils/defaultData'
 import { generatePDF } from '../utils/pdfExport'
 import { generateDOCX } from '../utils/docxExport'
+import { parseResumeText } from '../services/aiService'
 import DownloadOptionsModal from '../components/DownloadOptionsModal'
+import * as pdfjsLib from 'pdfjs-dist'
+import mammoth from 'mammoth'
 import '../styles/landing.css'
 
-export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreateNew, onGoToLanding }) {
+// Set up PDF.js worker using Vite's ?url import
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url'
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
+
+
+
+
+export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreateNew, onGoToLanding, onImportComplete }) {
+
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
@@ -15,6 +26,9 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
   const [showDownloadOptions, setShowDownloadOptions] = useState(false)
   const [selectedDoc, setSelectedDoc] = useState(null)
   const [deleteModalDoc, setDeleteModalDoc] = useState(null)
+  const [isParsing, setIsParsing] = useState(false)
+  const [parsingStep, setParsingStep] = useState('')
+
 
   useEffect(() => {
     if (!user) return
@@ -99,6 +113,78 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
     e.stopPropagation()
     setDeleteModalDoc(doc)
   }
+
+  const extractTextFromPDF = async (file) => {
+    const arrayBuffer = await file.arrayBuffer()
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+    let fullText = ""
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      const textContent = await page.getTextContent()
+      const pageText = textContent.items.map(item => item.str).join(' ')
+      fullText += pageText + "\n"
+    }
+    return fullText
+  }
+
+  const extractTextFromDOCX = async (file) => {
+    const arrayBuffer = await file.arrayBuffer()
+    const result = await mammoth.extractRawText({ arrayBuffer })
+    return result.value
+  }
+
+  const handleImportClick = () => {
+    document.getElementById('import-upload').click()
+  }
+
+  const handleFileImport = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsParsing(true)
+    setParsingStep('Reading file...')
+    try {
+      let text = ""
+      if (file.type === 'application/pdf') {
+        text = await extractTextFromPDF(file)
+      } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        text = await extractTextFromDOCX(file)
+      } else {
+        text = await file.text()
+      }
+
+      setParsingStep('AI is analyzing your resume...')
+      const parsedData = await parseResumeText(text)
+      
+      setParsingStep('Finalizing...')
+      const mergedData = {
+        ...defaultResumeData,
+        ...parsedData,
+        personal: { ...defaultResumeData.personal, ...(parsedData.personal || {}) },
+        theme: { ...defaultResumeData.theme, ...(parsedData.theme || {}) },
+        sectionLabels: { ...defaultResumeData.sectionLabels, ...(parsedData.sectionLabels || {}) }
+      }
+      
+      if (onImportComplete) {
+        onImportComplete(mergedData, file.name.replace(/\.[^/.]+$/, ""))
+      } else {
+        // Fallback
+        const newId = await createDocument(user.id, file.name.replace(/\.[^/.]+$/, ""), mergedData, 'classic')
+        onOpenDocument(newId)
+      }
+
+
+    } catch (err) {
+      console.error("Import failed", err)
+      alert(err.message || "Failed to import resume. Make sure it's a valid PDF or DOCX.")
+    } finally {
+      setIsParsing(false)
+      setParsingStep('')
+      // Clear input
+      e.target.value = ''
+    }
+  }
+
 
   return (
     <div className="landing-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -236,6 +322,42 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
                   </svg>
                   <span style={{ fontWeight: 600 }}>Create New Resume</span>
                </div>
+
+               {/* Import Card */}
+               <div 
+                  onClick={handleImportClick}
+                  style={{
+                     border: '2px dashed var(--glass-border)',
+                     borderRadius: 'var(--radius-lg)',
+                     padding: '30px',
+                     display: 'flex',
+                     flexDirection: 'column',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     cursor: 'pointer',
+                     minHeight: '200px',
+                     background: 'var(--glass-surface)',
+                     transition: 'all 0.2s ease',
+                     color: 'var(--text)'
+                  }}
+                  onMouseEnter={e => Object.assign(e.currentTarget.style, { borderColor: 'var(--accent)', color: 'var(--accent)', transform: 'translateY(-2px)' })}
+                  onMouseLeave={e => Object.assign(e.currentTarget.style, { borderColor: 'var(--glass-border)', color: 'var(--text)', transform: 'none' })}
+               >
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '10px' }}>
+                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                     <polyline points="17 8 12 3 7 8"></polyline>
+                     <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span style={{ fontWeight: 600 }}>Import Existing CV</span>
+                  <input 
+                    type="file" 
+                    id="import-upload" 
+                    hidden 
+                    accept=".pdf,.docx,.txt" 
+                    onChange={handleFileImport}
+                  />
+               </div>
+
 
                {/* Existing Resumes */}
                {documents.map(doc => (
@@ -390,6 +512,63 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
           userId={user?.id}
         />
       )}
+
+      {/* Parsing Overlay */}
+      {isParsing && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          color: 'var(--text)',
+          animation: 'pFadeUp 0.3s ease'
+        }}>
+          <div style={{
+            background: 'var(--glass-bg)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid var(--glass-border)',
+            padding: '40px 60px',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-lg)',
+            textAlign: 'center',
+            maxWidth: '400px'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px', animation: 'floatMockup 2s ease-in-out infinite' }}>
+              🤖
+            </div>
+            <h2 style={{ marginBottom: '10px' }}>Importing Resume</h2>
+            <p style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>{parsingStep}</p>
+            
+            <div style={{ marginTop: '30px', width: '100%', height: '4px', background: 'var(--glass-border)', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ 
+                width: '60%', 
+                height: '100%', 
+                background: 'var(--accent)', 
+                animation: 'loadingBar 2s infinite ease-in-out' 
+              }}></div>
+            </div>
+          </div>
+          <style>{`
+            @keyframes floatMockup {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+            @keyframes pFadeUp {
+              from { opacity: 0; transform: translateY(10px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes loadingBar {
+              0% { transform: translateX(-100%); }
+              100% { transform: translateX(200%); }
+            }
+          `}</style>
+        </div>
+      )}
     </div>
+
   )
 }

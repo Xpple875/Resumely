@@ -19,10 +19,11 @@ const ICONS = {
 }
 
 const COLORS = {
-  success: { accent: '#4ade80', bg: 'rgba(20, 40, 25, 0.88)', border: 'rgba(74, 222, 128, 0.25)' },
-  error:   { accent: '#f87171', bg: 'rgba(40, 15, 15, 0.88)', border: 'rgba(248, 113, 113, 0.25)' },
-  info:    { accent: 'var(--accent)', bg: 'rgba(30, 20, 12, 0.88)', border: 'rgba(196, 98, 45, 0.3)' },
+  success: { accent: '#4ade80', bg: 'var(--glass-bg)', border: 'rgba(74, 222, 128, 0.35)' },
+  error:   { accent: '#f87171', bg: 'var(--glass-bg)', border: 'rgba(248, 113, 113, 0.35)' },
+  info:    { accent: 'var(--accent)', bg: 'var(--glass-bg)', border: 'var(--glass-border)' },
 }
+
 
 function Toast({ toast, duration = 3500 }) {
   const [progress, setProgress] = useState(100)
@@ -48,9 +49,11 @@ function Toast({ toast, duration = 3500 }) {
       style={{
         background: c.bg,
         border: `1px solid ${c.border}`,
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        boxShadow: 'var(--shadow-lg), 0 8px 32px rgba(0,0,0,0.1)'
       }}
+
     >
       <span className="toast-item__icon" style={{ color: c.accent }}>
         {ICONS[toast.type] || ICONS.info}

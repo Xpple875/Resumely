@@ -49,7 +49,9 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    const [showRenameModal, setShowRenameModal] = useState(false)
    const [isGenerating, setIsGenerating] = useState(false)
    const [genType, setGenType] = useState('PDF')
+   const [isAILoading, setIsAILoading] = useState(false)
    const [isProfileOpen, setIsProfileOpen] = useState(false)
+
    const [isPublicSharing, setIsPublicSharing] = useState(false)
    const { toasts, showToast } = useToast()
 
@@ -373,12 +375,8 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   </div>
                )}
 
-               {isCloudLoading && (
-                  <span style={{ fontSize: '11px', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                     Loading…
-                  </span>
-               )}
+               {/* Removed small header loader */}
+
 
                {user && (
                  <div className="resume-name-badge" onClick={() => setShowRenameModal(true)} style={{ 
@@ -515,8 +513,9 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                {[1,2,3,4,5,6].map(n => <div key={n} className={`form-blob form-blob--${n}`}/>)}
             </div>
             <div className="form-content">
-               <ResumeForm data={resumeData} onChange={handleDataChange} onToast={showToast} />
+               <ResumeForm data={resumeData} onChange={handleDataChange} onToast={showToast} onAILoadingChange={setIsAILoading} />
             </div>
+
          </aside>
 
          <main className={`preview-panel ${mobileView==='preview'?'mobile-visible':'mobile-hidden'} ${!user ? 'full-width-viewer' : ''}`} ref={panelRef}>
@@ -568,8 +567,8 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
             />
          )}
 
-         {/* Generation Overlay */}
-         {isGenerating && (
+         {/* Generation / AI / Cloud Loading Overlay */}
+         {(isGenerating || isCloudLoading || isAILoading) && (
             <div style={{
                position: 'fixed',
                inset: 0,
@@ -589,16 +588,34 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   padding: '40px 60px',
                   borderRadius: 'var(--radius-lg)',
                   boxShadow: 'var(--shadow-lg)',
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  minWidth: '320px'
                }}>
                   <div style={{ fontSize: '48px', marginBottom: '20px', animation: 'floatMockup 2s ease-in-out infinite' }}>
-                     {genType === 'PDF' ? '📄' : '📝'}
+                     {isCloudLoading ? '☁️' : isAILoading ? '✨' : genType === 'PDF' ? '📄' : '📝'}
                   </div>
-                  <h2 style={{ marginBottom: '10px' }}>Generating {genType}</h2>
-                  <p style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>Tailoring your resume for perfection...</p>
+                  <h2 style={{ marginBottom: '10px' }}>
+                     {isCloudLoading ? 'Loading Resume' : isAILoading ? 'AI Enhancement' : `Generating ${genType}`}
+                  </h2>
+                  <p style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>
+                     {isCloudLoading ? 'Retrieving your data from the cloud...' : 
+                      isAILoading ? 'Our AI is polishing every bullet point for perfection...' : 
+                      'Tailoring your resume for perfection...'}
+                  </p>
+
+                  
+                  <div style={{ marginTop: '25px', width: '100%', height: '3px', background: 'var(--glass-border)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ 
+                      width: '40%', 
+                      height: '100%', 
+                      background: 'var(--accent)', 
+                      animation: 'loadingBar 1.5s infinite ease-in-out' 
+                    }}></div>
+                  </div>
                </div>
             </div>
          )}
+
 
          {/* Rename Modal */}
          {showRenameModal && (
