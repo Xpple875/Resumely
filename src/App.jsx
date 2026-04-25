@@ -48,9 +48,17 @@ export default function App() {
          setUser(session?.user ?? null)
       })
 
+      // Handle direct URL routing for Privacy/Terms
+      const path = window.location.pathname
+      if (path === '/privacy') setView('privacy')
+      else if (path === '/terms') setView('terms')
+
       // Listen for login/logout events from Supabase
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
          setUser(session?.user ?? null)
+         if (event === 'SIGNED_IN' && session?.user) {
+            setView('dashboard')
+         }
          if (event === 'PASSWORD_RECOVERY') {
             setShowUpdatePassword(true)
          }
@@ -114,7 +122,9 @@ export default function App() {
       localStorage.removeItem('resume_draft')
       setUnlocked(false)
       setUser(null)
-      window.location.reload()
+      setActiveDocumentId(null)
+      setView('landing')
+      // Removed window.location.reload() to allow a smooth state-based transition
    }
 
    const handleSignIn = (newUser) => {
