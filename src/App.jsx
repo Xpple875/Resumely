@@ -13,192 +13,192 @@ import { createDocument, supabase } from './services/supabaseClient'
 import { defaultResumeData } from './utils/defaultData'
 
 export default function App() {
-  const [view, setView] = useState(() => localStorage.getItem('resumely_view') || 'landing')
-  const [template, setTemplate] = useState('classic')
-  // Initial unlocked = local token check (for non-logged-in users who paid anonymously).
-  // When a user logs in, BuilderPage logic or App logic can override this.
-  const [unlocked, setUnlocked] = useState(isUnlocked())
-  const [user, setUser] = useState(null)
-  
-  // Dashboard routing requires us to supply an active document ID to the builder
-  const [activeDocumentId, setActiveDocumentId] = useState(() => localStorage.getItem('resumely_active_doc'))
-  const [showUpdatePassword, setShowUpdatePassword] = useState(false)
-  const [isCreatingFromDashboard, setIsCreatingFromDashboard] = useState(false)
-  const [isCreatingInCloud, setIsCreatingInCloud] = useState(false)
+   const [view, setView] = useState(() => localStorage.getItem('resumely_view') || 'landing')
+   const [template, setTemplate] = useState('classic')
+   // Initial unlocked = local token check (for non-logged-in users who paid anonymously).
+   // When a user logs in, BuilderPage logic or App logic can override this.
+   const [unlocked, setUnlocked] = useState(isUnlocked())
+   const [user, setUser] = useState(null)
 
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light')
+   // Dashboard routing requires us to supply an active document ID to the builder
+   const [activeDocumentId, setActiveDocumentId] = useState(() => localStorage.getItem('resumely_active_doc'))
+   const [showUpdatePassword, setShowUpdatePassword] = useState(false)
+   const [isCreatingFromDashboard, setIsCreatingFromDashboard] = useState(false)
+   const [isCreatingInCloud, setIsCreatingInCloud] = useState(false)
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
+   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light')
 
-  useEffect(() => {
-    localStorage.setItem('resumely_view', view)
-    if (activeDocumentId) {
-       localStorage.setItem('resumely_active_doc', activeDocumentId)
-    } else {
-       localStorage.removeItem('resumely_active_doc')
-    }
-  }, [view, activeDocumentId])
+   useEffect(() => {
+      document.documentElement.setAttribute('data-theme', theme)
+      localStorage.setItem('theme', theme)
+   }, [theme])
 
-  useEffect(() => {
-    // Check for existing session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-    })
+   useEffect(() => {
+      localStorage.setItem('resumely_view', view)
+      if (activeDocumentId) {
+         localStorage.setItem('resumely_active_doc', activeDocumentId)
+      } else {
+         localStorage.removeItem('resumely_active_doc')
+      }
+   }, [view, activeDocumentId])
 
-    // Listen for login/logout events from Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null)
-      if (event === 'PASSWORD_RECOVERY') {
+   useEffect(() => {
+      // Check for existing session on mount
+      supabase.auth.getSession().then(({ data: { session } }) => {
+         setUser(session?.user ?? null)
+      })
+
+      // Listen for login/logout events from Supabase
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+         setUser(session?.user ?? null)
+         if (event === 'PASSWORD_RECOVERY') {
+            setShowUpdatePassword(true)
+         }
+      })
+
+      // Also manually check hash for OAuth/Recovery flow
+      if (window.location.hash.includes('type=recovery')) {
          setShowUpdatePassword(true)
       }
-    })
 
-    // Also manually check hash for OAuth/Recovery flow
-    if (window.location.hash.includes('type=recovery')) {
-       setShowUpdatePassword(true)
-    }
+      return () => subscription.unsubscribe()
+   }, [])
 
-    return () => subscription.unsubscribe()
-  }, [])
+   const handleStart = (explicitUser = null) => {
+      const activeUser = explicitUser && explicitUser.id ? explicitUser : user;
+      if (activeUser) {
+         setView('dashboard')
+      } else {
+         if (loadDraft()) setView('builder')
+         else setView('template')
+      }
+   }
 
-  const handleStart = (explicitUser = null) => {
-    const activeUser = explicitUser && explicitUser.id ? explicitUser : user;
-    if (activeUser) {
-       setView('dashboard')
-    } else {
-       if (loadDraft()) setView('builder')
-       else setView('template')
-    }
-  }
+   const handleSelectTemplate = (id) => {
+      setTemplate(id)
+   }
 
-  const handleSelectTemplate = (id) => {
-    setTemplate(id)
-  }
+   const handleTemplateContinue = async () => {
+      if (isCreatingFromDashboard && user) {
+         setIsCreatingInCloud(true)
+         try {
+            const newId = await createDocument(user.id, "Untitled Resume", defaultResumeData, template)
+            setActiveDocumentId(newId)
+            setIsCreatingFromDashboard(false)
+            setView('builder')
+         } catch (err) {
+            console.error("Failed to create doc:", err)
+            alert("Error creating resume. Please try again.")
+         } finally {
+            setIsCreatingInCloud(false)
+         }
+      } else {
+         setView('builder')
+      }
+   }
 
-  const handleTemplateContinue = async () => {
-    if (isCreatingFromDashboard && user) {
-       setIsCreatingInCloud(true)
-       try {
-          const newId = await createDocument(user.id, "Untitled Resume", defaultResumeData, template)
-          setActiveDocumentId(newId)
-          setIsCreatingFromDashboard(false)
-          setView('builder')
-       } catch (err) {
-          console.error("Failed to create doc:", err)
-          alert("Error creating resume. Please try again.")
-       } finally {
-          setIsCreatingInCloud(false)
-       }
-    } else {
-       setView('builder')
-    }
-  }
+   const handleCreateNewFromDashboard = () => {
+      setIsCreatingFromDashboard(true)
+      setView('template')
+   }
 
-  const handleCreateNewFromDashboard = () => {
-    setIsCreatingFromDashboard(true)
-    setView('template')
-  }
+   const handleOpenDocument = (docId) => {
+      setTemplate('classic') // Reset to default while loading new doc
+      setActiveDocumentId(docId)
+      setView('builder') // Enter builder for this specific document
+   }
 
-  const handleOpenDocument = (docId) => {
-    setTemplate('classic') // Reset to default while loading new doc
-    setActiveDocumentId(docId)
-    setView('builder') // Enter builder for this specific document
-  }
+   const handleSignOut = async () => {
+      await supabase.auth.signOut()
+      clearToken()
+      localStorage.removeItem('resume_draft')
+      setUnlocked(false)
+      setUser(null)
+      window.location.reload()
+   }
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    clearToken()
-    localStorage.removeItem('resume_draft')
-    setUnlocked(false)
-    setUser(null)
-    window.location.reload()
-  }
+   const handleSignIn = (newUser) => {
+      setUser(newUser)
+   }
 
-  const handleSignIn = (newUser) => {
-    setUser(newUser)
-  }
+   const params = new URLSearchParams(window.location.search)
+   const shareId = params.get('share')
 
-  const params = new URLSearchParams(window.location.search)
-  const shareId = params.get('share')
-  
-  // If we have a share ID and no user, we force the builder view to show the public resume
-  useEffect(() => {
-     if (shareId && !activeDocumentId) {
-        setActiveDocumentId(shareId)
-        setView('builder')
-     }
-  }, [shareId, activeDocumentId])
+   // If we have a share ID and no user, we force the builder view to show the public resume
+   useEffect(() => {
+      if (shareId && !activeDocumentId) {
+         setActiveDocumentId(shareId)
+         setView('builder')
+      }
+   }, [shareId, activeDocumentId])
 
-  if (params.get('payment') === 'success' && !unlocked) {
-    return (
-      <PaymentSuccessPage
-        sessionId={params.get('session_id')}
-        user={user}
-        onUnlocked={() => { setUnlocked(true); setView('builder'); }}
-      />
-    )
-  }
+   if (params.get('payment') === 'success' && !unlocked) {
+      return (
+         <PaymentSuccessPage
+            sessionId={params.get('session_id')}
+            user={user}
+            onUnlocked={() => { setUnlocked(true); setView('builder'); }}
+         />
+      )
+   }
 
-  return (
-    <div className="app-container">
-      {view === 'landing' ? (
-        <LandingPage 
-          onStart={handleStart} 
-          user={user} 
-          onSignIn={handleSignIn} 
-          onShowTerms={() => setView('terms')}
-          onShowPrivacy={() => setView('privacy')}
-        />
-      ) : view === 'template' ? (
-        <TemplatePage 
-          onSelect={handleSelectTemplate} 
-          onContinue={handleTemplateContinue} 
-          selected={template} 
-          loading={isCreatingInCloud}
-          onGoToLanding={() => setView('landing')}
-        />
-      ) : view === 'dashboard' ? (
-        <DashboardPage 
-           user={user} 
-           onOpenDocument={handleOpenDocument} 
-           onSignOut={handleSignOut} 
-           onCreateNew={handleCreateNewFromDashboard}
-           onGoToLanding={() => setView('landing')}
-        />
-      ) : view === 'terms' ? (
-        <TermsPage onBack={() => setView('landing')} />
-      ) : view === 'privacy' ? (
-        <PrivacyPage onBack={() => setView('landing')} />
-      ) : (
-        <BuilderPage
-          template={template}
-          onChangeTemplate={(id) => id ? handleSelectTemplate(id) : setView('template')}
-          unlocked={unlocked}
-          setUnlocked={setUnlocked}
-          user={user}
-          activeDocumentId={activeDocumentId}
-          isPublicView={!!shareId}
-          onDocumentCreated={setActiveDocumentId}
-          onReturnToDashboard={() => setView('dashboard')}
-          onGoToLanding={() => setView('landing')}
-          onSignOut={handleSignOut}
-          onSignIn={handleSignIn}
-          theme={theme}
-          setTheme={setTheme}
-        />
-      )}
+   return (
+      <div className="app-container">
+         {view === 'landing' ? (
+            <LandingPage
+               onStart={handleStart}
+               user={user}
+               onSignIn={handleSignIn}
+               onShowTerms={() => setView('terms')}
+               onShowPrivacy={() => setView('privacy')}
+            />
+         ) : view === 'template' ? (
+            <TemplatePage
+               onSelect={handleSelectTemplate}
+               onContinue={handleTemplateContinue}
+               selected={template}
+               loading={isCreatingInCloud}
+               onGoToLanding={() => setView('landing')}
+            />
+         ) : view === 'dashboard' ? (
+            <DashboardPage
+               user={user}
+               onOpenDocument={handleOpenDocument}
+               onSignOut={handleSignOut}
+               onCreateNew={handleCreateNewFromDashboard}
+               onGoToLanding={() => setView('landing')}
+            />
+         ) : view === 'terms' ? (
+            <TermsPage onBack={() => setView('landing')} />
+         ) : view === 'privacy' ? (
+            <PrivacyPage onBack={() => setView('landing')} />
+         ) : (
+            <BuilderPage
+               template={template}
+               onChangeTemplate={(id) => id ? handleSelectTemplate(id) : setView('template')}
+               unlocked={unlocked}
+               setUnlocked={setUnlocked}
+               user={user}
+               activeDocumentId={activeDocumentId}
+               isPublicView={!!shareId}
+               onDocumentCreated={setActiveDocumentId}
+               onReturnToDashboard={() => setView('dashboard')}
+               onGoToLanding={() => setView('landing')}
+               onSignOut={handleSignOut}
+               onSignIn={handleSignIn}
+               theme={theme}
+               setTheme={setTheme}
+            />
+         )}
 
-      {showUpdatePassword && (
-        <UpdatePasswordModal 
-          onDismiss={() => {
-             setShowUpdatePassword(false)
-             window.location.hash = '' 
-          }} 
-        />
-      )}
-    </div>
-  )
+         {showUpdatePassword && (
+            <UpdatePasswordModal
+               onDismiss={() => {
+                  setShowUpdatePassword(false)
+                  window.location.hash = ''
+               }}
+            />
+         )}
+      </div>
+   )
 }

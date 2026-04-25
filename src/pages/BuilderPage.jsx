@@ -535,9 +535,10 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                            zIndex: 99999,
                            userSelect: 'none',
                            opacity: 1,
-                           backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='32' fill='rgba(0,0,0,0.07)' transform='rotate(-35 150 100)'%3ERESUMELY RESUMELY RESUMELY%3C/text%3E%3C/svg%3E")`,
+                           backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='32' fill='rgba(255,255,255,0.1)' transform='rotate(-35 150 100)'%3ERESUMELY RESUMELY RESUMELY%3C/text%3E%3C/svg%3E")`,
                            backgroundRepeat: 'repeat',
-                           backgroundSize: '300px 200px'
+                           backgroundSize: '300px 200px',
+                           mixBlendMode: 'difference'
                         }}
                      />
                   )}

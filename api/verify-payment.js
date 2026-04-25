@@ -1,6 +1,18 @@
+const rateLimitMap = new Map();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown-ip';
+  const now = Date.now();
+  if (rateLimitMap.has(ip)) {
+     if (now - rateLimitMap.get(ip) < 1000) {
+        return res.status(429).json({ error: 'Too many requests. Please wait a second.' });
+     }
+  }
+  rateLimitMap.set(ip, now);
+  if (rateLimitMap.size > 1000) rateLimitMap.clear();
+
 
   const { sessionId } = req.body;
   // Vercel uses process.env for secrets
