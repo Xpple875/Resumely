@@ -30,7 +30,7 @@
   /* Internal top/bottom padding is now fully managed by physical DIV chunks in React.
      We only specify side padding here to ensure text stays neatly away from the left/right edges */
   padding: 0 20mm;
-  width: 210mm;
+  width: 100%;
   box-sizing: border-box;
   background: transparent;
 }
@@ -97,7 +97,6 @@
   padding: 25px 20mm 20px 20mm; 
   margin: 0 -20mm 0 -20mm; 
   text-align: left; 
-  width: 210mm;
   max-width: none;
 }
 .resume-modern .rm-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.8em; color: #FFFFFF; line-height: 1.1; margin-bottom: 6px; }
@@ -111,7 +110,6 @@
   gap: 4px 24px; 
   font-size: 0.9em; 
   color: #6B6460; 
-  width: 210mm;
   max-width: none;
 }
 .resume-modern .rm-section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #E2DAD4; padding-bottom: 5px; margin: 20px 0 14px 0; break-after: avoid; }

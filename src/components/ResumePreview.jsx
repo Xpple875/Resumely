@@ -496,14 +496,9 @@ export default function ResumePreview({ data, template = 'classic', mobileView }
          const trueTotalWidth = maxRight - engineRect.left;
          const colStride = scaledColWidth + scaledGapWidth;
 
-         let calculatedPages = Math.ceil((trueTotalWidth - 5) / colStride);
+         // Subtract a small "fudge factor" (10px) to ignore sub-pixel overflows that trigger empty pages
+         let calculatedPages = Math.ceil((trueTotalWidth - 10) / colStride);
          
-         // Fallback check: if trueTotalWidth is small but inner content height is huge
-         // (rare multi-column failure case)
-         if (calculatedPages === 1 && innerContainer.scrollHeight > engineContainer.offsetHeight * 1.1) {
-            calculatedPages = Math.ceil(innerContainer.scrollHeight / engineContainer.offsetHeight);
-         }
-
          calculatedPages = Math.max(1, calculatedPages);
          setNumPages(prev => (prev !== calculatedPages ? calculatedPages : prev));
       };
