@@ -62,7 +62,7 @@ const ClassicContent = ({ data, theme, innerRef }) => {
    };
 
    return (
-      <div ref={innerRef} className="resume-classic resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, paddingTop: '10mm' }}>
+      <div ref={innerRef} className="resume-classic resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, paddingTop: '20mm' }}>
          <div className="r-header">
             <h1 className="r-name">{personal.name || 'YOUR NAME'}</h1>
             {personal.title && <div className="r-tagline" style={{ color: accentColor }}>{personal.title}</div>}
@@ -232,7 +232,7 @@ const MinimalContent = ({ data, theme, innerRef }) => {
    };
 
    return (
-      <div ref={innerRef} className="resume-minimal resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, paddingTop: '10mm' }}>
+      <div ref={innerRef} className="resume-minimal resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, paddingTop: '20mm' }}>
          <div className="rmin-header">
             <h1 className="rmin-name" style={{ color: accentColor }}>{personal.name || 'YOUR NAME'}</h1>
             {personal.title && <div className="rmin-title">{personal.title}</div>}
@@ -322,7 +322,7 @@ const ElegantContent = ({ data, theme, innerRef }) => {
    };
 
    return (
-      <div ref={innerRef} className="resume-elegant resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, textAlign: 'center', paddingTop: '10mm' }}>
+      <div ref={innerRef} className="resume-elegant resume-content-inner" style={{ position: 'relative', fontFamily: theme.fontFamily, fontSize: theme.fontSize, textAlign: 'center', paddingTop: '20mm' }}>
          <div style={{ marginBottom: '40px' }}>
             <h1 style={{ fontSize: '2.8rem', fontWeight: 'normal', margin: '0 0 10px 0', letterSpacing: '0.05em' }}>{personal.name || 'YOUR NAME'}</h1>
             {personal.title && <div style={{ fontSize: '1.1rem', color: accentColor, letterSpacing: '0.15em', marginBottom: '20px' }}>{personal.title.toUpperCase()}</div>}
@@ -555,9 +555,9 @@ export default function ResumePreview({ data, template = 'classic', mobileView }
          */}
          {Array.from({ length: numPages }).map((_, i) => {
             let pageTopPad = TOP_PAD_MM;
-            if (i === 0) {
-               pageTopPad = (template === 'modern') ? 0 : 10;
-            }
+             if (i === 0) {
+                pageTopPad = (template === 'modern') ? 0 : 20;
+             }
 
             return (
                <div key={i} className={`physical-paper-sheet sheet-${template}`}>
