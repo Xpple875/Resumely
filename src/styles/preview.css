@@ -35,6 +35,11 @@
   background: transparent;
 }
 
+/* Remove bottom margin from last section to prevent extra blank pages */
+.resume-content-inner > div:last-child {
+  margin-bottom: 0 !important;
+}
+
 /* All children must stay within paper width */
 .physical-paper-sheet *, .resume-content-inner * {
   max-width: 100%;

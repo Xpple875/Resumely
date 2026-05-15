@@ -496,7 +496,7 @@ export default function ResumePreview({ data, template = 'classic', mobileView }
          const trueTotalWidth = maxRight - engineRect.left;
          const colStride = scaledColWidth + scaledGapWidth;
 
-         let calculatedPages = Math.ceil(trueTotalWidth / colStride);
+         let calculatedPages = Math.ceil((trueTotalWidth - 5) / colStride);
          
          // Fallback check: if trueTotalWidth is small but inner content height is huge
          // (rare multi-column failure case)
