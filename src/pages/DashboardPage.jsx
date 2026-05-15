@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { getUserDocuments, createDocument, deleteDocument, deleteUserAccount, duplicateDocument, getDocumentById } from '../services/supabaseClient'
 import { defaultResumeData } from '../utils/defaultData'
-import { generatePDF } from '../utils/pdfExport'
-import { generateDOCX } from '../utils/docxExport'
+
 import { parseResumeText } from '../services/aiService'
 import DownloadOptionsModal from '../components/DownloadOptionsModal'
-import * as pdfjsLib from 'pdfjs-dist'
-import mammoth from 'mammoth'
+import ThemeToggle from '../components/ThemeToggle.jsx'
 import '../styles/landing.css'
 
-// Set up PDF.js worker using Vite's ?url import
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url'
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
-
-
-
-
-export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreateNew, onGoToLanding, onImportComplete }) {
+export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreateNew, onGoToLanding, onImportComplete, theme, setTheme }) {
 
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +24,22 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
   useEffect(() => {
     if (!user) return
     loadDocs()
+
+    // Scroll reveal observer
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { 
+          entry.target.classList.add('visible'); 
+          observer.unobserve(entry.target); 
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    return () => {
+       observer.disconnect();
+    }
   }, [user])
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
@@ -82,8 +89,10 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
       const fullDoc = await getDocumentById(selectedDoc.id)
       if (fullDoc?.resume_data) {
         if (format === 'pdf') {
+          const { generatePDF } = await import('../utils/pdfExport')
           await generatePDF(null, fullDoc.resume_data, fullDoc.template || 'classic')
         } else {
+          const { generateDOCX } = await import('../utils/docxExport')
           await generateDOCX(fullDoc.resume_data)
         }
       }
@@ -115,6 +124,10 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
   }
 
   const extractTextFromPDF = async (file) => {
+    const pdfjsLib = await import('pdfjs-dist')
+    const pdfWorker = await import('pdfjs-dist/build/pdf.worker.mjs?url')
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker.default
+
     const arrayBuffer = await file.arrayBuffer()
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
     let fullText = ""
@@ -128,8 +141,9 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
   }
 
   const extractTextFromDOCX = async (file) => {
+    const mammoth = await import('mammoth')
     const arrayBuffer = await file.arrayBuffer()
-    const result = await mammoth.extractRawText({ arrayBuffer })
+    const result = await mammoth.default.extractRawText({ arrayBuffer })
     return result.value
   }
 
@@ -186,6 +200,8 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
   }
 
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <div className="landing-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <nav>
@@ -201,6 +217,7 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
              <div style={{ position: 'relative' }}>
                 <button
                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                   className="hide-mobile"
                    style={{ 
                       borderRadius: '50%', 
                       background: 'var(--accent-soft)', 
@@ -282,8 +299,24 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
                 )}
              </div>
           )}
+          <ThemeToggle theme={theme} setTheme={setTheme} />
+          <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(true)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
         </div>
       </nav>
+
+      <div className={`mobile-drawer ${isMenuOpen ? 'open' : ''}`}>
+        <button className="drawer-close" onClick={() => setIsMenuOpen(false)}>×</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+          <div style={{ padding: '0.5rem 0', color: 'var(--text-light)', fontSize: '0.8rem' }}>{user?.email}</div>
+          <button className="drawer-link" onClick={() => { setIsMenuOpen(false); window.location.hash = 'type=recovery'; }} style={{ background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>Change Password</button>
+          <button className="drawer-link" onClick={() => { setIsMenuOpen(false); onSignOut(); }} style={{ background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>Sign Out</button>
+        </div>
+        <button className="drawer-cta" onClick={() => { setIsMenuOpen(false); handleCreateNew(); }}>
+          Create New Resume
+        </button>
+      </div>
 
       <main style={{ flex: 1, padding: '100px 20px 40px', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
          <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Your Resumes</h1>
@@ -359,24 +392,25 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
                </div>
 
 
-               {/* Existing Resumes */}
-               {documents.map(doc => (
-                  <div 
-                     key={doc.id}
-                     onClick={() => onOpenDocument(doc.id)}
-                     style={{
-                        border: '1px solid var(--glass-border)',
-                        borderRadius: 'var(--radius-lg)',
-                        padding: '24px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        cursor: 'pointer',
-                        minHeight: '200px',
-                        background: 'var(--bg)',
-                        boxShadow: 'var(--shadow-sm)',
-                        transition: 'all 0.2s ease',
-                        position: 'relative'
-                     }}
+                {/* Existing Resumes */}
+                {documents.map(doc => (
+                   <div 
+                      key={doc.id}
+                      onClick={() => onOpenDocument(doc.id)}
+                      className="reveal"
+                      style={{
+                         border: '1px solid var(--glass-border)',
+                         borderRadius: 'var(--radius-lg)',
+                         padding: '24px',
+                         display: 'flex',
+                         flexDirection: 'column',
+                         cursor: 'pointer',
+                         minHeight: '200px',
+                         background: 'var(--bg)',
+                         boxShadow: 'var(--shadow-sm)',
+                         transition: 'all 0.2s ease',
+                         position: 'relative'
+                      }}
                      onMouseEnter={e => Object.assign(e.currentTarget.style, { borderColor: 'var(--accent)', transform: 'translateY(-2px)', boxShadow: 'var(--shadow-md)' })}
                      onMouseLeave={e => Object.assign(e.currentTarget.style, { borderColor: 'var(--glass-border)', transform: 'none', boxShadow: 'var(--shadow-sm)' })}
                   >

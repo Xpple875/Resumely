@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import ThemeToggle from '../components/ThemeToggle.jsx'
 import '../styles/template.css'
 
 export const TEMPLATES = [
@@ -34,7 +35,21 @@ export const TEMPLATES = [
   },
 ]
 
-export default function TemplatePage({ selected, onSelect, onContinue, onGoToLanding, loading = false }) {
+export default function TemplatePage({ onSelect, onContinue, selected, loading, onGoToLanding, theme, setTheme }) {
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { 
+          entry.target.classList.add('visible'); 
+          observer.unobserve(entry.target); 
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="template-page" style={loading ? { pointerEvents: 'none', opacity: 0.8 } : {}}>
       <div className="template-page__inner">
@@ -44,18 +59,22 @@ export default function TemplatePage({ selected, onSelect, onContinue, onGoToLan
             onClick={onGoToLanding}
             style={{ cursor: 'pointer' }}
           >
-            Resum<span>e</span>ly
+            Resum<span>ely</span>
           </div>
-          <h1 className="template-page__title">Choose your template</h1>
-          <p className="template-page__sub">All three are ATS-tested. You can change this later.</p>
+          <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
+            <ThemeToggle theme={theme} setTheme={setTheme} />
+          </div>
+          <h1 className="template-page__title reveal">Choose your template</h1>
+          <p className="template-page__sub reveal" style={{ transitionDelay: '0.1s' }}>All three are ATS-tested. You can change this later.</p>
         </div>
 
         <div className="template-grid">
-          {TEMPLATES.map(t => (
+          {TEMPLATES.map((t, i) => (
             <button
               key={t.id}
-              className={`template-card ${selected === t.id ? 'selected' : ''}`}
+              className={`template-card reveal ${selected === t.id ? 'selected' : ''}`}
               onClick={() => onSelect(t.id)}
+              style={{ transitionDelay: `${0.2 + i * 0.1}s` }}
             >
               {t.tag && <div className="template-card__tag">{t.tag}</div>}
               <div className="template-card__preview">

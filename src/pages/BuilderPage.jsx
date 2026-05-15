@@ -6,13 +6,12 @@ import ToastContainer from '../components/ToastContainer.jsx'
 import PayGateModal from '../components/PayGateModal.jsx'
 import DownloadOptionsModal from '../components/DownloadOptionsModal.jsx'
 import AuthModal from '../components/AuthModal.jsx'
-import { generatePDF } from '../utils/pdfExport.js'
-import { generateDOCX } from '../utils/docxExport.js'
 import { defaultResumeData } from '../utils/defaultData.js'
 import { loadDraft, saveDraft } from '../hooks/useAutosave.js'
 import { useToast } from '../hooks/useToast.js'
 import { getDocumentById, createDocument, updateDocument, loadResumeFromCloud, markUserAsPaid, deleteUserAccount, incrementViewCount } from '../services/supabaseClient'
 import TemplateModal from '../components/TemplateModal.jsx'
+import ThemeToggle from '../components/ThemeToggle.jsx'
 import '../styles/builder.css'
 
 /** Merge cloud resume_data with defaults to handle new fields added since last save. */
@@ -51,6 +50,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    const [genType, setGenType] = useState('PDF')
    const [isAILoading, setIsAILoading] = useState(false)
    const [isProfileOpen, setIsProfileOpen] = useState(false)
+   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
    const [isPublicSharing, setIsPublicSharing] = useState(false)
    const { toasts, showToast } = useToast()
@@ -97,34 +97,42 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    }, [user?.id, activeDocumentId, isPublicView]) // eslint-disable-line react-hooks/exhaustive-deps
 
    // ── Actual PDF generation ──
-   const doDownload = () => {
+   const doDownload = async () => {
       setGenType('PDF')
       setIsGenerating(true)
       const wrapper = wrapperRef.current
       if (wrapper) wrapper.style.filter = 'blur(10px) grayscale(1)'
       
-      setTimeout(() => {
-         generatePDF(null, resumeData, template).finally(() => {
-            if (wrapper) wrapper.style.filter = 'none'
-            setIsGenerating(false)
-         })
-      }, 800) // Slightly longer to feel deliberate and premium
+      try {
+         const { generatePDF } = await import('../utils/pdfExport.js')
+         await new Promise(resolve => setTimeout(resolve, 800)) // Slightly longer to feel deliberate and premium
+         await generatePDF(null, resumeData, template)
+      } catch (err) {
+         console.error("PDF generation failed:", err)
+         showToast("Failed to generate PDF", "error")
+      } finally {
+         if (wrapper) wrapper.style.filter = 'none'
+         setIsGenerating(false)
+      }
    }
 
-   const doDownloadDocx = () => {
+   const doDownloadDocx = async () => {
       setGenType('DOCX')
       setIsGenerating(true)
       const wrapper = wrapperRef.current
       if (wrapper) wrapper.style.filter = 'blur(10px) grayscale(1)'
 
-      setTimeout(() => {
-         try {
-            generateDOCX(resumeData)
-         } finally {
-            if (wrapper) wrapper.style.filter = 'none'
-            setIsGenerating(false)
-         }
-      }, 800)
+      try {
+         const { generateDOCX } = await import('../utils/docxExport.js')
+         await new Promise(resolve => setTimeout(resolve, 800))
+         await generateDOCX(resumeData)
+      } catch (err) {
+         console.error("DOCX generation failed:", err)
+         showToast("Failed to generate DOCX", "error")
+      } finally {
+         if (wrapper) wrapper.style.filter = 'none'
+         setIsGenerating(false)
+      }
    }
 
    const handleDownload = () => {
@@ -290,17 +298,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   Resum<span>ely</span>
                </div>
 
-               <button
-                  className="theme-toggle"
-                  onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                  title="Toggle Light/Dark Mode"
-               >
-                  {theme === 'light' ? (
-                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                  ) : (
-                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                  )}
-               </button>
+               <ThemeToggle theme={theme} setTheme={setTheme} />
 
                {user && (
                   <div style={{ position: 'relative' }}>
@@ -375,10 +373,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   </div>
                )}
 
-               {/* Removed small header loader */}
-
-
-               {user && (
+                 {user && (
                  <div className="resume-name-badge" onClick={() => setShowRenameModal(true)} style={{ 
                     marginLeft: '15px', 
                     padding: '4px 12px', 
@@ -499,7 +494,25 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   </button>
                )}
             </div>
+
+            <button className="builder-header__mobile-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+               {isMenuOpen ? 'Close' : 'Menu'}
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                 {isMenuOpen ? <path d="M18 6L6 18M6 6l12 12"/> : <path d="M3 12h18M3 6h18M3 18h18"/>}
+               </svg>
+            </button>
          </header>
+
+         <div className={`builder-mobile-menu ${isMenuOpen ? 'open' : ''}`}>
+            <button className="btn btn-ghost" onClick={() => { setIsMenuOpen(false); setIsTemplateModalOpen(true); }} style={{ justifyContent: 'center' }}>Change Template</button>
+            <button className="btn btn-ghost" onClick={() => { setIsMenuOpen(false); handleCloudSave(); }} style={{ justifyContent: 'center' }}>Save Resume</button>
+            {user && (
+               <button className="btn btn-ghost" onClick={() => { setIsMenuOpen(false); onReturnToDashboard(); }} style={{ justifyContent: 'center' }}>Dashboard</button>
+            )}
+            <button className="btn btn-primary" onClick={() => { setIsMenuOpen(false); handleDownload(); }} style={{ width: '100%', justifyContent: 'center' }}>
+               {unlocked ? 'Download PDF' : '🔒 Download PDF'}
+            </button>
+         </div>
 
          {user && (
             <div className="mobile-tabs">

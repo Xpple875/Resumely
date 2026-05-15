@@ -69,7 +69,7 @@ export default function AuthModal({ onDismiss, onSuccess, context }) {
       <div className="payment-card">
         <button onClick={onDismiss} className="auth-close-btn">&times;</button>
 
-        <div className="payment-logo">Resum<span>e</span>ly</div>
+        <div className="payment-logo">Resum<span>ely</span></div>
 
         <h2 className="payment-title">
           {mode === 'signup' ? 'Create Account' : mode === 'login' ? 'Welcome Back' : 'Reset Password'}

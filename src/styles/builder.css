@@ -40,6 +40,46 @@
    align-items: center;
 }
 
+.builder-header__mobile-toggle {
+  display: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid rgba(196,98,45,0.1);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-items: center;
+  gap: 6px;
+}
+
+.builder-mobile-menu {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.builder-mobile-menu.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
 /* â”€â”€ Form Panel â”€â”€ */
 .form-panel {
    background: rgba(250, 249, 247, 0.85);
@@ -238,33 +278,7 @@
    transform: translateY(-1px);
 }
 
-.theme-toggle {
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   width: 36px;
-   height: 36px;
-   border-radius: 50%;
-   border: 1px solid var(--glass-border);
-   background: var(--glass-surface);
-   backdrop-filter: var(--glass-blur);
-   -webkit-backdrop-filter: var(--glass-blur);
-   color: var(--text-mid);
-   cursor: pointer;
-   transition: all var(--transition-spring);
-}
 
-.theme-toggle:hover {
-   color: var(--accent);
-   border-color: var(--accent);
-   background: var(--accent-soft);
-   transform: scale(1.1) rotate(5deg);
-   box-shadow: var(--shadow-sm);
-}
-
-.theme-toggle:active {
-   transform: scale(0.9);
-}
 
 /* â”€â”€ Form Sections â”€â”€ */
 .form-section {
@@ -1377,12 +1391,21 @@ select:focus {
    }
    
    .builder-header {
-      padding: 12px 16px;
-      flex-wrap: wrap;
+      padding: 8px 16px;
+      flex-wrap: nowrap;
+      height: 60px;
    }
-   .builder-header .btn-secondary {
-      padding: 0 16px;
-      height: 36px;
+   
+   .builder-header__actions {
+     display: none !important;
+   }
+
+   .builder-header__mobile-toggle {
+     display: flex;
+   }
+
+   .builder-header .resume-name-badge {
+     display: none !important;
    }
 
    .mobile-tabs {

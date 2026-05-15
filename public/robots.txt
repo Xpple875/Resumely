@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /templates
+Allow: /privacy
+Allow: /terms
+Disallow: /dashboard
+Disallow: /builder
+
+Sitemap: https://resumely-bay.vercel.app/sitemap.xml
