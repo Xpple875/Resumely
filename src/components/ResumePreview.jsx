@@ -463,7 +463,7 @@ const ResumeContent = React.forwardRef(({ data, template }, ref) => {
    return <ClassicContent data={data} theme={resolvedTheme} innerRef={ref} />;
 });
 
-export default function ResumePreview({ data, template = 'classic' }) {
+export default function ResumePreview({ data, template = 'classic', mobileView }) {
    const [numPages, setNumPages] = useState(1);
    const measureRef = useRef(null);
    const innerRef = useRef(null);
@@ -497,8 +497,14 @@ export default function ResumePreview({ data, template = 'classic' }) {
          const colStride = scaledColWidth + scaledGapWidth;
 
          let calculatedPages = Math.ceil(trueTotalWidth / colStride);
-         calculatedPages = Math.max(1, calculatedPages);
+         
+         // Fallback check: if trueTotalWidth is small but inner content height is huge
+         // (rare multi-column failure case)
+         if (calculatedPages === 1 && innerContainer.scrollHeight > engineContainer.offsetHeight * 1.1) {
+            calculatedPages = Math.ceil(innerContainer.scrollHeight / engineContainer.offsetHeight);
+         }
 
+         calculatedPages = Math.max(1, calculatedPages);
          setNumPages(prev => (prev !== calculatedPages ? calculatedPages : prev));
       };
 
@@ -517,7 +523,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
          resizeObserver.disconnect();
          cancelAnimationFrame(handle);
       };
-   }, [data, template]);
+   }, [data, template, mobileView]);
 
    if (!data || !data.personal) return null;
 

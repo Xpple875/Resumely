@@ -217,8 +217,10 @@
 }
 /* Scale paper to fit the panel width */
 .resume-preview-wrapper {
-   transform-origin: top center;
+   transform-origin: top left;
    width: 210mm;
+   margin: 0 auto; /* Center within flex parent */
+   display: block;
 }
 
 /* â”€â”€ Buttons â”€â”€ */
@@ -1164,21 +1166,20 @@ select:focus {
       padding: 16px;
    }
 
+   .resume-scale-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      overflow: hidden;
+   }
+
    .resume-preview-wrapper {
       width: 100%;
-      transform-origin: top left;
-      /* Scale down A4 preview to fit mobile screen */
-      transform: scale(0.45);
-      margin-bottom: -54%;
+      /* Scaled by JS scaleToFit logic */
    }
 }
 
-@media (max-width: 480px) {
-   .resume-preview-wrapper {
-      transform: scale(0.38);
-      margin-bottom: -62%;
-   }
-}
+/* Scaled by JS */
 @media print {
    @page {
       size: A4;
@@ -1371,12 +1372,7 @@ select:focus {
    box-shadow: 0 2px 8px rgba(196, 98, 45, 0.3);
 }
 
-@media (max-width: 480px) {
-   .resume-preview-wrapper {
-      transform: scale(0.38);
-      margin-bottom: -62%;
-   }
-}
+/* Scaled by JS */
 
 /* â”€â”€ Mobile Layout (< 768px) â”€â”€ */
 .mobile-tabs {
@@ -1438,10 +1434,24 @@ select:focus {
    }
    .mobile-visible {
       display: block !important;
+      height: 100%;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 80px; /* Extra room to scroll past the bottom page */
    }
 
    .form-panel {
       border-right: none;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* Prevent panel itself from scrolling */
+   }
+
+   .form-content {
+      flex: 1;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
    }
 }
 @media print {

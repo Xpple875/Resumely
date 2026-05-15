@@ -230,14 +230,23 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    useEffect(() => {
       function scaleToFit() {
          if (!panelRef.current || !wrapperRef.current) return
-         const panelW = panelRef.current.clientWidth - (window.innerWidth <= 768 ? 16 : 32)
-         const paperW = wrapperRef.current.offsetWidth
-         if (paperW === 0) return // Avoid division by zero
+         const clientW = panelRef.current.clientWidth
+         if (clientW === 0) return
+
+         const panelW = clientW - (window.innerWidth <= 768 ? 40 : 64)
+         const paperW = 794 // 210mm
          
-         const scale = Math.min(1, panelW / paperW)
+         const scale = Math.max(0.1, Math.min(1, panelW / paperW))
          wrapperRef.current.style.transform = `scale(${scale})`
-         wrapperRef.current.style.transformOrigin = 'top center'
-         wrapperRef.current.parentElement.style.height = `${scale * wrapperRef.current.offsetHeight}px`
+         wrapperRef.current.style.transformOrigin = 'top left'
+         
+         const rawH = wrapperRef.current.scrollHeight
+         if (rawH > 0) {
+            const container = wrapperRef.current.parentElement
+            container.style.height = `${scale * rawH}px`
+            container.style.width = `${scale * paperW}px`
+            container.style.margin = '0 auto' // Ensure centering
+         }
       }
 
       // Initial scale
@@ -245,6 +254,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       
       const ro = new ResizeObserver(scaleToFit)
       if (panelRef.current) ro.observe(panelRef.current)
+      if (wrapperRef.current) ro.observe(wrapperRef.current)
       window.addEventListener('resize', scaleToFit)
       
       return () => {
@@ -534,7 +544,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
          <main className={`preview-panel ${mobileView==='preview'?'mobile-visible':'mobile-hidden'} ${!user ? 'full-width-viewer' : ''}`} ref={panelRef}>
             <div className="resume-scale-container" style={{ overflow: 'hidden' }}>
                <div className="resume-preview-wrapper" ref={wrapperRef} style={{ transition: 'filter 0.3s ease', position: 'relative' }}>
-                  <ResumePreview data={resumeData} template={template} />
+                  <ResumePreview data={resumeData} template={template} mobileView={mobileView} />
                   
                   {/* Watermark overlay to prevent screenshots - Infinite SVG Pattern */}
                   {!unlocked && (

@@ -24,7 +24,11 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
   useEffect(() => {
     if (!user) return
     loadDocs()
+  }, [user])
 
+  useEffect(() => {
+    if (loading) return;
+    
     // Scroll reveal observer
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -35,12 +39,16 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
       });
     }, { threshold: 0.1 });
     
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    // Wait a tiny bit for DOM to update
+    const timeoutId = setTimeout(() => {
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    }, 100);
 
     return () => {
        observer.disconnect();
+       clearTimeout(timeoutId);
     }
-  }, [user])
+  }, [loading, documents.length])
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
 
@@ -327,7 +335,7 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
                {/* Content area is empty while loading initial set */}
             </div>
          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
                
                {/* Create New Card */}
                <div 
