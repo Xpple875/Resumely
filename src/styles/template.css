@@ -52,11 +52,21 @@
 }
 
 @media (max-width: 600px) {
+  .template-page {
+    padding: 32px 16px 60px;
+  }
+  .template-page__header {
+    margin-bottom: 24px;
+  }
+  .template-page__title {
+    font-size: 28px;
+  }
   .template-grid {
     grid-template-columns: 1fr;
-    max-width: 360px;
+    max-width: 340px;
     margin-left: auto;
     margin-right: auto;
+    gap: 16px;
   }
 }
 

@@ -161,18 +161,23 @@ export default function App() {
       }
    }
 
-   const handleSelectTemplate = (id) => {
+   const handleSelectTemplate = (id, immediate = false) => {
       setTemplate(id)
+      if (immediate) {
+         handleTemplateContinue(id)
+      }
    }
 
-   const handleTemplateContinue = async () => {
+   const handleTemplateContinue = async (overrideId = null) => {
+      // Ensure we don't accidentally use a React event object as a template ID
+      const activeTemplate = (typeof overrideId === 'string') ? overrideId : template
       if (isCreatingFromDashboard && user) {
          setIsCreatingInCloud(true)
          try {
             const { defaultResumeData } = await import('./utils/defaultData')
             const dataToSave = importData || defaultResumeData
             const nameToSave = importName || "Untitled Resume"
-            const newId = await createDocument(user.id, nameToSave, dataToSave, template)
+            const newId = await createDocument(user.id, nameToSave, dataToSave, activeTemplate)
             setActiveDocumentId(newId)
             setIsCreatingFromDashboard(false)
             setImportData(null)

@@ -32,7 +32,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       if (activeDocumentId) return defaultResumeData
       const draft = loadDraft()
       if (!draft) return defaultResumeData
-      return mergeWithDefaults(draft)
+      return mergeWithDefaults(draft.resumeData)
    })
 
    const [syncStatus, setSyncStatus] = useState('idle')
@@ -44,7 +44,11 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    // What was the user trying to do when they weren't signed in?
    const [pendingAction, setPendingAction] = useState(null) // null | 'save' | 'download'
    const [mobileView, setMobileView] = useState('form')
-   const [documentName, setDocumentName] = useState('Untitled Resume')
+   const [documentName, setDocumentName] = useState(() => {
+      if (activeDocumentId) return 'Untitled Resume'
+      const draft = loadDraft()
+      return draft?.name || 'Untitled Resume'
+   })
    const [showRenameModal, setShowRenameModal] = useState(false)
    const [isGenerating, setIsGenerating] = useState(false)
    const [genType, setGenType] = useState('PDF')
@@ -282,7 +286,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    const handleDataChange = (newData) => {
       const nextData = typeof newData === 'function' ? newData(resumeData) : newData
       setResumeData(nextData)
-      saveDraft(nextData)
+      if (!activeDocumentId) saveDraft(nextData, documentName)
    }
 
    // ── Auto-save Effect ──
@@ -294,7 +298,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       }, 5000) // 5 second debounce
 
       return () => clearTimeout(timer)
-   }, [resumeData, isPublicSharing, user?.id, activeDocumentId, isCloudLoading])
+   }, [resumeData, isPublicSharing, documentName, user?.id, activeDocumentId, isCloudLoading])
 
    return (
       <div className="builder-layout">
@@ -614,7 +618,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   textAlign: 'center',
                   minWidth: '320px'
                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '20px', animation: 'floatMockup 2s ease-in-out infinite' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '20px', animation: 'floatIcon 2s ease-in-out infinite' }}>
                      {isCloudLoading ? '☁️' : isAILoading ? '✨' : genType === 'PDF' ? '📄' : '📝'}
                   </div>
                   <h2 style={{ marginBottom: '10px' }}>
@@ -648,7 +652,11 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                   <input 
                      type="text" 
                      value={documentName} 
-                     onChange={e => setDocumentName(e.target.value)}
+                      onChange={e => {
+                         const newName = e.target.value
+                         setDocumentName(newName)
+                         if (!activeDocumentId) saveDraft(resumeData, newName)
+                      }}
                      placeholder="Enter resume name..."
                      autoFocus
                      style={{
@@ -662,12 +670,18 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                         fontSize: '0.95rem'
                      }}
                      onKeyDown={e => {
-                        if (e.key === 'Enter') setShowRenameModal(false)
+                        if (e.key === 'Enter') {
+                           setShowRenameModal(false)
+                           if (user && activeDocumentId) doCloudSave(user, true)
+                        }
                      }}
                   />
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                      <button className="btn btn-ghost" onClick={() => setShowRenameModal(false)}>Cancel</button>
-                     <button className="btn btn-primary" onClick={() => setShowRenameModal(false)}>Done</button>
+                     <button className="btn btn-primary" onClick={() => {
+                        setShowRenameModal(false)
+                        if (user && activeDocumentId) doCloudSave(user, true)
+                     }}>Done</button>
                   </div>
                </div>
             </div>

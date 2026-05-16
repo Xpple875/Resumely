@@ -579,7 +579,7 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
             textAlign: 'center',
             maxWidth: '400px'
           }}>
-            <div style={{ fontSize: '48px', marginBottom: '20px', animation: 'floatMockup 2s ease-in-out infinite' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px', animation: 'floatIcon 2s ease-in-out infinite' }}>
               🤖
             </div>
             <h2 style={{ marginBottom: '10px' }}>Importing Resume</h2>
@@ -595,14 +595,6 @@ export default function DashboardPage({ user, onOpenDocument, onSignOut, onCreat
             </div>
           </div>
           <style>{`
-            @keyframes floatMockup {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-10px); }
-            }
-            @keyframes pFadeUp {
-              from { opacity: 0; transform: translateY(10px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
             @keyframes loadingBar {
               0% { transform: translateX(-100%); }
               100% { transform: translateX(200%); }

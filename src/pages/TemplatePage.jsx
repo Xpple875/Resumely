@@ -36,17 +36,20 @@ export const TEMPLATES = [
 ]
 
 export default function TemplatePage({ onSelect, onContinue, selected, loading, onGoToLanding, theme, setTheme }) {
+  const [revealed, setRevealed] = React.useState({});
+
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) { 
-          entry.target.classList.add('visible'); 
+          const id = entry.target.getAttribute('data-reveal-id');
+          setRevealed(prev => ({ ...prev, [id]: true }));
           observer.unobserve(entry.target); 
         }
       });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.05, rootMargin: '0px 0px -50px 0px' });
     
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    document.querySelectorAll('[data-reveal-id]').forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
@@ -64,16 +67,23 @@ export default function TemplatePage({ onSelect, onContinue, selected, loading, 
           <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
             <ThemeToggle theme={theme} setTheme={setTheme} />
           </div>
-          <h1 className="template-page__title reveal">Choose your template</h1>
-          <p className="template-page__sub reveal" style={{ transitionDelay: '0.1s' }}>All three are ATS-tested. You can change this later.</p>
+          <h1 className={`template-page__title reveal ${revealed['title'] ? 'visible' : ''}`} data-reveal-id="title">Choose your template</h1>
+          <p className={`template-page__sub reveal ${revealed['sub'] ? 'visible' : ''}`} data-reveal-id="sub" style={{ transitionDelay: '0.1s' }}>All of our templates are ATS-tested. You can change this later.</p>
         </div>
 
         <div className="template-grid">
           {TEMPLATES.map((t, i) => (
             <button
               key={t.id}
-              className={`template-card reveal ${selected === t.id ? 'selected' : ''}`}
-              onClick={() => onSelect(t.id)}
+              data-reveal-id={t.id}
+              className={`template-card reveal ${revealed[t.id] ? 'visible' : ''} ${selected === t.id ? 'selected' : ''}`}
+              onClick={() => {
+                onSelect(t.id);
+                // On mobile, auto-continue after a brief visual confirmation delay
+                if (window.innerWidth < 768) {
+                  setTimeout(() => onContinue(t.id), 300);
+                }
+              }}
               style={{ transitionDelay: `${0.2 + i * 0.1}s` }}
             >
               {t.tag && <div className="template-card__tag">{t.tag}</div>}
