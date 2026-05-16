@@ -60,7 +60,10 @@ export default function App() {
    }
 
    const [view, setView] = useState(getInitialView)
-   const [template, setTemplate] = useState('classic')
+   const [template, setTemplate] = useState(() => {
+      const draft = loadDraft()
+      return draft?.template || 'classic'
+   })
    const [unlocked, setUnlocked] = useState(isUnlocked())
    const [user, setUser] = useState(null)
    const [activeDocumentId, setActiveDocumentId] = useState(() => localStorage.getItem('resumely_active_doc'))

@@ -12,6 +12,7 @@ import { useToast } from '../hooks/useToast.js'
 import { getDocumentById, createDocument, updateDocument, loadResumeFromCloud, markUserAsPaid, deleteUserAccount, incrementViewCount } from '../services/supabaseClient'
 import TemplateModal from '../components/TemplateModal.jsx'
 import ThemeToggle from '../components/ThemeToggle.jsx'
+import { fetchAIUsage } from '../services/aiService.js'
 import '../styles/builder.css'
 
 /** Merge cloud resume_data with defaults to handle new fields added since last save. */
@@ -192,6 +193,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       setShowAuthModal(false)
       cloudLoadAttempted.current = true
       if (onSignIn) onSignIn(newUser)
+      fetchAIUsage()
 
       const action = pendingAction
       setPendingAction(null)
@@ -286,7 +288,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
    const handleDataChange = (newData) => {
       const nextData = typeof newData === 'function' ? newData(resumeData) : newData
       setResumeData(nextData)
-      if (!activeDocumentId) saveDraft(nextData, documentName)
+      if (!activeDocumentId) saveDraft(nextData, documentName, template)
    }
 
    // ── Auto-save Effect ──
@@ -298,7 +300,12 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
       }, 5000) // 5 second debounce
 
       return () => clearTimeout(timer)
-   }, [resumeData, isPublicSharing, documentName, user?.id, activeDocumentId, isCloudLoading])
+   }, [resumeData, isPublicSharing, documentName, template, user?.id, activeDocumentId, isCloudLoading])
+   
+   // ── Guest Template Persistence ──
+   useEffect(() => {
+      if (!activeDocumentId) saveDraft(resumeData, documentName, template)
+   }, [template])
 
    return (
       <div className="builder-layout">
@@ -655,7 +662,7 @@ export default function BuilderPage({ template, onChangeTemplate, unlocked, setU
                       onChange={e => {
                          const newName = e.target.value
                          setDocumentName(newName)
-                         if (!activeDocumentId) saveDraft(resumeData, newName)
+                         if (!activeDocumentId) saveDraft(resumeData, newName, template)
                       }}
                      placeholder="Enter resume name..."
                      autoFocus

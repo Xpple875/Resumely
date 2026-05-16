@@ -18,6 +18,29 @@ export function setAIUsesLeft(count) {
    window.dispatchEvent(new CustomEvent('ai_uses_updated', { detail: count }))
 }
 
+export async function fetchAIUsage() {
+   try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token || null
+
+      const response = await fetch('/api/enhance', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ mode: 'get_usage', token }),
+      })
+
+      const data = await response.json()
+      if (response.ok && data.uses_left !== undefined) {
+         setAIUsesLeft(data.uses_left)
+      }
+   } catch (err) {
+      console.error('Failed to fetch AI usage:', err)
+   }
+}
+
+// Initial fetch
+fetchAIUsage()
+
 /** React hook for UI components to track the real limit securely linked to the cloud. */
 export function useAILimits() {
    const [usesLeft, setUsesLeft] = useState(globalUsesLeft)

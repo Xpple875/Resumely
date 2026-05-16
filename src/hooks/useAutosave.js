@@ -1,9 +1,10 @@
 
 // We are keeping this simple to avoid sync loops
-export const saveDraft = (resumeData, name) => {
+export const saveDraft = (resumeData, name, template) => {
   const draft = {
     resumeData,
     name,
+    template,
     updatedAt: new Date().toISOString()
   }
   localStorage.setItem('resume_draft', JSON.stringify(draft))
@@ -14,11 +15,15 @@ export const loadDraft = () => {
   try {
     if (!saved) return null
     const parsed = JSON.parse(saved)
-    // Support both old (just data) and new (object with data/name) formats
+    // Support both old (just data) and new (object with data/name/template) formats
     if (parsed && parsed.resumeData) {
        return parsed
     }
-    return { resumeData: parsed, name: 'Untitled Resume' }
+    return { 
+       resumeData: parsed, 
+       name: 'Untitled Resume',
+       template: 'classic'
+    }
   } catch (e) {
     return null
   }

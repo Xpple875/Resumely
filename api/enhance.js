@@ -23,10 +23,10 @@ export default async function handler(req, res) {
    rateLimitMap.set(ip, now);
    if (rateLimitMap.size > 1000) rateLimitMap.clear();
 
-   // mode can be 'summary', 'bullet', or 'description'
+   // mode can be 'summary', 'bullet', 'description', or 'get_usage'
    const { bullet, jobTitle, company, isSummary, mode, token } = req.body
 
-   if (!bullet || !bullet.trim()) {
+   if (mode !== 'get_usage' && (!bullet || !bullet.trim())) {
       return res.status(400).json({ error: 'No text provided' })
    }
 
@@ -68,6 +68,12 @@ export default async function handler(req, res) {
          .single()
 
       count = usageData?.uses_count || 0
+
+      if (mode === 'get_usage') {
+         return res.status(200).json({ 
+            uses_left: Math.max(0, 10 - count) 
+         })
+      }
 
       if (count >= 10) {
          return res.status(429).json({ error: 'Free limit reached. You have used all 10 AI boosts.' })
@@ -118,6 +124,7 @@ Rules:
 2. If a field is missing, use "" for strings or [] for arrays.
 3. Map experience, education, skills, projects, certifications, awards, publications, and courses.
 4. For experience and education, generate a unique "id" (e.g., "id_123") for each entry.
+5. CRITICAL: Preserve the original wording exactly. Do NOT paraphrase, summarize, improve, or change any of the text content. Your job is extraction, not enhancement. Keep every word exactly as it appears in the source.
 
 Format:
 {

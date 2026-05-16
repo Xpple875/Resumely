@@ -28,7 +28,7 @@ export default function ResumeForm({ data, onChange, onToast, onAILoadingChange 
   const handleEnhanceAll = async () => {
     const uses = getAIUsesLeft();
     if (uses <= 0) {
-      onToast("You've used all 10 AI enhancements for this session. Refresh to reset.", 'error');
+      onToast("You've used all 10 free AI enhancements. Upgrade for unlimited access.", 'error');
       return;
     }
     
@@ -102,7 +102,7 @@ export default function ResumeForm({ data, onChange, onToast, onAILoadingChange 
 
       </div>
 
-      <JDMatcher resumeData={data} onToast={onToast} />
+      <JDMatcher resumeData={data} onChange={onChange} onToast={onToast} />
 
       <SectionManager 
         order={data.sectionOrder}

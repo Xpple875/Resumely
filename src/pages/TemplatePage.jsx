@@ -13,7 +13,7 @@ export const TEMPLATES = [
     id: 'elegant',
     name: 'Elegant',
     description: 'Centered luxury layout with sophisticated serif typography. Perfect for executives.',
-    tag: 'Premium',
+    tag: null,
   },
   {
     id: 'modern',
