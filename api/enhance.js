@@ -1,7 +1,7 @@
 /**
  * Vercel Serverless Function — Groq AI Proxy
  * Route: POST /api/enhance
- * Model: llama-3.3-70b-versatile (Groq free tier — 14,400 req/day)
+ * Model: qwen/qwen3.6-27b with reasoning_effort 'none' (replaces llama-3.3-70b-versatile, retired by Groq on 2026-08-16)
  * API key: GROQ_API_KEY in Vercel environment variables
  */
 import { createClient } from '@supabase/supabase-js'
@@ -207,9 +207,10 @@ Original text: ${bullet.trim()}`
             'Authorization': `Bearer ${apiKey}`,
          },
          body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
+            model: 'qwen/qwen3.6-27b',
             messages: [{ role: 'user', content: finalPrompt }],
             temperature: 0.1, // Lower temperature for more consistent JSON
+            reasoning_effort: 'none',
             max_tokens: effectiveMode === 'parse_resume' ? 4000 : 1000,
          }),
 
